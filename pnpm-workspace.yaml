@@ -2,9 +2,17 @@ packages:
   - 'packages/*'
 allowBuilds:
   '@parcel/watcher': false
+  core-js: false
+  core-js-pure: false
+  es5-ext: false
   esbuild: false
   simple-git-hooks: false
+  typeit: false
+  unrs-resolver: true
   vue-demi: false
 shamefullyHoist: true
 ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
+minimumReleaseAgeExclude:
+  - '@crane199709/saas-forge-api-client@0.1.0 || 0.1.1'
+enableGlobalVirtualStore: false

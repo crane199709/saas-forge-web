@@ -2,6 +2,7 @@
   "name": "@sa/elp",
   "type": "module",
   "version": "1.4.0",
+  "packageManager": "pnpm@11.22.0",
   "description": "A fresh and elegant admin template, based on Vue3、Vite7、rolldown-vite、TypeScript、ElementPlus and UnoCSS. 一个基于Vue3、Vite7、rolldown-vite、TypeScript、ElementPlus and UnoCSS的清新优雅的中后台模版。",
   "author": {
     "name": "Soybean",
@@ -44,6 +45,7 @@
     "prepare": "simple-git-hooks",
     "preview": "vite preview",
     "release": "sa release",
+    "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "vue-tsc --noEmit --skipLibCheck",
     "update-pkg": "sa update-pkg"
   },
@@ -52,6 +54,7 @@
     "@antv/g2": "5.4.8",
     "@antv/g6": "5.1.0",
     "@better-scroll/core": "2.5.1",
+    "@crane199709/saas-forge-api-client": "0.1.1",
     "@iconify/vue": "5.0.0",
     "@sa/alova": "workspace:*",
     "@sa/axios": "workspace:*",

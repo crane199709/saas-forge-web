@@ -6,7 +6,6 @@ import {
   createWebHashHistory,
   createWebHistory
 } from 'vue-router';
-import { createBuiltinVueRoutes } from './routes/builtin';
 import { createRouterGuard } from './guard';
 
 const { VITE_ROUTER_HISTORY_MODE = 'history', VITE_BASE_URL } = import.meta.env;
@@ -19,7 +18,15 @@ const historyCreatorMap: Record<Env.RouterHistoryMode, (base?: string) => Router
 
 export const router = createRouter({
   history: historyCreatorMap[VITE_ROUTER_HISTORY_MODE](VITE_BASE_URL),
-  routes: createBuiltinVueRoutes()
+  routes: [
+    {
+      path: '/connection',
+      name: 'gateway-connection',
+      component: () => import('@/pages/gateway-connection.vue'),
+      meta: { title: 'SaaS Forge', constant: true }
+    },
+    { path: '/:pathMatch(.*)*', redirect: '/connection' }
+  ]
 });
 
 /** Setup Vue Router */

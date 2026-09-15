@@ -20,6 +20,9 @@ importers:
       '@better-scroll/core':
         specifier: 2.5.1
         version: 2.5.1
+      '@crane199709/saas-forge-api-client':
+        specifier: 0.1.1
+        version: 0.1.1
       '@iconify/vue':
         specifier: 5.0.0
         version: 5.0.0(vue@3.5.31(typescript@5.9.3))
@@ -727,6 +730,9 @@ packages:
 
   '@better-scroll/shared-utils@2.5.1':
     resolution: {integrity: sha512-AplkfSjXVYP9LZiD6JsKgmgQJ/mG4uuLmBuwLz8W5OsYc7AYTfN8kw6GqZ5OwCGoXkVhBGyd8NeC4xwYItp0aw==}
+
+  '@crane199709/saas-forge-api-client@0.1.1':
+    resolution: {integrity: sha512-x6ovS9aBtW8u3oMOxyQPBWDF33hK+xO8DOaXtrijGqgSL/3X2ydn3Cs+zeicJ7M6CqUvHtWuY7TgmdaEYTor5w==}
 
   '@ctrl/tinycolor@4.2.0':
     resolution: {integrity: sha512-kzyuwOAQnXJNLS9PSyrk0CWk35nWJW/zl/6KvnTBMFK65gm7U1/Z5BqjxeapjZCIhQcM/DsrEmcbRwDyXyXK4A==}
@@ -6076,6 +6082,8 @@ snapshots:
       '@better-scroll/shared-utils': 2.5.1
 
   '@better-scroll/shared-utils@2.5.1': {}
+
+  '@crane199709/saas-forge-api-client@0.1.1': {}
 
   '@ctrl/tinycolor@4.2.0': {}
 
