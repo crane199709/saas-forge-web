@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-需求与规格记录在 crane0927/saas-forge-web 的 GitHub Issues，
+需求与规格记录在 crane199709/saas-forge-web 的 GitHub Issues，
 通过 gh CLI 操作。在仓库内运行时，根据 git remote 确定目标仓库。
 
 ## 常用操作

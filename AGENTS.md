@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-使用 crane0927/saas-forge-web 的 GitHub Issues。
+使用 crane199709/saas-forge-web 的 GitHub Issues。
 详见 `docs/agents/issue-tracker.md`。
 
 ### Triage labels
