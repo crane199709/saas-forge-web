@@ -1,4 +1,4 @@
-import { computed, nextTick, ref, shallowRef } from 'vue';
+import { computed, h, nextTick, ref, shallowRef } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 import { defineStore } from 'pinia';
 import { useBoolean } from '@sa/hooks';
@@ -6,6 +6,7 @@ import type { CustomRoute, ElegantConstRoute, LastLevelRouteKey, RouteKey, Route
 import { router } from '@/router';
 import { fetchGetConstantRoutes, fetchGetUserRoutes, fetchIsRouteExist } from '@/service/api';
 import { SetupStoreId } from '@/enum';
+import { $t } from '@/locales';
 import { createStaticRoutes, getAuthVueRoutes } from '@/router/routes';
 import { ROOT_ROUTE } from '@/router/routes/builtin';
 import { getRouteName, getRoutePath } from '@/router/elegant/transform';
@@ -78,8 +79,17 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
 
   const removeRouteFns: (() => void)[] = [];
 
-  /** Global menus */
-  const menus = ref<App.Global.Menu[]>([]);
+  /** Formal Console currently exposes only the platform home. */
+  const menus = ref<App.Global.Menu[]>([
+    {
+      key: 'home',
+      label: $t('route.home'),
+      i18nKey: 'route.home',
+      routeKey: 'home',
+      routePath: '/home',
+      icon: () => h('span', { class: 'i-mdi-home-outline' })
+    }
+  ]);
   const searchMenus = computed(() => transformMenuToSearchMenus(menus.value));
 
   /** Get global menus */

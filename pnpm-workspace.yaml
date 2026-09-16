@@ -14,5 +14,5 @@ shamefullyHoist: true
 ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
 minimumReleaseAgeExclude:
-  - '@crane199709/saas-forge-api-client@0.1.0 || 0.1.1'
+  - '@crane199709/saas-forge-api-client@0.1.0 || 0.1.1 || 0.2.0'
 enableGlobalVirtualStore: false

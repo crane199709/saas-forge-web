@@ -9,7 +9,7 @@ const { t } = useI18n({
   messages: {
     'zh-CN': {
       title: 'SaaS Forge',
-      description: '检查与服务的公开连接。登录及工作台将在后续版本开放。',
+      description: '检查与服务的公开连接。此页面不验证登录状态。',
       check: '检查连接',
       idle: '尚未检查连接。',
       loading: '正在连接服务…',
@@ -24,7 +24,7 @@ const { t } = useI18n({
     },
     'en-US': {
       title: 'SaaS Forge',
-      description: 'Check the public service connection. Sign-in and workspaces will be available in a later release.',
+      description: 'Check the public service connection. This page does not verify your session.',
       check: 'Check connection',
       idle: 'Connection has not been checked.',
       loading: 'Connecting to the service…',

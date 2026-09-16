@@ -292,6 +292,29 @@ declare namespace App {
     };
 
     type Schema = {
+      console: {
+        signIn: string;
+        email: string;
+        password: string;
+        home: string;
+        welcome: string;
+        identity: string;
+        context: string;
+        platform: string;
+        loading: string;
+        retry: string;
+        logout: string;
+        blocked: string;
+        logoutPending: string;
+        noContext: string;
+        initial: string;
+        selection: string;
+        tenant: string;
+        invalid: string;
+        credentials: string;
+        expired: string;
+        footer: string;
+      };
       system: {
         title: string;
         updateTitle: string;
