@@ -1,6 +1,6 @@
 # Issue #203：独立前端交付记录
 
-日期：2026-09-15。实现提交：`12eaf58`。代码与 npm 制品已交付；**真实 Gateway 成功读取尚未通过，不应关闭 Issue #203**。
+初验：2026-09-15；补验：2026-09-16。实现提交：`12eaf58`。**本票本机验收通过，真实 Gateway 读取的 CORS 阻塞已解除**；源码提交尚未推送。
 
 ## 基线
 
@@ -26,15 +26,26 @@
 | 内部 HTTP 入口 | 禁止公开读取，提示使用受信 HTTPS Console |
 | 模拟失败状态 | HTTP 403、连接拒绝、10 秒超时与手动重试通过；不代表真实后端业务成功 |
 | 演示路由 | `/login` 跳转匿名连接页，未启用 Soybean 演示认证 |
-| 静态 Standards / Spec 审查 | 均 0 项需修复发现；明确保留真实成功链路待验收 |
+| 静态 Standards / Spec 审查 | 初轮均 0 项需修复发现；当时待验收的真实链路已于下文补验 |
 
 干净安装证明初始工作区已有的 allowBuilds 选择是安装必要条件，因此保持原值并纳入交付。自有包的发布年龄例外只覆盖 0.1.0 / 0.1.1；其余供应链策略保留。禁用 global virtual store 使本机与 CI 使用一致的仓库内依赖布局。
 
-## 未通过与未执行
+## 历史阻塞与补验
 
-真实 Chrome 通过正式 Client 向 `https://api.saas.forge.test/.well-known/jwks.json` 发起 GET，但运行中的 Gateway 没有返回 `Access-Control-Allow-Origin`，浏览器实际阻止读取。页面正确显示网络、CORS、证书排查提示，不能将此当作成功连通。
+2026-09-15 初验时，真实 Chrome 通过正式 Client 向 `https://api.saas.forge.test/.well-known/jwks.json` 发起 GET，但运行中的 Gateway 没有返回 `Access-Control-Allow-Origin`，浏览器实际阻止读取。页面正确显示网络、CORS、证书排查提示，不能将此当作成功连通。
 
-用户已恢复 HTTPS 443。对照 Edge 与内部 Gateway 响应后，确认两者均缺少 CORS 头。后端已提交仅开放受控来源的 JWKS CORS 修改并通过对应测试，仍需用户在 IDE 重新运行 Gateway，再补验受控来源成功和非法来源拒绝。本任务没有接管后端进程。
+用户已恢复 HTTPS 443。对照 Edge 与内部 Gateway 响应后，确认两者均缺少 CORS 头。后端已提交仅开放受控来源的 JWKS CORS 修改并通过对应测试，当时等待用户在 IDE 重新运行 Gateway；该步骤已于 2026-09-16 完成。本任务没有接管后端进程。
+
+2026-09-16 北京时间 09:04，用户重新运行 Gateway 后，独立临时 Chrome `153.0.8010.48` 补验通过：
+
+- 真实受信 HTTPS Console 页面使用正式 Client `0.1.1` 读取真实 Gateway，HTTP 200，页面明确显示公开验证密钥读取成功且不代表已登录；页面 JavaScript 错误为 0。
+- 实际请求 Origin 为 `https://console.saas.forge.test`，完整请求头没有 Cookie 或 Authorization；响应允许来源精确匹配，未允许跨域凭据；未忽略证书错误。
+- 空白 Remote Origin 页面夹具的浏览器请求被真实 Gateway 以 403 拒绝，未返回允许来源头，浏览器不可读取。仅发起文档为夹具，未模拟 API 响应；Chrome 网络协议记录了实际 403。独立 HTTPS 请求也确认错误码为 `BROWSER_REQUEST_REJECTED`。
+- 源基线：前端 `74ffbac`（实现 `12eaf58`）、后端 `c100bce`（CORS 实现 `68a8a74`）；这记录的是源工作区基线，并非服务公开返回的构建提交号。只启动并停止本任务前端进程，没有接管后端服务。
+
+公开读取组合的实际兼容性已验证；2026-09-15 的失败记录保留为历史事实。Remote 根路径返回 404 的初次补验未产生有效 API 拒绝证据，不计为通过。
+
+## 未执行与范围
 
 未执行登录、受保护业务、跨标签 Cookie 会话或完整 Fresh Compose；未声称新 CI 已远端通过。页面没有精确金额等业务展示，本票未修改既有数字格式化能力。
 
