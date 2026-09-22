@@ -319,6 +319,13 @@ declare namespace App {
         changePassword: string;
         newPassword: string;
         confirmPassword: string;
+        setupTitle: string;
+        setupIntro: string;
+        setupInvalid: string;
+        setupUnknown: string;
+        setupUnavailable: string;
+        setupSubmitting: string;
+        backToLogin: string;
         passwordRules: string;
         passwordInvalid: string;
         passwordChanged: string;

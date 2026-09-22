@@ -6,6 +6,7 @@ import { useThemeStore } from '@/store/modules/theme';
 import { $t } from '@/locales';
 
 defineOptions({ name: 'LoginPage' });
+defineProps<{ title?: string }>();
 
 const appStore = useAppStore();
 const themeStore = useThemeStore();
@@ -48,7 +49,7 @@ const bgColor = computed(() => {
           </div>
         </header>
         <main class="pt-24px">
-          <h3 class="text-18px text-primary font-medium">{{ $t('console.signIn') }}</h3>
+          <h3 class="text-18px text-primary font-medium">{{ title || $t('console.signIn') }}</h3>
           <div class="pt-24px">
             <Transition :name="themeStore.page.animateMode" mode="out-in" appear>
               <slot />

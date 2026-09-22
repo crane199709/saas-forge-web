@@ -1,5 +1,13 @@
 const local: App.I18n.Schema = {
   console: {
+    setupTitle: '首次设置密码',
+    setupIntro: '此链接仅用于建立首个密码。完成后，请使用邮箱和新密码登录。',
+    setupInvalid: '链接缺失、无效、已过期或已使用，请联系管理员重新提供设置链接。',
+    setupUnknown: '设置结果未确认。请重新输入相同密码以重试原操作，或返回登录。请勿改用其他密码。',
+    setupUnavailable: 'API 配置不可用，请联系管理员修正后重新打开原始链接。',
+    setupSubmitting: '正在设置密码…',
+    backToLogin: '返回登录',
+
     changePassword: '设置新密码',
     newPassword: '新密码',
     confirmPassword: '确认新密码',

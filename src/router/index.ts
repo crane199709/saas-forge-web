@@ -7,6 +7,7 @@ import {
   createWebHashHistory,
   createWebHistory
 } from 'vue-router';
+import { capturePasswordSetupLink } from '@/runtime/password-setup-link';
 import { consoleState, startConsole } from '@/runtime/console';
 import { createProgressGuard } from './guard/progress';
 import { createDocumentTitleGuard } from './guard/title';
@@ -19,9 +20,17 @@ const historyCreatorMap: Record<Env.RouterHistoryMode, (base?: string) => Router
   memory: createMemoryHistory
 };
 
+capturePasswordSetupLink();
+
 export const router = createRouter({
   history: historyCreatorMap[VITE_ROUTER_HISTORY_MODE](VITE_BASE_URL),
   routes: [
+    {
+      path: '/password-setup',
+      name: 'password-setup',
+      component: () => import('@/pages/password-setup.vue'),
+      meta: { title: 'SaaS Forge', constant: true }
+    },
     { path: '/', name: 'root', redirect: '/home' },
     {
       path: '/login',
@@ -69,7 +78,7 @@ export async function setupRouter(app: App) {
   createProgressGuard(router);
   createDocumentTitleGuard(router);
   router.beforeEach(async to => {
-    if (to.name === 'gateway-connection') return true;
+    if (to.name === 'password-setup' || to.name === 'gateway-connection') return true;
     await startConsole();
     const active =
       consoleState.value.status === 'authenticated' ? consoleState.value.snapshot?.activeContext?.type : undefined;
@@ -83,7 +92,8 @@ export async function setupRouter(app: App) {
     if (state.status === 'loading' || state.status === 'checking') return;
     const active = state.status === 'authenticated' ? state.snapshot?.activeContext?.type : undefined;
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
-    if (router.currentRoute.value.name !== 'gateway-connection') router.replace(active ? home : '/login');
+    if (!['password-setup', 'gateway-connection'].includes(String(router.currentRoute.value.name)))
+      router.replace(active ? home : '/login');
   });
   await router.isReady();
 }

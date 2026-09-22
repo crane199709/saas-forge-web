@@ -1,5 +1,17 @@
 const local: App.I18n.Schema = {
   console: {
+    setupTitle: 'Establish your password',
+    setupIntro:
+      'This link establishes your first password only. After completion, sign in with your email and new password.',
+    setupInvalid:
+      'This link is missing, invalid, expired or already used. Request a new setup link from your administrator.',
+    setupUnknown:
+      'The result is unknown. Enter the SAME password to retry the original operation, or return to sign in. Do not use a different password.',
+    setupUnavailable:
+      'The API configuration is unavailable. Contact your administrator and reopen the original link after it is corrected.',
+    setupSubmitting: 'Establishing your password…',
+    backToLogin: 'Return to sign in',
+
     changePassword: 'Set a new password',
     newPassword: 'New password',
     confirmPassword: 'Confirm new password',
