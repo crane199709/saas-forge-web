@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/modules/app';
 import { useThemeStore } from '@/store/modules/theme';
 import { useRouteStore } from '@/store/modules/route';
 import { useTabStore } from '@/store/modules/tab';
+import { consoleState } from '@/runtime/console';
 
 defineOptions({ name: 'GlobalContent' });
 
@@ -44,7 +45,7 @@ function resetScroll() {
         <component
           :is="Component"
           v-if="appStore.reloadFlag"
-          :key="tabStore.getTabIdByRoute(route)"
+          :key="`${consoleState.snapshot?.sessionId}:${consoleState.snapshot?.revision}:${tabStore.getTabIdByRoute(route)}`"
           :class="{ 'p-16px': showPadding }"
           class="flex-grow bg-layout transition-300"
         />

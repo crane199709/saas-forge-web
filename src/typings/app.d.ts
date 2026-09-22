@@ -293,6 +293,14 @@ declare namespace App {
 
     type Schema = {
       console: {
+        company: string;
+        chooseWorkspace: string;
+        platformManagement: string;
+        switchTitle: string;
+        switchWarning: string;
+        switchConfirm: string;
+        targetUnavailable: string;
+
         signIn: string;
         email: string;
         password: string;
@@ -308,6 +316,14 @@ declare namespace App {
         logoutPending: string;
         noContext: string;
         initial: string;
+        changePassword: string;
+        newPassword: string;
+        confirmPassword: string;
+        passwordRules: string;
+        passwordInvalid: string;
+        passwordChanged: string;
+        passwordUnknown: string;
+
         selection: string;
         tenant: string;
         invalid: string;

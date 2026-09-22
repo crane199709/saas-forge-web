@@ -2,6 +2,7 @@ import { shallowRef } from 'vue';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
+import { resolveConsoleBrand } from './console-brand';
 import { ConsoleSessionRuntime } from './console-session';
 import type { SessionView } from './console-session';
 import { createBrowserCoordination, operationKey } from './browser-coordination';
@@ -15,7 +16,8 @@ export function consoleRuntime(): ConsoleSessionRuntime {
   if (!runtime) {
     const origin = requireHttpsOrigin(import.meta.env.VITE_API_ORIGIN);
     runtime = new ConsoleSessionRuntime(createConsoleTransport(origin), createBrowserCoordination(origin), {
-      key: operationKey
+      key: operationKey,
+      resolveBrand: resolveConsoleBrand
     });
     runtime.subscribe(value => {
       consoleState.value = value;

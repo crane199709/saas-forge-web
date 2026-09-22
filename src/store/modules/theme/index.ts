@@ -4,6 +4,7 @@ import { usePreferredColorScheme } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { getPaletteColorByNumber } from '@sa/color';
 import { localStg } from '@/utils/storage';
+import { consoleState } from '@/runtime/console';
 import { themeSettings } from '@/theme/settings';
 import { SetupStoreId } from '@/enum';
 import {
@@ -41,9 +42,9 @@ export const useThemeStore = defineStore(SetupStoreId.Theme, () => {
   const themeColors = computed(() => {
     const { themeColor, otherColor, isInfoFollowPrimary } = settings.value;
     const colors: App.Theme.ThemeColor = {
-      primary: themeColor,
+      primary: consoleState.value.brand?.primaryColor ?? themeColor,
       ...otherColor,
-      info: isInfoFollowPrimary ? themeColor : otherColor.info
+      info: consoleState.value.brand?.accentColor ?? (isInfoFollowPrimary ? themeColor : otherColor.info)
     };
     return colors;
   });
@@ -189,9 +190,10 @@ export const useThemeStore = defineStore(SetupStoreId.Theme, () => {
     // themeColors change, update css vars and storage theme color
     watch(
       themeColors,
-      val => {
+      () => {
         setupThemeVarsToGlobal();
-        localStg.set('themeColor', val.primary);
+        // 只持久化用户偏好；权威 Tenant 品牌不进入本地存储。
+        localStg.set('themeColor', settings.value.themeColor);
       },
       { immediate: true }
     );

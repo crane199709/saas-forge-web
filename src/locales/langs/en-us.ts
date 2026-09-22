@@ -1,5 +1,22 @@
 const local: App.I18n.Schema = {
   console: {
+    changePassword: 'Set a new password',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm new password',
+    passwordRules: 'Use 12–128 characters without whitespace. Avoid common or compromised passwords.',
+    passwordInvalid: 'The password does not meet the requirements or the entries do not match. Enter it again.',
+    passwordChanged: 'Password updated. Sign in again with your new password.',
+    passwordUnknown:
+      'The password change result is unconfirmed and the session has ended. Try signing in with your new password.',
+
+    company: 'Company',
+    chooseWorkspace: 'Choose workspace',
+    platformManagement: 'Platform management',
+    switchTitle: 'Switch workspace in all tabs',
+    switchWarning:
+      'Unsaved changes cannot be confirmed for every tab. Continuing discards unsaved changes in this and other tabs and switches their workspace. Cancel to return and save first.',
+    switchConfirm: 'Discard changes and switch',
+    targetUnavailable: 'The target workspace is no longer available. Recheck permissions before selecting again.',
     signIn: 'Sign in',
     email: 'Email',
     password: 'Password',
@@ -15,8 +32,8 @@ const local: App.I18n.Schema = {
     logoutPending: 'Sign-out is pending. Retry to finish revoking this session.',
     noContext: 'This account has no available workspace. Contact your administrator or sign in with another account.',
     initial: 'This account must change its initial password before entering a workspace.',
-    selection: 'Workspace selection is not available in this release. You can sign out and use another account.',
-    tenant: 'This release provides the platform workspace. The company workspace is not available yet.',
+    selection: 'Choose a workspace to continue.',
+    tenant: 'Company workspace',
     invalid: 'Enter a valid email and password.',
     credentials: 'The email or password is incorrect.',
     expired: 'The session has expired. Recover the session or sign out.',
@@ -179,6 +196,7 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    workbench: 'Company workspace',
     login: 'Login',
     403: 'No Permission',
     404: 'Page Not Found',

@@ -1,5 +1,21 @@
 const local: App.I18n.Schema = {
   console: {
+    changePassword: '设置新密码',
+    newPassword: '新密码',
+    confirmPassword: '确认新密码',
+    passwordRules: '请输入 12–128 个字符，不含空白，避免使用常见或已泄露的密码。',
+    passwordInvalid: '密码未满足要求或两次输入不一致，请重新输入。',
+    passwordChanged: '密码已更新，请使用新密码重新登录。',
+    passwordUnknown: '改密结果未确认，会话已结束。请尝试使用新密码登录。',
+
+    company: '公司',
+    chooseWorkspace: '选择工作区',
+    platformManagement: '平台管理',
+    switchTitle: '切换所有标签页的工作区',
+    switchWarning:
+      '无法确认所有标签页是否有未保存内容。继续将放弃当前及其他标签页的未保存更改，并同步切换工作区；你也可以取消并先返回保存。',
+    switchConfirm: '放弃未保存内容并切换',
+    targetUnavailable: '目标工作区已不可访问。请重新检查权限后再选择。',
     signIn: '登录',
     email: '邮箱',
     password: '密码',
@@ -15,8 +31,8 @@ const local: App.I18n.Schema = {
     logoutPending: '退出尚未完成，请重试以完成会话撤销。',
     noContext: '当前账号没有可用的工作上下文。请联系管理员，或退出后使用其他账号登录。',
     initial: '当前账号需要先修改初始密码，才能进入工作台。',
-    selection: '此版本尚未开放工作上下文选择。可以退出后使用其他账号登录。',
-    tenant: '此版本提供平台工作台，公司工作台尚未开放。',
+    selection: '请选择要进入的工作区。',
+    tenant: '公司工作台',
     invalid: '请输入有效的邮箱和密码。',
     credentials: '邮箱或密码不正确。',
     expired: '会话已过期，请恢复会话或退出。',
@@ -179,6 +195,7 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    workbench: '公司工作台',
     login: '登录',
     403: '无权限',
     404: '页面不存在',

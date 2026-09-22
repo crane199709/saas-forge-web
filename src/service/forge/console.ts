@@ -8,9 +8,16 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport {
   const basePath = requireHttpsOrigin(apiOrigin);
   let token: string | undefined;
   const api = new Console.ConsoleAuthenticationApi(
-    new Console.Configuration({ basePath, credentials: 'include', accessToken: () => token ?? '' })
+    new Console.Configuration({
+      basePath,
+      credentials: 'include',
+      accessToken: () => token ?? ''
+    })
   );
-  const options = () => ({ redirect: 'error' as const, signal: AbortSignal.timeout(8000) });
+  const options = () => ({
+    redirect: 'error' as const,
+    signal: AbortSignal.timeout(8000)
+  });
   async function call<T>(operation: () => Promise<T>): Promise<T> {
     try {
       return await operation();
@@ -22,6 +29,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport {
         }
         throw new SessionFailure('SERVICE_UNAVAILABLE');
       }
+      if (error instanceof SessionFailure) throw error;
       throw new SessionFailure('NETWORK_UNAVAILABLE');
     }
   }
@@ -51,6 +59,21 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport {
           options()
         )
       ),
+    select: (target, revision, key) =>
+      call(async () => {
+        const response = await api.selectConsoleContextRaw(
+          {
+            xSFCSRF: '1',
+            ifMatch: `"${revision}"`,
+            idempotencyKey: key,
+            consoleContextSelectionRequest: target
+          },
+          options()
+        );
+        const etag = response.raw.headers.get('ETag');
+        if (!etag || !/^"(0|[1-9][0-9]*)"$/.test(etag)) throw new SessionFailure('SESSION_RESPONSE_INVALID');
+        return etag.slice(1, -1);
+      }),
     logout: (revision, key) =>
       call(() =>
         api.logoutConsoleSession(
@@ -59,6 +82,18 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport {
             ifMatch: `"${revision}"`,
             idempotencyKey: key,
             body: {}
+          },
+          options()
+        )
+      ),
+    changePassword: (password, revision, key) =>
+      call(() =>
+        api.changeConsoleInitialPassword(
+          {
+            xSFCSRF: '1',
+            ifMatch: `"${revision}"`,
+            idempotencyKey: key,
+            consolePasswordChangeRequest: { newPassword: password }
           },
           options()
         )

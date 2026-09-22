@@ -1,15 +1,23 @@
 import { SessionFailure } from './console-session';
-import type { LogoutIntent, SessionCoordination } from './console-session';
+import type { CoordinationMessage, LogoutIntent, SessionCoordination } from './console-session';
 
 /** Only logout intent is durable. Credentials, identity and session snapshots never leave the Realm. */
 export function createBrowserCoordination(apiOrigin: string): SessionCoordination {
   const name = `sf:console:${apiOrigin}`;
   const storageKey = `${name}:logout`;
-  const listeners = new Set<(kind: 'changed' | 'logout') => void>();
+  const listeners = new Set<(kind: CoordinationMessage) => void>();
   const channel = new BroadcastChannel(name);
   channel.onmessage = event => {
-    if (event.data === 'changed' || event.data === 'logout') listeners.forEach(listener => listener(event.data));
+    if (['changed', 'logout', 'switching', 'edited'].includes(event.data))
+      listeners.forEach(listener => listener(event.data));
   };
+  // 只传递编辑发生这一事实，不读取或广播任何输入值。休眠页仍按未知状态显式确认。
+  const edited = () => {
+    listeners.forEach(listener => listener('edited'));
+    channel.postMessage('edited');
+  };
+  document.addEventListener('input', edited, true);
+  document.addEventListener('change', edited, true);
   return {
     async exclusive(operation) {
       if (!navigator.locks) throw new SessionFailure('SESSION_COORDINATION_UNAVAILABLE');
@@ -49,6 +57,8 @@ export function createBrowserCoordination(apiOrigin: string): SessionCoordinatio
       return () => listeners.delete(listener);
     },
     dispose() {
+      document.removeEventListener('input', edited, true);
+      document.removeEventListener('change', edited, true);
       listeners.clear();
       channel.close();
     }

@@ -143,10 +143,7 @@ function getSiderCollapsedWidth() {
     <div class="size-full flex-center" role="status" aria-live="polite">{{ $t('console.loading') }}</div>
   </dialog>
   <AdminLayout
-    v-if="
-      ['authenticated', 'checking'].includes(consoleState.status) &&
-      consoleState.snapshot?.activeContext?.type === 'PLATFORM'
-    "
+    v-if="['authenticated', 'checking'].includes(consoleState.status) && Boolean(consoleState.snapshot?.activeContext)"
     v-model:sider-collapse="appStore.siderCollapse"
     :inert="checking"
     :style="checking ? { visibility: 'hidden' } : undefined"

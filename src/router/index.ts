@@ -42,6 +42,18 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/workbench',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'workbench',
+          component: () => import('@/pages/tenant-home.vue'),
+          meta: { title: 'SaaS Forge', i18nKey: 'console.tenant' }
+        }
+      ]
+    },
+    {
       path: '/connection',
       name: 'gateway-connection',
       component: () => import('@/pages/gateway-connection.vue'),
@@ -59,17 +71,19 @@ export async function setupRouter(app: App) {
   router.beforeEach(async to => {
     if (to.name === 'gateway-connection') return true;
     await startConsole();
-    const platform =
-      consoleState.value.status === 'authenticated' && consoleState.value.snapshot?.activeContext?.type === 'PLATFORM';
-    if (!platform && to.name !== 'login') return '/login';
-    if (platform && to.name === 'login') return '/home';
+    const active =
+      consoleState.value.status === 'authenticated' ? consoleState.value.snapshot?.activeContext?.type : undefined;
+    const home = active === 'PLATFORM' ? '/home' : '/workbench';
+    if (!active && to.name !== 'login') return '/login';
+    if (active && (to.name === 'login' || to.path !== home)) return home;
     return true;
   });
   watch(consoleState, state => {
     // Remove protected content as soon as a transition starts; the page also checks state directly.
     if (state.status === 'loading' || state.status === 'checking') return;
-    const platform = state.status === 'authenticated' && state.snapshot?.activeContext?.type === 'PLATFORM';
-    if (router.currentRoute.value.name !== 'gateway-connection') router.replace(platform ? '/home' : '/login');
+    const active = state.status === 'authenticated' ? state.snapshot?.activeContext?.type : undefined;
+    const home = active === 'PLATFORM' ? '/home' : '/workbench';
+    if (router.currentRoute.value.name !== 'gateway-connection') router.replace(active ? home : '/login');
   });
   await router.isReady();
 }

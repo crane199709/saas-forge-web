@@ -1,10 +1,11 @@
-import { computed, h, nextTick, ref, shallowRef } from 'vue';
+import { computed, h, nextTick, ref, shallowRef, watch } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 import { defineStore } from 'pinia';
 import { useBoolean } from '@sa/hooks';
 import type { CustomRoute, ElegantConstRoute, LastLevelRouteKey, RouteKey, RouteMap } from '@elegant-router/types';
 import { router } from '@/router';
 import { fetchGetConstantRoutes, fetchGetUserRoutes, fetchIsRouteExist } from '@/service/api';
+import { consoleState } from '@/runtime/console';
 import { SetupStoreId } from '@/enum';
 import { $t } from '@/locales';
 import { createStaticRoutes, getAuthVueRoutes } from '@/router/routes';
@@ -79,7 +80,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
 
   const removeRouteFns: (() => void)[] = [];
 
-  /** Formal Console currently exposes only the platform home. */
+  /** 菜单仅展示服务端当前工作上下文，不用于授予权限。 */
   const menus = ref<App.Global.Menu[]>([
     {
       key: 'home',
@@ -90,6 +91,25 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
       icon: () => h('span', { class: 'i-mdi-home-outline' })
     }
   ]);
+  watch(
+    () => consoleState.value.snapshot?.activeContext?.type,
+    type => {
+      const tenant = type === 'TENANT';
+      menus.value = type
+        ? [
+            {
+              key: tenant ? 'workbench' : 'home',
+              label: $t(tenant ? 'console.tenant' : 'console.home'),
+              i18nKey: tenant ? 'console.tenant' : 'console.home',
+              routeKey: tenant ? 'workbench' : 'home',
+              routePath: tenant ? '/workbench' : '/home',
+              icon: () => h('span', { class: 'i-mdi-home-outline' })
+            }
+          ]
+        : [];
+    },
+    { immediate: true }
+  );
   const searchMenus = computed(() => transformMenuToSearchMenus(menus.value));
 
   /** Get global menus */
