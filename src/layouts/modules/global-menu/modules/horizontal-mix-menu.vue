@@ -28,7 +28,8 @@ function handleSelectMixMenu(menu: App.Global.Menu) {
 </script>
 
 <template>
-  <Teleport :to="`#${GLOBAL_HEADER_MENU_ID}`">
+  <!-- 工作区切换会重建布局，等待同轮渲染中的菜单挂载目标就绪。 -->
+  <Teleport defer :to="`#${GLOBAL_HEADER_MENU_ID}`">
     <ElMenu
       ellipsis
       class="w-full"
@@ -39,7 +40,7 @@ function handleSelectMixMenu(menu: App.Global.Menu) {
       <MenuItem v-for="item in childLevelMenus" :key="item.key" :item="item" :index="item.key" />
     </ElMenu>
   </Teleport>
-  <Teleport :to="`#${GLOBAL_SIDER_MENU_ID}`">
+  <Teleport defer :to="`#${GLOBAL_SIDER_MENU_ID}`">
     <FirstLevelMenu
       :menus="allMenus"
       :active-menu-key="activeFirstLevelMenuKey"

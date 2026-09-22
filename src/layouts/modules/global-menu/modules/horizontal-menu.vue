@@ -12,7 +12,8 @@ const { selectedKeyDummy, handleSelect } = useMenu();
 </script>
 
 <template>
-  <Teleport :to="`#${GLOBAL_HEADER_MENU_ID}`">
+  <!-- 工作区切换会重建布局，等待同轮渲染中的菜单挂载目标就绪。 -->
+  <Teleport defer :to="`#${GLOBAL_HEADER_MENU_ID}`">
     <ElMenu
       ellipsis
       class="w-full"

@@ -1,0 +1,1850 @@
+{
+  "date": "2026-09-22",
+  "chrome": "153.0.8010.53",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "url": "https://console.saas.forge.test",
+  "client": "0.4.0",
+  "checks": [
+    {
+      "check": "single login, brand, reload and platform route guard",
+      "passed": true
+    },
+    {
+      "check": "keyboard initial selection, focused heading, cancel, both tabs hidden during switch, tenant to platform synchronization",
+      "passed": true
+    },
+    {
+      "check": "lost real 204 blocks both tabs; retry recovers; platform to tenant2 and tenant2 to tenant1; atomic brand fallback and restore",
+      "passed": true
+    },
+    {
+      "check": "late real session 200 after cross-tab switch cannot overwrite new tenant",
+      "passed": true
+    },
+    {
+      "check": "real current membership revocation hides both tabs and rejects old token 401 without platform fallback",
+      "passed": true
+    },
+    {
+      "check": "no-context real account cannot access protected route",
+      "passed": true
+    },
+    {
+      "check": "frozen real Chrome tab, conservative discard confirmation, cancel and resumed authority recovery",
+      "passed": true
+    },
+    {
+      "check": "English/Chinese and dark theme retained across real switch; keyboard dialog and Escape cancellation focus",
+      "passed": true
+    },
+    {
+      "check": "five Soybean layout/menu variants with real cross-tab switches and zero rendering errors",
+      "passed": true
+    },
+    {
+      "check": "branded dark theme text contrast and visible keyboard focus",
+      "passed": true
+    },
+    {
+      "check": "lost real 204 blocks both tabs; retry recovers; platform to tenant2 and tenant2 to tenant1; atomic brand fallback and restore",
+      "passed": true
+    },
+    {
+      "check": "final lost-response regression and browser storage boundary",
+      "passed": true
+    }
+  ],
+  "finalPageErrors": [],
+  "cookies": [
+    {
+      "name": "__Host-sf_console_slot",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Strict",
+      "path": "/"
+    },
+    {
+      "name": "__Host-sf_console_refresh",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Strict",
+      "path": "/"
+    }
+  ],
+  "storage": {
+    "brandStored": false,
+    "identityStored": false,
+    "readableCookieEmpty": true
+  },
+  "responses": [
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v1/platform/tenants",
+      "status": 403,
+      "code": "PLATFORM_AUTHORIZATION_DENIED"
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "CONTEXT_SELECTION_REQUIRED",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v1/platform/tenants",
+      "status": 401,
+      "code": "ACCESS_TOKEN_INVALID"
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 403,
+      "code": "CURRENT_CONTEXT_REVOKED"
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/platform/tenants",
+      "status": 401,
+      "code": "ACCESS_TOKEN_INVALID"
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v1/platform/tenants",
+      "status": 401,
+      "code": "ACCESS_TOKEN_INVALID"
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "CONTEXT_SELECTION_REQUIRED",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "CONTEXT_SELECTION_REQUIRED",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "CONTEXT_SELECTION_REQUIRED",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 403,
+      "code": "TARGET_CONTEXT_UNAVAILABLE"
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 1
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "NO_AVAILABLE_CONTEXT",
+      "companies": 0
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "PLATFORM",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/context-selections",
+      "status": 204
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    },
+    {
+      "path": "/api/v2/auth/refresh",
+      "status": 200,
+      "state": "AUTHENTICATED",
+      "active": "TENANT",
+      "companies": 2
+    }
+  ]
+}

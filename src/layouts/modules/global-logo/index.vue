@@ -22,7 +22,11 @@ withDefaults(defineProps<Props>(), {
   >
     <img v-if="consoleState.brand" :src="consoleState.brand.logoUrl" alt="" class="size-32px object-contain" />
     <SystemLogo v-else class="size-32px" />
-    <h2 v-show="showTitle" class="pl-8px text-16px text-primary font-bold transition duration-300 ease-in-out">
+    <h2
+      v-show="showTitle"
+      class="pl-8px text-16px text-primary font-bold transition duration-300 ease-in-out"
+      :class="{ 'dark:text-base-text': consoleState.brand }"
+    >
       {{ consoleState.brand?.displayName ?? $t('system.title') }}
     </h2>
   </RouterLink>

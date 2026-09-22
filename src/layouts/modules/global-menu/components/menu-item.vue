@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { consoleState } from '@/runtime/console';
+
 interface Props {
   item: App.Global.Menu;
 }
@@ -18,7 +20,7 @@ const hasChildren = item.children && item.children.length > 0;
     </template>
     <MenuItem v-for="child in item.children" :key="child.key" :item="child" :index="child.key"></MenuItem>
   </ElSubMenu>
-  <ElMenuItem v-else>
+  <ElMenuItem v-else :class="{ 'tenant-brand-menu-item': consoleState.brand }">
     <ElIcon>
       <component :is="item.icon" />
     </ElIcon>
@@ -27,6 +29,11 @@ const hasChildren = item.children && item.children.length > 0;
 </template>
 
 <style scoped>
+/* 品牌色可接近黑色，深色背景上的选中文字使用主题正文色。 */
+:global(html.dark .tenant-brand-menu-item.is-active) {
+  color: var(--el-text-color-primary);
+}
+
 .ib-ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;

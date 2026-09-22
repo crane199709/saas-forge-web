@@ -1,6 +1,6 @@
 # Issue #205：公司工作台与双身份切换
 
-状态：2026-09-22，前端已安装正式 Client 0.4.0，35 项测试及类型、lint、构建检查通过；真实 Chrome 与后端联调仍未完成，不能据此关闭 Issue #205。早期记录保留历史事实，最新结果见文末。
+状态：2026-09-22，Issue #205 六项验收已逐项通过。正式 Client 0.4.0、独立检查及真实 Chrome 联调证据齐备；历史阻塞和失败记录保留，最终结论以文末为准。
 
 ## 实现范围
 
@@ -47,3 +47,29 @@
 - 真实 Chrome 公司/平台切换、刷新与跨标签恢复、休眠与未保存确认、失权及越权拒绝、品牌原子应用、语言/主题/键盘/焦点和无障碍仍未执行，不能勾选为已通过。完整 CI 未执行。
 
 开发者随后确认后端已启动并提供受限凭据目录；通过 `pnpm run dev` 启动独立前端，受信 HTTPS Console 恢复为 200。此入口恢复结果不代替账号业务验收。
+
+
+## 2026-09-22 最终真实 Chrome 验收
+
+环境：桌面 Google Chrome 153.0.8010.53，1440×1000，`https://console.saas.forge.test` → `https://api.saas.forge.test`；系统信任证书，未忽略 TLS 校验。Browser plugin not available，按用户明确授权使用独立 Playwright Chrome。前端原生 `pnpm run dev`，后端由开发者启动，未接管后端进程。正式 Client 0.4.0 的制品来源见上文。
+
+开发者授权创建本机专用测试夹具：三类 Identity（单租户、双身份、无上下文）、两个 Tenant、三条 Membership，其中双身份有平台角色；密码由生产 PasswordVerifier 生成哈希，随机明文仅留在 Git 忽略的受限凭据文件中。夹具写入真实本机数据库，业务验收全部经过真实 Chrome、Gateway、IAM 与 Tenant Access，不模拟业务成功响应；本票不以夹具准备证明公司创建或邀请工作流完成。既有管理员原凭据过期，经授权使用受限 reset 入口重置，由开发者亲自首次改密；`password-changes` 204 后重新登录进入平台首页，其公司候选数仍为零。
+
+| Issue 验收项 | 真实证据与结论 |
+| --- | --- |
+| 租户登录、选择、切换、刷新、无上下文失败关闭 | 单租户登录返回 AUTHENTICATED/TENANT；刷新维持同公司。双身份登录返回 CONTEXT_SELECTION_REQUIRED，显示平台和两家公司；初选、平台↔公司、公司↔公司均经 context-selections 204 与 refresh 200。无上下文账号返回 NO_AVAILABLE_CONTEXT，直达工作台仍回登录受限页。 |
+| 服务端权威工作视图与 Membership 边界 | 双身份每次显式切换均调用正式 operation。单租户直接访问 `/home` 被导回 `/workbench`，正式 PlatformTenantsApi 返回 403 / PLATFORM_AUTHORIZATION_DENIED；提交他人的 Membership 返回 TARGET_CONTEXT_UNAVAILABLE。平台管理员没有自动取得 Membership。 |
+| 切换中/失败遮蔽，晚到响应与多标签协调 | 暂停真实选择请求时两页均只显示会话确认状态。丢弃后端已返回的真实 204 响应，两页阻断旧身份；重试同一次操作恢复成功。旧 session 200 在另一页发起切换后才交付，不能覆盖新公司。取消确认不切换；真实冻结后台标签页后仍显示全标签未保存警告，恢复时按权威上下文同步。 |
+| 失权及时遮蔽、路由与 API 拒绝 | 精确禁用专用双身份当前公司的一条 Membership，session 返回 403 / CURRENT_CONTEXT_REVOKED，两页隐藏旧身份，不降级到其仍有权限的平台或其他公司。旧 Token 返回 401 / ACCESS_TOKEN_INVALID。精确恢复该一条 Membership 后旧 Token 仍返回 401。 |
+| 品牌、语言、主题、键盘与焦点 | 公司 1 的完整 logo/favicon/色值/名称一起应用；公司 2 无 Profile 时整体回退平台。中英文与深浅色在真实切换后正确显示；标题焦点、Enter 打开/确认、Escape 取消及焦点返回原按钮通过。深色品牌标题/菜单/平台按钮实测对比度约 12.91/11.95/9.11:1，键盘焦点显示 2px 正文色轮廓。 |
+| 两仓独立交付 | 本仓 35 项测试、类型、改动文件 lint、生产构建及提交钩子通过；后端独立记录 JDK 17 定向 48 项检查。上述页面证据使用正式发布 Client 及开发者已启动后端。 |
+
+### 验收发现的修复与回归
+
+1. 跨标签连续公司切换复现 Vue `Cannot read properties of null (reading 'type')`，可能留下旧公司页面。错误栈定位菜单 Teleport 挂载目标尚未就绪；为五类 Soybean 菜单 Teleport 使用 `defer`，保留原布局与会话遮蔽。修复后连续四次公司切换，以及五种布局/菜单组合的真实双标签切换均通过，零 pageerror。移除 revision 页面键的排查尝试无效，已撤回，最终未改变页面键逻辑。
+2. 深色品牌文字及 plain 平台按钮对比度不足。仅对 Tenant 品牌标题/选中菜单采用深色主题正文色，平台按钮使用原品牌实底白字，并补充工作区按钮可见键盘焦点。没有改写权威品牌色，也不持久化 Tenant 品牌。
+3. 最终代码重跑真实响应丢失与恢复分支，零 pageerror、零框架错误遮罩；HttpOnly/Secure/SameSite=Strict Cookie 属性通过，`document.cookie` 为空，localStorage 不含测试身份或品牌。
+
+长期证据：[浏览器检查与脱敏 HTTP 状态](assets/issue-205/browser-evidence.json)、[中文浅色工作台](assets/issue-205/light-zh.png)、[英文深色工作台](assets/issue-205/dark-en.png)。截图只包含专用测试身份，不包含个人密码或 Token。
+
+范围限制：未执行完整 CI、Fresh Compose、所有直达服务实例或其他 Issue 的完整安全矩阵；没有把这些检查记为通过。后台冻结验证覆盖 Chrome 生命周期冻结，不宣称覆盖操作系统所有休眠策略。测试夹具准备不属于生产业务创建流程验收。
