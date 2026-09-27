@@ -168,6 +168,34 @@ const local: App.I18n.Schema = {
       pending: 'This object has a pending operation. Check or continue the original operation.'
     }
   },
+  lifecycle: {
+    title: 'Tenant lifecycle',
+    check: 'Check lifecycle',
+    hint: 'Actions follow current server permission. Suspension revokes tenant sessions; resumption requires members to sign in again and pass eligibility checks.',
+    unknown:
+      'The operation result is unknown. New actions are blocked. Check authoritative progress before continuing.',
+    progress: 'Progress',
+    operation: 'Original operation ID',
+    actions: {
+      suspend: 'Suspend tenant',
+      resume: 'Resume tenant',
+      recover: 'Recover suspension',
+      continue: 'Continue original operation'
+    },
+    confirm: {
+      suspend: 'Suspend this tenant? Protected access and existing tenant sessions will be revoked.',
+      resume: 'Resume this tenant? Old sessions will remain invalid; members must sign in again.',
+      recover: 'Recover the original suspension workflow without starting a new suspension or resumption?',
+      continue: 'Continue the original lifecycle operation recorded by the server?'
+    },
+    states: {
+      NONE: 'No operation',
+      PENDING: 'Processing',
+      COMPLETED: 'Completed',
+      RETRY_REQUIRED: 'Retry required',
+      RECOVERY_REQUIRED: 'Suspension recovery required'
+    }
+  },
   tenants: {
     title: 'Tenants',
     create: 'Create tenant',
@@ -223,6 +251,8 @@ const local: App.I18n.Schema = {
     }
   },
   console: {
+    accessRevoked:
+      'Tenant access has been revoked: the tenant may be suspended, expired, or your membership may have changed. Protected content is hidden. Sign in again after access is restored.',
     setupTitle: 'Establish your password',
     setupIntro:
       'This link establishes your first password only. After completion, sign in with your email and new password.',

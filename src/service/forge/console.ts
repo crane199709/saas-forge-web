@@ -51,14 +51,14 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   };
   const businessConfiguration = new Configuration(businessOptions);
   // Gateway 对无请求体的浏览器写操作也要求 JSON Content-Type。
-  const oauthConfiguration = new Configuration({
+  const jsonConfiguration = new Configuration({
     ...businessOptions,
     headers: { ...businessOptions.headers, 'Content-Type': 'application/json' }
   });
   return {
-    oauth: new OAuthClientsApi(oauthConfiguration),
+    oauth: new OAuthClientsApi(jsonConfiguration),
     entitlements: new PlatformEntitlementBootstrapApi(businessConfiguration),
-    tenants: new PlatformTenantsApi(businessConfiguration),
+    tenants: new PlatformTenantsApi(jsonConfiguration),
     bootstrap: () => call(() => api.bootstrapConsoleSession({ xSFCSRF: '1', body: {} }, options())),
     session: () => call(() => api.getConsoleSession(options())),
     login: (email, password, revision) =>

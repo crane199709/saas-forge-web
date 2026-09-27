@@ -449,6 +449,17 @@ declare namespace App {
           pending: string;
         };
       };
+      lifecycle: {
+        title: string;
+        check: string;
+        hint: string;
+        unknown: string;
+        progress: string;
+        operation: string;
+        actions: { suspend: string; resume: string; recover: string; continue: string };
+        confirm: { suspend: string; resume: string; recover: string; continue: string };
+        states: { NONE: string; PENDING: string; COMPLETED: string; RETRY_REQUIRED: string; RECOVERY_REQUIRED: string };
+      };
       tenants: {
         title: string;
         create: string;
@@ -501,6 +512,7 @@ declare namespace App {
         };
       };
       console: {
+        accessRevoked: string;
         company: string;
         chooseWorkspace: string;
         platformManagement: string;

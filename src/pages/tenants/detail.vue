@@ -7,6 +7,7 @@ import type { TenantFailure } from '@/service/forge/tenants';
 import { tenantWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
 import Subscription from './subscription.vue';
+import Lifecycle from './lifecycle.vue';
 import { useTenantDisplay } from './shared';
 defineOptions({ name: 'TenantDetail' });
 const route = useRoute();
@@ -64,6 +65,7 @@ onUnmounted(() => controller?.abort());
       <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(tenant.updatedAt) }}</ElDescriptionsItem>
     </ElDescriptions>
     <Subscription :key="String(route.params.id)" :tenant-id="String(route.params.id)" />
-    <!-- 管理员初始化和生命周期由各自业务票接入。 -->
+    <Lifecycle :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
+    <!-- 管理员初始化由独立业务票接入。 -->
   </ElCard>
 </template>

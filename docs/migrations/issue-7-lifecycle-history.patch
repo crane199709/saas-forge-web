@@ -1,0 +1,164 @@
+From 37fa499b1e926e7dbeca31a97669661fdcc99b6e Mon Sep 17 00:00:00 2001
+From: liuhuan <crane0927@163.com>
+Date: Tue, 8 Sep 2026 13:56:28 +0800
+Subject: [PATCH 1/2] =?UTF-8?q?feat(dev):=20=E5=AE=9E=E7=8E=B0=E5=8F=8C=20?=
+ =?UTF-8?q?Console=20=E5=8E=9F=E5=AD=90=E7=BC=96=E6=8E=92=E4=B8=8E?=
+ =?UTF-8?q?=E8=81=9A=E5=90=88=E7=8A=B6=E6=80=81?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Refs #152
+---
+ consoles/test/frontend-lifecycle.test.mjs | 6 ++++++
+ 1 file changed, 6 insertions(+)
+ create mode 100644 consoles/test/frontend-lifecycle.test.mjs
+
+diff --git a/consoles/test/frontend-lifecycle.test.mjs b/consoles/test/frontend-lifecycle.test.mjs
+new file mode 100644
+index 0000000..e1d0d86
+--- /dev/null
++++ b/consoles/test/frontend-lifecycle.test.mjs
+@@ -0,0 +1,6 @@
++// 统一 Console 验证入口也执行仓库级 CLI 与受管生命周期测试。
++import '../../scripts/test/frontend-lifecycle.test.mjs';
++import '../../scripts/test/frontend-orchestration.test.mjs';
++import '../../scripts/test/frontend-cli.test.mjs';
++import '../../scripts/test/https-edge-lifecycle.test.mjs';
++import '../../scripts/test/local-development.test.mjs';
+
+From 8d4c5707e410a5de6220ab8f88a1c5b912590b54 Mon Sep 17 00:00:00 2001
+From: liuhuan <crane0927@163.com>
+Date: Tue, 15 Sep 2026 09:50:42 +0800
+Subject: [PATCH 2/2] =?UTF-8?q?refactor(consoles):=20=E5=88=87=E6=8D=A2?=
+ =?UTF-8?q?=E6=AD=A3=E5=BC=8F=E4=B8=9A=E5=8A=A1=E9=A1=B5=E9=9D=A2=E8=87=B3?=
+ =?UTF-8?q?=20Vue=20=E5=B9=B6=E6=B8=85=E9=99=A4=E6=97=A7=20UI?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+基于 Soybean Element Plus 迁移平台端、租户端与共享认证流程，保留类型化 Client 和原操作恢复边界。移除 React UI、旧共享壳及专属依赖，更新设计文档、浏览器回归和视觉基线。
+
+本地类型、Lint、构建与相关测试通过；真实后端、四域联调及 Fresh Compose 未执行。
+---
+ .../platform-console/src/LifecycleSection.vue | 111 ++++++++++++++++++
+ 1 file changed, 111 insertions(+)
+ create mode 100644 consoles/platform-console/src/LifecycleSection.vue
+
+diff --git a/consoles/platform-console/src/LifecycleSection.vue b/consoles/platform-console/src/LifecycleSection.vue
+new file mode 100644
+index 0000000..6e7b7ae
+--- /dev/null
++++ b/consoles/platform-console/src/LifecycleSection.vue
+@@ -0,0 +1,111 @@
++<script setup lang="ts">
++import { computed, ref, toRaw } from 'vue';
++import { ElButton, ElCard, ElMessageBox } from 'element-plus';
++import { useRead, useMutation, Problem } from '@saas-forge/admin';
++import { usePlatform } from './use-platform';
++const props = defineProps<{ id: string; revision: number }>();
++const emit = defineEmits<{ changed: [] }>();
++const { client, t } = usePlatform();
++const confirming = ref(false);
++const read = useRead(
++  (signal) => client.getTenantLifecycle(props.id, signal),
++  () => props.revision,
++);
++const mutation = useMutation();
++const stateText = computed(() => {
++  const value = read.value.value;
++  if (!value) return '';
++  return t(
++    value.state === 'PENDING'
++      ? value.action === 'RESUME'
++        ? 'lifecycleResumePending'
++        : 'lifecycleSuspendPending'
++      : value.state === 'RECOVERY_REQUIRED'
++        ? 'lifecycleRecoveryRequired'
++        : value.state === 'COMPLETED'
++          ? value.action === 'RESUME'
++            ? 'lifecycleResumed'
++            : 'lifecycleSuspended'
++          : value.state === 'RETRY_REQUIRED'
++            ? 'lifecycleRetryRequired'
++            : 'lifecycleReady',
++  );
++});
++const labels = {
++  SUSPEND: 'lifecycleSuspend',
++  RESUME: 'lifecycleResume',
++  RECOVER: 'lifecycleRecover',
++} as const;
++function allowed(action?: keyof typeof labels) {
++  const value = read.value.value;
++  return (
++    read.ready.value &&
++    value &&
++    (action === 'SUSPEND'
++      ? value.canSuspend
++      : action === 'RESUME'
++        ? value.canResume
++        : action === 'RECOVER'
++          ? value.canRecoverSuspension
++          : value.canContinue)
++  );
++}
++async function submit(action?: keyof typeof labels) {
++  if (!allowed(action) || confirming.value || mutation.busy.value) return;
++  if (action) {
++    confirming.value = true;
++    try {
++      await ElMessageBox.confirm(
++        t(action === 'RESUME' ? 'lifecycleResumeConsequence' : 'lifecycleSuspendConsequence') +
++          ' ' +
++          props.id,
++        t(labels[action]),
++        { type: 'warning' },
++      );
++    } catch {
++      return;
++    } finally {
++      confirming.value = false;
++    }
++  }
++  if (!allowed(action)) return;
++  await mutation.run(
++    (signal) =>
++      action
++        ? client.changeTenantLifecycle(props.id, action, undefined, signal)
++        : client.continueTenantLifecycle(toRaw(read.value.value!), signal),
++    true,
++  );
++  read.refresh();
++  emit('changed');
++}
++</script>
++<template>
++  <ElCard shadow="never"
++    ><template #header
++      ><h2>{{ t('lifecycleTitle') }}</h2></template
++    ><Problem
++      :code="read.problem.value || mutation.problem.value"
++      :title="mutation.unknown.value ? t('lifecycleUnconfirmed') : undefined"
++    />
++    <p v-if="read.value.value" role="status">{{ stateText }}</p>
++    <p v-if="read.value.value?.operationId">
++      {{ t('lifecycleReference', { reference: read.value.value.operationId }) }}
++    </p>
++    <div class="console-actions">
++      <ElButton :disabled="read.loading.value || mutation.busy.value" @click="read.refresh()">{{
++        t('oauthReload')
++      }}</ElButton
++      ><ElButton
++        v-for="action in ['SUSPEND', 'RESUME', 'RECOVER'] as const"
++        v-show="allowed(action)"
++        :key="action"
++        :disabled="confirming || mutation.busy.value"
++        @click="submit(action)"
++        >{{ t(labels[action]) }}</ElButton
++      ><ElButton v-if="allowed()" :loading="mutation.busy.value" @click="submit()">{{
++        t('lifecycleContinue')
++      }}</ElButton>
++    </div>
++  </ElCard>
++</template>

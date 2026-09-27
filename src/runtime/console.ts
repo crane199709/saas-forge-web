@@ -1,4 +1,5 @@
 import { shallowRef } from 'vue';
+import { LifecycleWorkspace } from '@/service/forge/lifecycle';
 import { SubscriptionWorkspace } from '@/service/forge/subscriptions';
 import { OAuthWorkspace } from '@/service/forge/oauth-clients';
 import { EntitlementWorkspace } from '@/service/forge/entitlements';
@@ -15,6 +16,7 @@ import { createBrowserCoordination, operationKey } from './browser-coordination'
 export const consoleState = shallowRef<SessionView>({ status: 'loading' });
 let runtime: ConsoleSessionRuntime | undefined;
 let tenants: TenantWorkspace | undefined;
+let lifecycle: LifecycleWorkspace | undefined;
 let subscriptions: SubscriptionWorkspace | undefined;
 let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
@@ -34,6 +36,13 @@ export function consoleRuntime(): ConsoleSessionRuntime {
       quota: new EntitlementWorkspace('quota', transport.entitlements, { session: runtime, key: operationKey })
     };
     oauth = new OAuthWorkspace(transport.oauth, { session: runtime, key: operationKey, storage: sessionStorage });
+    lifecycle = new LifecycleWorkspace(transport.tenants, {
+      session: runtime,
+      key: operationKey,
+      storage: localStorage,
+      exclusive: async (tenantId, operation) =>
+        await navigator.locks.request(`sf:tenant-lifecycle:${tenantId}`, operation)
+    });
     tenants = new TenantWorkspace(transport.tenants, runtime, operationKey);
     subscriptions = new SubscriptionWorkspace(transport.entitlements, {
       session: runtime,
@@ -56,6 +65,11 @@ export function oauthWorkspace(): OAuthWorkspace {
 export function subscriptionWorkspace(): SubscriptionWorkspace {
   consoleRuntime();
   return subscriptions!;
+}
+
+export function lifecycleWorkspace(): LifecycleWorkspace {
+  consoleRuntime();
+  return lifecycle!;
 }
 
 export function tenantWorkspace(): TenantWorkspace {
@@ -100,6 +114,7 @@ if (import.meta.hot)
     clearInterval(timer);
     oauth?.dispose();
     tenants?.dispose();
+    lifecycle?.dispose();
     subscriptions?.dispose();
     entitlements?.plan.dispose();
     entitlements?.quota.dispose();

@@ -27,15 +27,17 @@ function retry() {
 const busy = computed(() => consoleState.value.status === 'loading');
 const message = computed(() => {
   const state = consoleState.value;
-  if (state.problem === 'PASSWORD_CHANGED') return $t('console.passwordChanged');
+  const fixedMessages = { PASSWORD_CHANGED: 'console.passwordChanged', SESSION_EXPIRED: 'console.expired' } as const;
+  const fixed = fixedMessages[state.problem as keyof typeof fixedMessages];
+  if (fixed) return $t(fixed);
   if (state.problem === 'PASSWORD_CHANGE_RESULT_UNKNOWN') return $t('console.passwordUnknown');
   if (state.problem?.startsWith('PASSWORD_') || state.problem === 'VALIDATION_FAILED')
     return $t('console.passwordInvalid');
   if (state.status === 'logoutPending') return $t('console.logoutPending');
   if (state.problem === 'AUTHENTICATION_FAILED') return $t('console.credentials');
   if (state.problem === 'TARGET_CONTEXT_UNAVAILABLE') return $t('console.targetUnavailable');
-  if (state.problem === 'SESSION_EXPIRED') return $t('console.expired');
-  if (state.status === 'blocked') return $t('console.blocked');
+  if (state.status === 'blocked')
+    return $t(state.problem === 'CURRENT_CONTEXT_REVOKED' ? 'console.accessRevoked' : 'console.blocked');
   if (state.snapshot?.state === 'NO_AVAILABLE_CONTEXT') return $t('console.noContext');
   if (state.snapshot?.state === 'PASSWORD_CHANGE_REQUIRED') return $t('console.initial');
   if (state.snapshot?.state === 'CONTEXT_SELECTION_REQUIRED') return $t('console.selection');

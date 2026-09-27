@@ -159,6 +159,33 @@ const local: App.I18n.Schema = {
       pending: '同一对象存在未决操作，请核查或继续原操作。'
     }
   },
+  lifecycle: {
+    title: '租户生命周期',
+    check: '核查生命周期',
+    hint: '操作以最新后台许可为准。冻结将撤销租户会话；解除冻结后，成员必须重新登录并通过资格校验。',
+    unknown: '操作结果未知，已禁止新操作。请核查权威进展，不要重复提交。',
+    progress: '操作进展',
+    operation: '原操作 ID',
+    actions: {
+      suspend: '冻结租户',
+      resume: '解除冻结',
+      recover: '恢复冻结操作',
+      continue: '继续原操作'
+    },
+    confirm: {
+      suspend: '确认冻结此租户？其受保护访问和现有租户会话将失效。',
+      resume: '确认解除冻结？旧会话不会恢复，成员需要重新登录。',
+      recover: '确认恢复原冻结流程？不会新建冻结或解除冻结操作。',
+      continue: '确认继续后台记录的原生命周期操作？'
+    },
+    states: {
+      NONE: '暂无操作',
+      PENDING: '处理中',
+      COMPLETED: '已完成',
+      RETRY_REQUIRED: '需要重试',
+      RECOVERY_REQUIRED: '需要恢复冻结'
+    }
+  },
   tenants: {
     title: '租户管理',
     create: '创建租户',
@@ -211,6 +238,7 @@ const local: App.I18n.Schema = {
     }
   },
   console: {
+    accessRevoked: '当前租户访问已失效，可能已冻结、到期或成员资格已变更。受保护内容已隐藏；恢复资格后仍需重新登录。',
     setupTitle: '首次设置密码',
     setupIntro: '此链接仅用于建立首个密码。完成后，请使用邮箱和新密码登录。',
     setupInvalid: '链接缺失、无效、已过期或已使用，请联系管理员重新提供设置链接。',
