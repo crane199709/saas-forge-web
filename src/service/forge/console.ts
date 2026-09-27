@@ -43,14 +43,20 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
       throw new SessionFailure('NETWORK_UNAVAILABLE');
     }
   }
-  const businessConfiguration = new Configuration({
+  const businessOptions = {
     basePath,
-    credentials: 'omit',
+    credentials: 'omit' as const,
     accessToken: () => token ?? '',
     headers: { 'X-SF-CSRF': '1' }
+  };
+  const businessConfiguration = new Configuration(businessOptions);
+  // Gateway 对无请求体的浏览器写操作也要求 JSON Content-Type。
+  const oauthConfiguration = new Configuration({
+    ...businessOptions,
+    headers: { ...businessOptions.headers, 'Content-Type': 'application/json' }
   });
   return {
-    oauth: new OAuthClientsApi(businessConfiguration),
+    oauth: new OAuthClientsApi(oauthConfiguration),
     entitlements: new PlatformEntitlementBootstrapApi(businessConfiguration),
     tenants: new PlatformTenantsApi(businessConfiguration),
     bootstrap: () => call(() => api.bootstrapConsoleSession({ xSFCSRF: '1', body: {} }, options())),

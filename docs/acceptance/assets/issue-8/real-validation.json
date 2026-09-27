@@ -1,0 +1,83 @@
+{
+  "run": "issue8-1790516033035",
+  "frontend": "8bfd972 plus OAuth JSON Content-Type fix",
+  "backend": "da4567c859b200d375b4eed6d69e9d557cf60048",
+  "client": "0.4.0",
+  "environment": "existing native local services / compose infrastructure",
+  "receiver": "existing platform-mechanism-receiver, loopback only, Nacos IAM discovery, no self registration",
+  "checks": [
+    {
+      "name": "formal login"
+    },
+    {
+      "name": "prior failed-run test Client revoked",
+      "clientId": "01a0e300-cb32-7a10-a7cf-f13a7e046d74"
+    },
+    {
+      "name": "page creation and one-time Secret clearance"
+    },
+    {
+      "name": "receiver allows runtime read",
+      "status": 200,
+      "clientId": "01a0e312-8570-721a-b90f-3bc080e945ff",
+      "scopes": ["runtime:read"]
+    },
+    {
+      "name": "receiver rejects insufficient scope",
+      "status": 403,
+      "code": "ACCESS_TOKEN_SCOPE_INSUFFICIENT"
+    },
+    {
+      "name": "token endpoint rejects ungranted scope",
+      "status": 403,
+      "code": "CLIENT_CREDENTIALS_SCOPE_REJECTED"
+    },
+    {
+      "name": "new Secret consumes receiver",
+      "status": 200,
+      "clientId": "01a0e312-8570-721a-b90f-3bc080e945ff",
+      "scopes": ["runtime:read"]
+    },
+    {
+      "name": "old Secret remains valid in server overlap",
+      "status": 200,
+      "clientId": "01a0e312-8570-721a-b90f-3bc080e945ff",
+      "scopes": ["runtime:read"]
+    },
+    {
+      "name": "server overlap prevents second rotation"
+    },
+    {
+      "name": "revocation rejects prior access token",
+      "status": 401,
+      "code": "ACCESS_TOKEN_INVALID"
+    },
+    {
+      "name": "revocation rejects new access token",
+      "status": 401,
+      "code": "ACCESS_TOKEN_INVALID"
+    },
+    {
+      "name": "revoked Client cannot issue with old or new Secret"
+    },
+    {
+      "name": "real committed lost response blocks replacement",
+      "createRequests": 1
+    },
+    {
+      "name": "unknown operation remains locked after refresh"
+    },
+    {
+      "name": "unknown-result test Client revoked through page"
+    },
+    {
+      "name": "test browser session formally logged out"
+    }
+  ],
+  "chrome": "154.0.8037.57",
+  "clientId": "01a0e312-8570-721a-b90f-3bc080e945ff",
+  "coreResult": "passed",
+  "unknownClientId": "01a0e312-9c99-725a-85a4-c250acf447c4",
+  "result": "passed",
+  "createdClients": ["01a0e312-8570-721a-b90f-3bc080e945ff", "01a0e312-9c99-725a-85a4-c250acf447c4"]
+}

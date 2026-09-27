@@ -1,0 +1,5 @@
+{
+  "logout": "passed",
+  "priorAccessTokenStatus": 401,
+  "cleanupStoredCredentials": false
+}

@@ -282,3 +282,33 @@ test('a later recoverable rotation is not acknowledged by an earlier successful 
     request.mock.restore();
   }
 });
+
+test('bodyless rotation and revocation carry the JSON content type required by the browser Gateway', async () => {
+  const writes: string[] = [];
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    if (url.includes('operations')) return Response.json(page([]));
+    if (url.endsWith('credential-status')) return Response.json({ clientId: id, canRotate: true, canRevoke: true });
+    if (init.method === 'GET') return Response.json(client);
+    const headers = new Headers(init.headers);
+    if (headers.get('Content-Type') !== 'application/json') return new Response(null, { status: 403 });
+    assert.equal(headers.get('Authorization'), 'Bearer test-token');
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    assert.equal(init.body, undefined);
+    writes.push(url.endsWith('/revocations') ? 'REVOKE' : 'ROTATE');
+    return url.endsWith('/revocations')
+      ? new Response(null, { status: 204 })
+      : Response.json({ ...client, clientSecret: 'test-only-secret' });
+  });
+  const { workspace } = setup();
+  try {
+    await workspace.checkOperations();
+    assert.equal(await workspace.rotate(id, 'Receiver'), true);
+    workspace.clearSecret();
+    await workspace.checkOperations();
+    assert.equal(await workspace.revoke(id, 'Receiver'), true);
+    assert.deepEqual(writes, ['ROTATE', 'REVOKE']);
+  } finally {
+    workspace.dispose();
+    request.mock.restore();
+  }
+});
