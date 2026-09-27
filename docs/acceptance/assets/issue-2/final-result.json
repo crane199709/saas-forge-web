@@ -1,0 +1,19 @@
+{
+  "prefix": "Issue2-Final-1790503528624",
+  "chrome": "154.0.8037.57",
+  "checks": [
+    "real committed creation with lost response locks duplicate submission",
+    "authoritative original record preserves key and opens actual tenant without replay",
+    "real tenant detail survives full page reload",
+    "21 real tenants created via drawer and typed client",
+    "real name filter returns first 20 tenants",
+    "real cursor pagination next page has final distinct tenant",
+    "previous page restores real first page",
+    "real empty name filter",
+    "reset clears filters and cursor",
+    "no browser page errors",
+    "real combined name and status filter"
+  ],
+  "created": 21,
+  "success": true
+}

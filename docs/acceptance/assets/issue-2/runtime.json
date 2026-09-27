@@ -1,0 +1,37 @@
+[
+  {
+    "service": "iam",
+    "pid": 83213,
+    "java": "java version \"17.0.12\" 2024-07-16 LTS",
+    "classpathClassSha256": "fedb04fae6cc5af5f7fd02e606836a5f3e55f090ad5d5954e480b9c198314742",
+    "classCount": 828
+  },
+  {
+    "service": "gateway",
+    "pid": 83216,
+    "java": "java version \"17.0.12\" 2024-07-16 LTS",
+    "classpathClassSha256": "43165f326003a7def25e74b1a16b4308e20c17231545c291b70112365a215aab",
+    "classCount": 69
+  },
+  {
+    "service": "audit",
+    "pid": 83240,
+    "java": "java version \"17.0.12\" 2024-07-16 LTS",
+    "classpathClassSha256": "a6ed2946f6a9f86f356529d3484b55e890f209fd51d133bf8ccbea760117d7cd",
+    "classCount": 41
+  },
+  {
+    "service": "tenant-access",
+    "pid": 83252,
+    "java": "java version \"17.0.12\" 2024-07-16 LTS",
+    "classpathClassSha256": "6b40c8893387311db6fbc6f4f53fb4fa709ebccabeb3d7029bae713dc0f16657",
+    "classCount": 554
+  },
+  {
+    "service": "entitlement",
+    "pid": 83276,
+    "java": "java version \"17.0.12\" 2024-07-16 LTS",
+    "classpathClassSha256": "22e0f89107feaea4b282755798623638c0d1eaf82401f45bb73b4f2a100d5e9b",
+    "classCount": 541
+  }
+]
