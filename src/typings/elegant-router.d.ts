@@ -20,6 +20,10 @@ declare module "@elegant-router/types" {
     "workbench": "/workbench";
     "tenants": "/tenants";
     "tenant-detail": "/tenants/:id";
+    "plans": "/plans";
+    "plan-detail": "/plans/:id";
+    "quota-definitions": "/quota-definitions";
+    "quota-detail": "/quota-definitions/:id";
     "exception": "/exception";
     "exception_403": "/exception/403";
     "exception_404": "/exception/404";
@@ -113,6 +117,10 @@ declare module "@elegant-router/types" {
     | "workbench"
     | "tenants"
     | "tenant-detail"
+    | "plans"
+    | "plan-detail"
+    | "quota-definitions"
+    | "quota-detail"
     | "exception"
     | "exception_403"
     | "exception_404"
@@ -164,6 +172,10 @@ declare module "@elegant-router/types" {
     | "workbench"
     | "tenants"
     | "tenant-detail"
+    | "plans"
+    | "plan-detail"
+    | "quota-definitions"
+    | "quota-detail"
     | "exception"
     | "document"
   >;
@@ -229,6 +241,10 @@ declare module "@elegant-router/types" {
     | "workbench"
     | "tenants"
     | "tenant-detail"
+    | "plans"
+    | "plan-detail"
+    | "quota-definitions"
+    | "quota-detail"
     | "exception_403"
     | "exception_404"
     | "exception_500"

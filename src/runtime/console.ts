@@ -1,4 +1,6 @@
 import { shallowRef } from 'vue';
+import { EntitlementWorkspace } from '@/service/forge/entitlements';
+import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
@@ -11,6 +13,7 @@ import { createBrowserCoordination, operationKey } from './browser-coordination'
 export const consoleState = shallowRef<SessionView>({ status: 'loading' });
 let runtime: ConsoleSessionRuntime | undefined;
 let tenants: TenantWorkspace | undefined;
+let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -22,6 +25,10 @@ export function consoleRuntime(): ConsoleSessionRuntime {
       key: operationKey,
       resolveBrand: resolveConsoleBrand
     });
+    entitlements = {
+      plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
+      quota: new EntitlementWorkspace('quota', transport.entitlements, { session: runtime, key: operationKey })
+    };
     tenants = new TenantWorkspace(transport.tenants, runtime, operationKey);
     runtime.subscribe(value => {
       consoleState.value = value;
@@ -33,6 +40,11 @@ export function consoleRuntime(): ConsoleSessionRuntime {
 export function tenantWorkspace(): TenantWorkspace {
   consoleRuntime();
   return tenants!;
+}
+
+export function entitlementWorkspace(kind: EntitlementKind): EntitlementWorkspace {
+  consoleRuntime();
+  return entitlements![kind];
 }
 
 const verify = () => {
@@ -66,5 +78,7 @@ if (import.meta.hot)
     document.removeEventListener('visibilitychange', verify);
     clearInterval(timer);
     tenants?.dispose();
+    entitlements?.plan.dispose();
+    entitlements?.quota.dispose();
     runtime?.dispose();
   });

@@ -1,4 +1,58 @@
 const local: App.I18n.Schema = {
+  entitlements: {
+    plan: {
+      title: '套餐管理',
+      create: '创建套餐',
+      closeCreate: '关闭创建套餐抽屉',
+      detail: '套餐详情',
+      back: '返回套餐列表',
+      activate: '激活套餐'
+    },
+    quota: {
+      title: '额度定义',
+      create: '准备额度定义',
+      closeCreate: '关闭额度定义抽屉',
+      detail: '额度定义详情',
+      back: '返回额度定义列表',
+      activate: '激活额度定义'
+    },
+    code: '编码',
+    name: '套餐名称',
+    limit: 'max_users 上限',
+    id: 'ID',
+    filters: '筛选额度或套餐',
+    empty: '没有符合条件的记录',
+    reuse: '复用已有 max_users',
+    recovery: '我的操作记录',
+    recoveryHint: '完整读取当前操作者的记录后，仅在服务端允许时继续原操作。其他对象的未决操作不会阻断当前对象。',
+    operation: '操作',
+    target: '对象',
+    unknown: '操作结果待确认。请核查原操作，不要重复提交同一对象。',
+    unchecked: '尚未完成记录核查，创建、激活和恢复暂不可用。',
+    noOperations: '没有操作记录',
+    requirements: '请先完成记录核查，确保没有同一对象的未决操作；创建套餐还需要已激活的 max_users 定义。',
+    legacyZero: '历史零额度：不能用于新的授权或激活；已有权益保持不变。',
+    states: {
+      RETIRED: '已停用',
+      DRAFT: '草稿',
+      ACTIVE: '已激活'
+    },
+    actions: {
+      CREATE: '创建',
+      ACTIVATE: '激活'
+    },
+    errors: {
+      invalid: '服务返回的记录不完整或不一致，相关操作已锁定。',
+      unavailable: '服务或网络不可用，请重试读取并核查原操作。',
+      forbidden: '当前会话无权执行此操作，请核查会话与权限。',
+      notFound: '未找到记录；这不表示可以重新提交。',
+      stale: '会话或请求已变化，请重新读取。',
+      input:
+        '编码需为 2–63 位小写字母、数字或连字符且以字母开头；名称为 1–200 个字符且非全空白；max_users 上限为 1–2147483647 的整数。',
+      definitionRequired: '需要已激活且精确匹配的 max_users 定义与正整数额度。请先准备额度，无法确认时不允许提交。',
+      pending: '同一对象存在未决操作，请核查或继续原操作。'
+    }
+  },
   tenants: {
     title: '租户管理',
     create: '创建租户',
@@ -254,6 +308,10 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    plans: '套餐管理',
+    'plan-detail': '套餐详情',
+    'quota-definitions': '额度定义',
+    'quota-detail': '额度定义详情',
     tenants: '租户管理',
     'tenant-detail': '租户详情',
     workbench: '公司工作台',

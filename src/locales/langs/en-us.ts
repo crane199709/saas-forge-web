@@ -1,4 +1,61 @@
 const local: App.I18n.Schema = {
+  entitlements: {
+    plan: {
+      title: 'Plans',
+      create: 'Create plan',
+      closeCreate: 'Close create plan drawer',
+      detail: 'Plan details',
+      back: 'Back to plans',
+      activate: 'Activate plan'
+    },
+    quota: {
+      title: 'Quota definitions',
+      create: 'Prepare quota definition',
+      closeCreate: 'Close quota definition drawer',
+      detail: 'Quota definition details',
+      back: 'Back to quota definitions',
+      activate: 'Activate quota definition'
+    },
+    code: 'Code',
+    name: 'Plan name',
+    limit: 'max_users limit',
+    id: 'ID',
+    filters: 'Filter quotas or plans',
+    empty: 'No matching records',
+    reuse: 'Reuse existing max_users',
+    recovery: 'My operations',
+    recoveryHint:
+      'All current-actor records must be read before the server-authorized original operation can continue. Pending operations on other objects do not block this object.',
+    operation: 'Operation',
+    target: 'Object',
+    unknown: 'Operation result is unconfirmed. Check the original operation; do not submit the same object again.',
+    unchecked: 'Operation checks are incomplete. Creation, activation and recovery are unavailable.',
+    noOperations: 'No operations',
+    requirements:
+      'Complete the operation check and resolve pending operations for this object. Creating a plan also requires an active max_users definition.',
+    legacyZero: 'Historical zero quota: ineligible for new grants or activation; existing entitlements are unchanged.',
+    states: {
+      RETIRED: 'Retired',
+      DRAFT: 'Draft',
+      ACTIVE: 'Active'
+    },
+    actions: {
+      CREATE: 'Create',
+      ACTIVATE: 'Activate'
+    },
+    errors: {
+      invalid: 'Incomplete or inconsistent server records. Related actions are locked.',
+      unavailable: 'Service or network unavailable. Retry reads and check the original operation.',
+      forbidden: 'The current session cannot perform this action. Check session and permissions.',
+      notFound: 'Record not found. This does not authorize a new submission.',
+      stale: 'Session or request changed. Read the current state again.',
+      input:
+        'Code: 2–63 lowercase letters, digits or hyphens, starting with a letter. Name: 1–200 characters, not only whitespace. max_users: an integer from 1 to 2147483647.',
+      definitionRequired:
+        'An exact, active max_users definition and a positive integer quota are required. Prepare the quota first; unconfirmed state cannot authorize submission.',
+      pending: 'This object has a pending operation. Check or continue the original operation.'
+    }
+  },
   tenants: {
     title: 'Tenants',
     create: 'Create tenant',
@@ -262,6 +319,10 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    plans: 'Plans',
+    'plan-detail': 'Plan details',
+    'quota-definitions': 'Quota definitions',
+    'quota-detail': 'Quota definition details',
     tenants: 'Tenants',
     'tenant-detail': 'Tenant details',
     workbench: 'Company workspace',

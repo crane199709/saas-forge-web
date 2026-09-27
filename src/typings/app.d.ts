@@ -292,6 +292,59 @@ declare namespace App {
     };
 
     type Schema = {
+      entitlements: {
+        plan: {
+          title: string;
+          create: string;
+          closeCreate: string;
+          detail: string;
+          back: string;
+          activate: string;
+        };
+        quota: {
+          title: string;
+          create: string;
+          closeCreate: string;
+          detail: string;
+          back: string;
+          activate: string;
+        };
+        code: string;
+        name: string;
+        limit: string;
+        id: string;
+        filters: string;
+        empty: string;
+        reuse: string;
+        recovery: string;
+        recoveryHint: string;
+        operation: string;
+        target: string;
+        unknown: string;
+        unchecked: string;
+        noOperations: string;
+        requirements: string;
+        legacyZero: string;
+        states: {
+          RETIRED: string;
+          DRAFT: string;
+          ACTIVE: string;
+        };
+        actions: {
+          CREATE: string;
+          ACTIVATE: string;
+        };
+        errors: {
+          invalid: string;
+          unavailable: string;
+          forbidden: string;
+          notFound: string;
+          stale: string;
+          input: string;
+          definitionRequired: string;
+          pending: string;
+        };
+      };
       tenants: {
         title: string;
         create: string;

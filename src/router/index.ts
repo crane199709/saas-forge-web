@@ -69,6 +69,46 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/plans',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'plans',
+          component: () => import('@/pages/entitlements/index.vue'),
+          props: { kind: 'plan' },
+          meta: { title: 'Plans', i18nKey: 'entitlements.plan.title' }
+        },
+        {
+          path: ':id',
+          name: 'plan-detail',
+          component: () => import('@/pages/entitlements/detail.vue'),
+          props: { kind: 'plan' },
+          meta: { title: 'Plans', i18nKey: 'entitlements.plan.detail' }
+        }
+      ]
+    },
+    {
+      path: '/quota-definitions',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'quota-definitions',
+          component: () => import('@/pages/entitlements/index.vue'),
+          props: { kind: 'quota' },
+          meta: { title: 'Quota definitions', i18nKey: 'entitlements.quota.title' }
+        },
+        {
+          path: ':id',
+          name: 'quota-detail',
+          component: () => import('@/pages/entitlements/detail.vue'),
+          props: { kind: 'quota' },
+          meta: { title: 'Quota definitions', i18nKey: 'entitlements.quota.detail' }
+        }
+      ]
+    },
+    {
       path: '/workbench',
       component: () => import('@/layouts/base-layout/index.vue'),
       children: [
@@ -102,7 +142,10 @@ export async function setupRouter(app: App) {
       consoleState.value.status === 'authenticated' ? consoleState.value.snapshot?.activeContext?.type : undefined;
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
     if (!active && to.name !== 'login') return '/login';
-    const allowed = active === 'PLATFORM' ? ['home', 'tenants', 'tenant-detail'] : ['workbench'];
+    const allowed =
+      active === 'PLATFORM'
+        ? ['home', 'tenants', 'tenant-detail', 'plans', 'plan-detail', 'quota-definitions', 'quota-detail']
+        : ['workbench'];
     if (active && !allowed.includes(String(to.name))) return home;
     return true;
   });
@@ -115,7 +158,10 @@ export async function setupRouter(app: App) {
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
     const name = String(router.currentRoute.value.name);
     if (['password-setup', 'gateway-connection'].includes(name)) return;
-    const allowed = active === 'PLATFORM' ? ['home', 'tenants', 'tenant-detail'] : ['workbench'];
+    const allowed =
+      active === 'PLATFORM'
+        ? ['home', 'tenants', 'tenant-detail', 'plans', 'plan-detail', 'quota-definitions', 'quota-detail']
+        : ['workbench'];
     if (!active || !allowed.includes(name)) router.replace(active ? home : '/login');
   });
   await router.isReady();

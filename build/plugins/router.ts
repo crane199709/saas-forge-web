@@ -13,6 +13,10 @@ export function setupElegantRouter() {
         'workbench',
         'tenants',
         'tenant-detail',
+        'plans',
+        'plan-detail',
+        'quota-definitions',
+        'quota-detail',
         'exception_403',
         'exception_404',
         'exception_500',
@@ -30,6 +34,8 @@ export function setupElegantRouter() {
     routePathTransformer(routeName, routePath) {
       const key = routeName as RouteKey;
 
+      if (key === 'plan-detail') return '/plans/:id';
+      if (key === 'quota-detail') return '/quota-definitions/:id';
       if (key === 'tenant-detail') return '/tenants/:id';
 
       if (key === 'login') {

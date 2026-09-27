@@ -1,10 +1,17 @@
-import { Configuration, Console, PlatformTenantsApi } from '@crane199709/saas-forge-api-client';
+import {
+  Configuration,
+  Console,
+  PlatformEntitlementBootstrapApi,
+  PlatformTenantsApi
+} from '@crane199709/saas-forge-api-client';
 import { SessionFailure } from '../../runtime/console-session';
 import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
-export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & { tenants: PlatformTenantsApi } {
+export function createConsoleTransport(
+  apiOrigin: unknown
+): ConsoleTransport & { tenants: PlatformTenantsApi; entitlements: PlatformEntitlementBootstrapApi } {
   const basePath = requireHttpsOrigin(apiOrigin);
   let token: string | undefined;
   const api = new Console.ConsoleAuthenticationApi(
@@ -33,15 +40,15 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
       throw new SessionFailure('NETWORK_UNAVAILABLE');
     }
   }
+  const businessConfiguration = new Configuration({
+    basePath,
+    credentials: 'omit',
+    accessToken: () => token ?? '',
+    headers: { 'X-SF-CSRF': '1' }
+  });
   return {
-    tenants: new PlatformTenantsApi(
-      new Configuration({
-        basePath,
-        credentials: 'omit',
-        accessToken: () => token ?? '',
-        headers: { 'X-SF-CSRF': '1' }
-      })
-    ),
+    entitlements: new PlatformEntitlementBootstrapApi(businessConfiguration),
+    tenants: new PlatformTenantsApi(businessConfiguration),
     bootstrap: () => call(() => api.bootstrapConsoleSession({ xSFCSRF: '1', body: {} }, options())),
     session: () => call(() => api.getConsoleSession(options())),
     login: (email, password, revision) =>

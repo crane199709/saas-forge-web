@@ -1,0 +1,1174 @@
+From b49abfee0f4e2620755ba6202a3b74e15d4e86fe Mon Sep 17 00:00:00 2001
+From: Crane <crane0927@163.com>
+Date: Sun, 13 Sep 2026 21:24:03 +0800
+Subject: [PATCH 1/3] =?UTF-8?q?=E4=BA=A4=E4=BB=98=E5=8E=9F=E7=94=9F?=
+ =?UTF-8?q?=E5=BC=80=E5=8F=91=E6=B5=81=E7=A8=8B=E4=B8=8E=20Platform=20?=
+ =?UTF-8?q?=E7=A7=9F=E6=88=B7=E5=88=9D=E5=A7=8B=E5=8C=96=E9=97=AD=E7=8E=AF?=
+ =?UTF-8?q?=20(#179)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+* feat(consoles): 支持原生开发与独立 HTTPS 入口
+
+分离正式 API Client 生成与日常启动，校验生成物并明确显示受控 HTTPS 浏览器入口。复用独立 Edge 生命周期，补充原生启动、HMR、独立停止及真实认证验收记录。
+
+Refs #162
+
+* feat(dev): 支持 Gateway 与 IAM 原生本地启动
+
+新增个人配置模板、本地配置加载与 IAM HTTP 服务发现，补齐开发身份自身发现权限。记录已通过的模块验证及待完成的实际 IDE 和认证链路验收。
+
+Refs #163
+
+* fix(dev): 从 resources 加载本地配置并排除发布打包
+
+Refs #163
+
+* docs(dev): 记录 Issue 163 实际验证结果
+
+* refactor(iam): 改为内部签发自身服务令牌
+
+* docs(dev): 更新 Issue 163 登录刷新验收状态
+
+* docs(dev): 确认 Issue 163 全部验收完成
+
+* feat(local): 支持 Tenant Access 原生启动与双向服务发现
+
+补齐个人配置、按次 Nacos HTTP/gRPC 发现、失败关闭与调用超时，保留非 local 配置行为。相关模块 449 项测试通过；真实 IDE 与浏览器验收待完成。
+
+Refs #164
+
+* docs(local): 记录 Tenant Access 现场验收与剩余证据
+
+* docs(local): 完成 Issue 164 受保护双向联调验收
+
+* feat(local): 支持 Entitlement 原生配置与权益协作发现
+
+Refs #165。补齐 local HTTP/gRPC 服务发现、个人配置模板和聚焦回归。相关模块 516 项测试通过；真实 IDEA、Tenant 初始化及 Quota 现场验收待补齐。
+
+* feat(audit): 支持原生本地配置与消费验收流程
+
+Refs #166
+
+* docs(audit): 补齐真实事件消费与 IDE 重启验收证据
+
+Refs #166
+
+* build(verification): 支持按影响范围进行本地验证
+
+新增 backend-local 与前端包级验证入口，保留默认完整门禁；补充真实 CLI 回归、范围升级文档与前后实测记录。
+
+Refs #167
+
+* docs(local): 记录 Entitlement 原生启动与发现验收
+
+Refs #165
+
+* ci(verification): 合并重复完整门禁并保留独有覆盖
+
+将 JDK 17 完整验证与五浏览器认证验收置于同一 reusable job，
+复用当前构建制品，保留 JDK 21、独立浏览器、Tenant 和 Nacos 门禁。
+补充制品失败传播回归、覆盖映射和本机复现说明。
+
+Refs #168
+
+* docs(ci): 补齐 Issue 168 实际完整门禁验收证据
+
+记录源码 2a1d7ae 的八项 CI 门禁、五渠道安全证据与负向入口回归，
+补齐前后执行次数和阶段耗时，区分累计 job 时间与整体墙钟时间。
+
+Refs #168
+
+* fix(test): 隔离撤销索引探针与自动恢复的竞争
+
+IAM 定时重建可能在未就绪断言前把 Ready 改回 1。临时限制隔离 Redis 的 SET，保留 JWKS 和读取，并在退出时恢复权限；增加竞争及失败传播回归。Refs #168。
+
+* docs(console): 明确身份与租户初始化闭环设计
+
+Refs #170
+
+* feat(console): 补齐平台当前身份读取与会话隔离
+
+新增 IAM Current Session 正式契约、共享 Client 和双语身份授权展示。
+复用认证 Runtime，隔离迟到响应与错误正文，并拒绝不合法的授权快照。
+修复语言选择器遮挡登出，补充 HTTP、Runtime、页面和浏览器回归。
+
+真实 HTTPS 服务链路及 Fresh Compose 浏览器验收仍待环境就绪。
+Refs #171
+
+* docs(console): 记录当前身份真实浏览器验收结果
+
+* ci: 将开发阶段兼容范围收缩为 Chrome 与 JDK 17
+
+保留 Chromium 日常功能与视觉测试，将真实产品验收统一为 Chrome。迁移契约基线保护并保留安全及 Fresh Compose 检查，同步项目规范、ADR 和操作说明。
+
+验证：Chrome 31 项通过、6 项视觉跳过；Chromium 37 项通过；CLI 回归 32 项通过；JDK 17 根 validate 与相关静态检查通过。完整 Fresh Compose 和远端 CI 未执行。
+
+Refs #103, #161
+
+* test(console): 修正语言切换焦点并完成身份验收
+
+* feat(tenant): 实现查询创建与服务端恢复
+
+新增正式契约、原操作者恢复记录和双语 Console 页面，覆盖事务回滚、24 小时边界、并发与响应丢失。真实 Chrome/Fresh Compose 验收因本机 443 占用待完成，详见验收记录。
+
+Refs #172
+
+* fix(console): 保持路由异常隔离并完成 Tenant 产品验收
+
+在 Data Router 内复用安全错误边界，防止默认错误页暴露原异常。修正验收脚本在导航期间误匹配旧字段和下拉层的问题，补充存储检查与最终截图。
+
+最终 Fresh Compose 产品测试 34/34、重置后 Chrome 浏览器门禁与前端完整验证通过。保留 Remote 一次未分类错误及迁移独立校验入口缺失的记录。
+
+Refs #172
+
+* feat(console): 落地 A 方案租户管理界面与共享侧栏
+
+* feat(console): 重构共享登录页并添加入口角标
+
+* docs(tenant): 移除失效校验要求并完成 #172 关闭审核
+
+* feat(entitlement): 实现额度定义查询与创建激活恢复
+
+Refs #173
+
+* fix(console): 保持刷新后额度未决操作的原始身份
+
+修复 #173 审查发现，补充回滚恢复与过期语义。
+
+* fix(entitlement): 为浏览器额度激活声明 JSON 请求
+
+* fix(entitlement): 校验额度激活与恢复的空请求正文
+
+* test(console): 通过窄屏抽屉执行产品导航验收
+
+* test(console): 在抽屉打开时核验旧导航已移除
+
+* test(console): 打开抽屉后验证 Remote 品牌继承
+
+* test(console): 按主题验证品牌对比度调整后的颜色
+
+* test(console): 为品牌并发回读打开新窗口导航
+
+* docs(entitlement): 归档额度定义 Chrome 与 Fresh 验收证据
+
+* docs(entitlement): 补充现有环境恢复记录迁移与关闭核验
+
+* feat(entitlement)!: 实现 Plan 管理与最小额度规则
+
+新增 Plan 查询、创建激活页面与原操作恢复，保留历史零额度和稳定响应。通过前后端完整验证、两轴复审及生命周期 Fresh Compose 13/13；Chrome 页面验收仍受本地 443 占用阻断。
+
+BREAKING CHANGE: 新 Plan max_users 下限由 0 收紧为 1；Java CreatePlanRequest 使用 NewPlanQuotaLimit 请求元素类型。历史响应模型与既有权益保持不变。
+
+Refs #174
+
+* test(console): 完成 Plan 真实 Chrome 验收
+
+等待创建路由并限定表单，避免同名列表筛选框截获输入；保留请求状态断言及失败截图。记录 Chrome/Fresh 产品 36/36、重置后浏览器门禁通过，以及本地 V6 升级复核。
+
+Refs #174
+
+* test(design-system): 在真实浏览器验证表格操作确认
+
+CI 的 jsdom 可访问名称查询耗尽表格集成测试的 15 秒上限。迁移完整用例到独立浏览器测试，保留原断言并增强菜单可见性及 Escape 取消，避免输入状态污染既有矩阵。
+
+完整前端门禁及最终真实 Chrome 用例通过。Refs #174
+
+* feat(entitlement): 实现 Tenant 首个订阅与权威权益读取
+
+Refs #175
+
+* feat(tenant): 实现管理员初始化进度与安全恢复
+
+补齐正式读取与恢复契约、共享 Runtime 和 Tenant 详情入口，保留持久根工作流并独立回读额度。
+
+完整前后端验证通过；Chrome/Fresh 验收待受信证书与 443 环境条件满足后执行。
+
+Refs #176
+
+* test(tenant): 完成管理员初始化 Chrome Fresh 验收
+
+修正隔离管理员夹具与响应式布局等待，补充浏览器回归和真实恢复、权限拒绝、Quota 补偿验收记录。
+
+Refs #176
+
+* feat(console): 实现密码设置通知状态与重发恢复
+
+新增 IAM 权威通知读取、Tenant 独立查询和原操作者恢复，复用共享 Client 与双语详情面板。
+
+补齐无请求体重发的 JSON Content-Type 并保留原授权和幂等键，修复真实浏览器请求被 Gateway 拒绝的问题。
+
+验证包含后端集成、前端工作区、两轴审查和 Fresh Chrome 39 项产品测试；详细结果见验收记录。
+
+Refs #177
+
+* feat(console): 实现 OAuth Client 列表与详情读取
+
+关联 Issue #178。复用 IAM 平台授权、正式生成 Client 与共享 Runtime，增加筛选、游标分页和双语详情。记录自动化验证及尚未完成的真实服务验收。
+
+* fix(console): 修复 OAuth Client 完整验收发现的问题
+
+* docs(console): 汇总 Issue #170 验收并同步完成状态
+
+Refs #170
+
+* docs(entitlement): 补齐原生联调验收与端口配置说明
+
+Refs #165
+
+* docs(development): 切换原生开发默认入口并汇总验收证据
+
+统一日常启动与分层验证文档，保留旧编排的集成验收职责。记录父规格映射及启动耗时、资源和 IDE 交互的待补证据。
+
+Refs #169
+
+* docs(acceptance): 补充原生开发现场验收确认
+
+Refs #169
+---
+ consoles/integration-test/plan-acceptance.mjs | 172 +++++++++++++
+ .../quota-definition-acceptance.mjs           | 225 ++++++++++++++++++
+ 2 files changed, 397 insertions(+)
+ create mode 100644 consoles/integration-test/plan-acceptance.mjs
+ create mode 100644 consoles/integration-test/quota-definition-acceptance.mjs
+
+diff --git a/consoles/integration-test/plan-acceptance.mjs b/consoles/integration-test/plan-acceptance.mjs
+new file mode 100644
+index 0000000..72e30f3
+--- /dev/null
++++ b/consoles/integration-test/plan-acceptance.mjs
+@@ -0,0 +1,172 @@
++import assert from 'node:assert/strict';
++import { mkdtemp, rm } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { execFileSync } from 'node:child_process';
++import { chromium } from 'playwright';
++
++// Browser plugin not available. 正式 Chrome 页面经 HTTPS/Gateway/Nacos 访问真实服务。
++export async function verifyPlan({
++  rootDomain,
++  email,
++  password,
++  login,
++  selectLocale,
++  accessibility,
++  safeStorage,
++  capture,
++  quotaDefinitionId,
++}) {
++  const profile = await mkdtemp(path.join(tmpdir(), 'sf-plan-'));
++  const base = `https://platform.${rootDomain}`;
++  const project = process.env.SF_ACCEPTANCE_PROJECT;
++  assert.match(project ?? '', /^saas-forge-console-\d+-\d+-[a-f0-9]{6}$/);
++  assert.match(quotaDefinitionId, /^[0-9a-f-]{36}$/);
++  const launch = () =>
++    chromium.launchPersistentContext(profile, {
++      channel: 'chrome',
++      headless: true,
++      ignoreHTTPSErrors: false,
++      locale: 'zh-CN',
++      viewport: { width: 1440, height: 960 },
++    });
++  const errors = [];
++  let context;
++  let id;
++  try {
++    context = await launch();
++    let page = await context.newPage();
++    page.on('pageerror', () => errors.push('pageerror'));
++    await page.goto(base);
++    await login(page, email, password, 'zh-CN');
++    await page.goto(`${base}/plans`);
++    await accessibility(page, '套餐');
++    await page.getByRole('button', { name: '创建套餐', exact: true }).click();
++    await page.waitForURL(`${base}/plans/new`);
++    const createForm = page.getByRole('form', { name: '创建套餐', exact: true });
++    await createForm.getByRole('textbox', { name: '编码', exact: false }).fill('browser-plan');
++    await createForm.getByRole('textbox', { name: '名称', exact: false }).fill('Browser Plan');
++    await createForm.getByRole('textbox', { name: 'max_users 上限', exact: false }).fill('0');
++    await page.getByRole('button', { name: '创建套餐', exact: true }).click();
++    await page.getByText(/编码需为/).waitFor();
++    await createForm.getByRole('textbox', { name: 'max_users 上限', exact: false }).fill('1');
++    let creates = 0;
++    let createKey;
++    let createStatus;
++    await page.route('**/api/v1/platform/plans', async (route) => {
++      if (route.request().method() !== 'POST') return route.continue();
++      creates++;
++      createKey = route.request().headers()['idempotency-key'];
++      const response = await route.fetch();
++      createStatus = response.status();
++      if (createStatus === 201) id = (await response.json()).id;
++      await route.abort('failed');
++    });
++    try {
++      await page.getByRole('button', { name: '创建套餐', exact: true }).dblclick();
++      await page.getByText('操作结果待确认', { exact: true }).waitFor();
++    } catch (error) {
++      await capture(page, 'issue-174-create-failure');
++      throw new Error(
++        `Plan create recovery: requests=${creates}, status=${createStatus ?? 'none'}, pageErrors=${errors.length}`,
++        { cause: error },
++      );
++    }
++    assert.equal(creates, 1);
++    assert.equal(createStatus, 201);
++    assert.ok(id);
++    assert.ok(createKey);
++    await capture(page, 'issue-174-create-response-lost');
++    await page.unroute('**/api/v1/platform/plans');
++    await page.reload();
++    await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: '创建 Plan' })
++      .getByRole('button', { name: '查看套餐' })
++      .click();
++    await page.getByText(id, { exact: true }).waitFor();
++    await accessibility(page, '套餐详情');
++    let activations = 0;
++    let activationStatus;
++    await page.route('**/api/v1/platform/plans/*/activations', async (route) => {
++      activations++;
++      activationStatus = (await route.fetch()).status();
++      await route.abort('failed');
++    });
++    await page.getByRole('button', { name: '激活套餐', exact: true }).dblclick();
++    await page.getByText('操作结果待确认', { exact: true }).waitFor();
++    assert.equal(activations, 1);
++    assert.equal(activationStatus, 200);
++    await capture(page, 'issue-174-activation-response-lost');
++    await page.unroute('**/api/v1/platform/plans/*/activations');
++    await page.reload();
++    await page.getByText('已激活', { exact: true }).waitFor();
++    await safeStorage(page);
++    await capture(page, 'issue-174-active-detail');
++    await page.goto(`${base}/plans`);
++    await page.getByRole('textbox', { name: '编码', exact: true }).fill('browser-plan');
++    await page.getByRole('combobox', { name: '状态', exact: true }).press('Enter');
++    await page
++      .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option')
++      .filter({ hasText: '已激活' })
++      .click();
++    const query = page.waitForResponse((response) => {
++      const url = new URL(response.url());
++      return (
++        url.pathname === '/api/v1/platform/plans' &&
++        url.searchParams.get('status') === 'ACTIVE' &&
++        url.searchParams.get('code') === 'browser-plan'
++      );
++    });
++    await page.getByRole('button', { name: '查询', exact: true }).click();
++    assert.equal((await query).status(), 200);
++    await page.getByRole('table').getByText('browser-plan', { exact: true }).waitFor();
++    // 仅在隔离 Fresh 数据库模拟升级前记录；不通过新请求创建零额度。
++    const legacyId = '019535d9-0000-7000-8000-000000000974';
++    execFileSync(
++      'docker',
++      [
++        'exec',
++        '-i',
++        `${project}-postgres-1`,
++        'psql',
++        '-U',
++        'saasforge_console_e2e',
++        '-d',
++        'entitlement_db',
++        '-v',
++        'ON_ERROR_STOP=1',
++      ],
++      {
++        input: `INSERT INTO plans VALUES ('${legacyId}', 'legacy-zero', 'Legacy Zero', 'DRAFT', now(), now()); INSERT INTO plan_quotas VALUES ('${legacyId}', '${quotaDefinitionId}', 0);`,
++        stdio: ['pipe', 'pipe', 'pipe'],
++      },
++    );
++    await selectLocale(page, 'English');
++    await page.goto(`${base}/plans/${legacyId}`);
++    await page
++      .getByText(
++        'Historical zero quota: ineligible for new grants; existing entitlements are unchanged.',
++        { exact: true },
++      )
++      .waitFor();
++    assert.equal(await page.getByRole('button', { name: 'Activate plan', exact: true }).count(), 0);
++    await accessibility(page, 'Plan details');
++    await capture(page, 'issue-174-legacy-english');
++    await context.close();
++    context = await launch();
++    page = await context.newPage();
++    await page.goto(`${base}/plans/${id}`);
++    await page.getByText('Active', { exact: true }).waitFor();
++    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
++    await login(page, email, password, 'en-US');
++    await page.goto(`${base}/plans/${id}`);
++    await page.getByText('Active', { exact: true }).waitFor();
++    await safeStorage(page);
++    assert.deepEqual(errors, []);
++  } finally {
++    await context?.close();
++    await rm(profile, { recursive: true, force: true });
++  }
++}
+diff --git a/consoles/integration-test/quota-definition-acceptance.mjs b/consoles/integration-test/quota-definition-acceptance.mjs
+new file mode 100644
+index 0000000..bc75f9a
+--- /dev/null
++++ b/consoles/integration-test/quota-definition-acceptance.mjs
+@@ -0,0 +1,225 @@
++import assert from 'node:assert/strict';
++import { mkdtemp, rm } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { execFileSync } from 'node:child_process';
++import { chromium } from 'playwright';
++
++// Browser plugin not available. 所有业务响应来自真实服务；仅在提交后丢弃响应。
++export async function verifyQuotaDefinition({
++  rootDomain,
++  email,
++  password,
++  login,
++  selectLocale,
++  accessibility,
++  safeStorage,
++  capture,
++}) {
++  const profile = await mkdtemp(path.join(tmpdir(), 'sf-quota-definition-'));
++  const base = `https://platform.${rootDomain}`;
++  const launch = () =>
++    chromium.launchPersistentContext(profile, {
++      channel: 'chrome',
++      headless: true,
++      ignoreHTTPSErrors: false,
++      locale: 'zh-CN',
++      viewport: { width: 1440, height: 960 },
++    });
++  let context;
++  let id;
++  const errors = [];
++  const project = process.env.SF_ACCEPTANCE_PROJECT;
++  assert.match(project ?? '', /^saas-forge-console-\d+-\d+-[a-f0-9]{6}$/);
++  function allowWrites(privilege, allow) {
++    assert.ok(['INSERT', 'UPDATE'].includes(privilege));
++    execFileSync(
++      'docker',
++      [
++        'exec',
++        '-i',
++        `${project}-postgres-1`,
++        'psql',
++        '-U',
++        'saasforge_console_e2e',
++        '-d',
++        'entitlement_db',
++        '-v',
++        'ON_ERROR_STOP=1',
++      ],
++      {
++        input: `${allow ? 'GRANT' : 'REVOKE'} ${privilege} ON quota_definitions ${allow ? 'TO' : 'FROM'} entitlement_app;`,
++        stdio: ['pipe', 'pipe', 'pipe'],
++      },
++    );
++  }
++  async function continueAfterRollback(page, label, key) {
++    await page.reload();
++    await page
++      .getByText('已有操作待核查，请读取操作记录继续原操作或核查结果。', { exact: true })
++      .waitFor();
++    assert.equal(await page.getByRole('button', { name: label, exact: true }).count(), 0);
++    await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
++    let recovered;
++    await page.route('**/api/v1/platform/quota-definition-operations/*/recovery', async (route) => {
++      try {
++        const response = await route.fetch();
++        const body = await response.json();
++        recovered = {
++          status: response.status(),
++          key: route.request().headers()['idempotency-key'],
++          id: body.quotaDefinitionId,
++        };
++      } catch {
++        recovered = { status: 0 };
++      }
++      await route.abort('failed');
++    });
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: label })
++      .getByRole('button', { name: '继续原操作' })
++      .click();
++    await page.getByText('操作记录暂时无法读取', { exact: true }).waitFor();
++    await page.unroute('**/api/v1/platform/quota-definition-operations/*/recovery');
++    assert.equal(recovered?.status, 200);
++    assert.equal(recovered.key, key);
++    id = recovered.id;
++  }
++  try {
++    context = await launch();
++    let page = await context.newPage();
++    page.on('pageerror', () => errors.push('pageerror'));
++    await page.goto(base);
++    await login(page, email, password, 'zh-CN');
++    await page.goto(`${base}/quota-definitions`);
++    await accessibility(page, '额度定义');
++    await page.getByRole('button', { name: '创建 max_users', exact: true }).click();
++    await accessibility(page, '创建 max_users');
++    let creates = 0;
++    let createKey;
++    let createStatus;
++    allowWrites('INSERT', false);
++    await page.route('**/api/v1/platform/quota-definitions', async (route) => {
++      if (route.request().method() !== 'POST') return route.continue();
++      creates += 1;
++      createKey = route.request().headers()['idempotency-key'];
++      try {
++        createStatus = (await route.fetch()).status();
++      } catch {
++        createStatus = 0;
++      }
++      await route.abort('failed');
++    });
++    try {
++      await page.getByRole('button', { name: '创建 max_users', exact: true }).dblclick();
++      await page.getByText('操作结果待确认', { exact: true }).waitFor();
++    } finally {
++      allowWrites('INSERT', true);
++    }
++    assert.equal(creates, 1);
++    assert.equal(createStatus, 502);
++    await capture(page, 'issue-173-create-response-lost');
++    await page.unroute('**/api/v1/platform/quota-definitions');
++    await continueAfterRollback(page, '创建 max_users', createKey);
++    await page.reload();
++    await page.getByRole('button', { name: '复用 max_users', exact: true }).waitFor();
++    assert.equal(
++      await page.getByRole('button', { name: '创建 max_users', exact: true }).count(),
++      0,
++    );
++    await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: '创建 max_users' })
++      .getByRole('button', { name: '查看额度定义' })
++      .click();
++    await accessibility(page, '额度定义详情');
++    await page.getByText(id, { exact: true }).waitFor();
++    let activations = 0;
++    let activationKey;
++    let activationStatus;
++    allowWrites('UPDATE', false);
++    await page.route('**/api/v1/platform/quota-definitions/*/activations', async (route) => {
++      activations += 1;
++      activationKey = route.request().headers()['idempotency-key'];
++      try {
++        activationStatus = (await route.fetch()).status();
++      } catch {
++        activationStatus = 0;
++      }
++      await route.abort('failed');
++    });
++    try {
++      await page.getByRole('button', { name: '激活 max_users', exact: true }).dblclick();
++      await page.getByText('操作结果待确认', { exact: true }).waitFor();
++    } finally {
++      allowWrites('UPDATE', true);
++    }
++    assert.equal(activations, 1);
++    assert.equal(activationStatus, 502);
++    await capture(page, 'issue-173-activation-response-lost');
++    await page.unroute('**/api/v1/platform/quota-definitions/*/activations');
++    await continueAfterRollback(page, '激活 max_users', activationKey);
++    await page.reload();
++    await page.getByText('已激活', { exact: true }).waitFor();
++    assert.equal(
++      await page.getByRole('button', { name: '激活 max_users', exact: true }).count(),
++      0,
++    );
++    await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: '激活 max_users' })
++      .getByText('已提交', { exact: false })
++      .waitFor();
++    await capture(page, 'issue-173-authoritative-detail');
++    await safeStorage(page);
++    await page.getByRole('button', { name: '返回额度定义', exact: true }).click();
++    await page.getByRole('textbox', { name: '编码', exact: true }).fill('max_users');
++    await page.getByRole('combobox', { name: '状态', exact: true }).press('Enter');
++    await page
++      .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option')
++      .filter({ hasText: '已激活' })
++      .click();
++    const query = page.waitForResponse((response) => {
++      const url = new URL(response.url());
++      return (
++        url.pathname === '/api/v1/platform/quota-definitions' &&
++        url.searchParams.get('status') === 'ACTIVE' &&
++        url.searchParams.get('code') === 'max_users'
++      );
++    });
++    await page.getByRole('button', { name: '查询', exact: true }).click();
++    assert.equal((await query).status(), 200);
++    await page.getByRole('table').getByText('max_users', { exact: true }).waitFor();
++    await selectLocale(page, 'English');
++    await page.getByRole('button', { name: 'Reuse max_users', exact: true }).click();
++    await accessibility(page, 'Quota definition details');
++    await page.getByText('Active', { exact: true }).waitFor();
++    await capture(page, 'issue-173-english-detail');
++    await context.close();
++    context = await launch();
++    page = await context.newPage();
++    page.on('pageerror', () => errors.push('pageerror'));
++    await page.goto(`${base}/quota-definitions`);
++    await page.getByRole('button', { name: 'Read operation records', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: 'Activate max_users' })
++      .getByRole('button', { name: 'View quota definition' })
++      .click();
++    await page.getByText(id, { exact: true }).waitFor();
++    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
++    await login(page, email, password, 'en-US');
++    await page.goto(`${base}/quota-definitions/new`);
++    await page.getByRole('button', { name: 'Reuse max_users', exact: true }).click();
++    await page.getByText(id, { exact: true }).waitFor();
++    await safeStorage(page);
++    assert.deepEqual(errors, []);
++    return id;
++  } finally {
++    await context?.close();
++    await rm(profile, { recursive: true, force: true });
++  }
++}
+
+From f0f46229b8d841907f09f0895226f6eaa2eabd22 Mon Sep 17 00:00:00 2001
+From: liuhuan <crane0927@163.com>
+Date: Mon, 14 Sep 2026 16:51:52 +0800
+Subject: [PATCH 2/3] =?UTF-8?q?refactor(namespace)!:=20=E7=BB=9F=E4=B8=80?=
+ =?UTF-8?q?=E4=BD=BF=E7=94=A8=20saas.forge=20=E5=91=BD=E5=90=8D?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+同步 Java 包和源码目录、协议标识、配置键、域名、消息主题及相关脚本和文档。
+按明确授权重建现有契约基线，以完整目录树哈希限定 CI 例外，并记录 ADR 0048。
+
+BREAKING CHANGE: Java import、gRPC 服务名、事件标识和运行配置采用新名称；现有环境需单独迁移，未提供旧命名兼容层。
+---
+ consoles/integration-test/plan-acceptance.mjs             | 2 +-
+ consoles/integration-test/quota-definition-acceptance.mjs | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/consoles/integration-test/plan-acceptance.mjs b/consoles/integration-test/plan-acceptance.mjs
+index 72e30f3..5dc5edf 100644
+--- a/consoles/integration-test/plan-acceptance.mjs
++++ b/consoles/integration-test/plan-acceptance.mjs
+@@ -132,7 +132,7 @@ export async function verifyPlan({
+         `${project}-postgres-1`,
+         'psql',
+         '-U',
+-        'saasforge_console_e2e',
++        'saas.forge_console_e2e',
+         '-d',
+         'entitlement_db',
+         '-v',
+diff --git a/consoles/integration-test/quota-definition-acceptance.mjs b/consoles/integration-test/quota-definition-acceptance.mjs
+index bc75f9a..3533b77 100644
+--- a/consoles/integration-test/quota-definition-acceptance.mjs
++++ b/consoles/integration-test/quota-definition-acceptance.mjs
+@@ -41,7 +41,7 @@ export async function verifyQuotaDefinition({
+         `${project}-postgres-1`,
+         'psql',
+         '-U',
+-        'saasforge_console_e2e',
++        'saas.forge_console_e2e',
+         '-d',
+         'entitlement_db',
+         '-v',
+
+From 8d4c5707e410a5de6220ab8f88a1c5b912590b54 Mon Sep 17 00:00:00 2001
+From: liuhuan <crane0927@163.com>
+Date: Tue, 15 Sep 2026 09:50:42 +0800
+Subject: [PATCH 3/3] =?UTF-8?q?refactor(consoles):=20=E5=88=87=E6=8D=A2?=
+ =?UTF-8?q?=E6=AD=A3=E5=BC=8F=E4=B8=9A=E5=8A=A1=E9=A1=B5=E9=9D=A2=E8=87=B3?=
+ =?UTF-8?q?=20Vue=20=E5=B9=B6=E6=B8=85=E9=99=A4=E6=97=A7=20UI?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+基于 Soybean Element Plus 迁移平台端、租户端与共享认证流程，保留类型化 Client 和原操作恢复边界。移除 React UI、旧共享壳及专属依赖，更新设计文档、浏览器回归和视觉基线。
+
+本地类型、Lint、构建与相关测试通过；真实后端、四域联调及 Fresh Compose 未执行。
+---
+ consoles/integration-test/plan-acceptance.mjs |   7 +-
+ .../quota-definition-acceptance.mjs           |  13 +-
+ .../src/EntitlementDetails.vue                | 122 +++++++++++++++
+ consoles/platform-console/src/PlanCreate.vue  | 143 ++++++++++++++++++
+ consoles/platform-console/src/QuotaCreate.vue |  67 ++++++++
+ consoles/platform-console/src/plan-guard.ts   |  25 +++
+ 6 files changed, 364 insertions(+), 13 deletions(-)
+ create mode 100644 consoles/platform-console/src/EntitlementDetails.vue
+ create mode 100644 consoles/platform-console/src/PlanCreate.vue
+ create mode 100644 consoles/platform-console/src/QuotaCreate.vue
+ create mode 100644 consoles/platform-console/src/plan-guard.ts
+
+diff --git a/consoles/integration-test/plan-acceptance.mjs b/consoles/integration-test/plan-acceptance.mjs
+index 5dc5edf..56c0826 100644
+--- a/consoles/integration-test/plan-acceptance.mjs
++++ b/consoles/integration-test/plan-acceptance.mjs
+@@ -81,7 +81,7 @@ export async function verifyPlan({
+     await page.reload();
+     await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: '创建 Plan' })
+       .getByRole('button', { name: '查看套餐' })
+       .click();
+@@ -107,10 +107,7 @@ export async function verifyPlan({
+     await page.goto(`${base}/plans`);
+     await page.getByRole('textbox', { name: '编码', exact: true }).fill('browser-plan');
+     await page.getByRole('combobox', { name: '状态', exact: true }).press('Enter');
+-    await page
+-      .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option')
+-      .filter({ hasText: '已激活' })
+-      .click();
++    await page.locator('.el-select-dropdown__item:visible').filter({ hasText: '已激活' }).click();
+     const query = page.waitForResponse((response) => {
+       const url = new URL(response.url());
+       return (
+diff --git a/consoles/integration-test/quota-definition-acceptance.mjs b/consoles/integration-test/quota-definition-acceptance.mjs
+index 3533b77..13441ca 100644
+--- a/consoles/integration-test/quota-definition-acceptance.mjs
++++ b/consoles/integration-test/quota-definition-acceptance.mjs
+@@ -76,7 +76,7 @@ export async function verifyQuotaDefinition({
+       await route.abort('failed');
+     });
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: label })
+       .getByRole('button', { name: '继续原操作' })
+       .click();
+@@ -130,7 +130,7 @@ export async function verifyQuotaDefinition({
+     );
+     await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: '创建 max_users' })
+       .getByRole('button', { name: '查看额度定义' })
+       .click();
+@@ -169,7 +169,7 @@ export async function verifyQuotaDefinition({
+     );
+     await page.getByRole('button', { name: '读取操作记录', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: '激活 max_users' })
+       .getByText('已提交', { exact: false })
+       .waitFor();
+@@ -178,10 +178,7 @@ export async function verifyQuotaDefinition({
+     await page.getByRole('button', { name: '返回额度定义', exact: true }).click();
+     await page.getByRole('textbox', { name: '编码', exact: true }).fill('max_users');
+     await page.getByRole('combobox', { name: '状态', exact: true }).press('Enter');
+-    await page
+-      .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option')
+-      .filter({ hasText: '已激活' })
+-      .click();
++    await page.locator('.el-select-dropdown__item:visible').filter({ hasText: '已激活' }).click();
+     const query = page.waitForResponse((response) => {
+       const url = new URL(response.url());
+       return (
+@@ -205,7 +202,7 @@ export async function verifyQuotaDefinition({
+     await page.goto(`${base}/quota-definitions`);
+     await page.getByRole('button', { name: 'Read operation records', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: 'Activate max_users' })
+       .getByRole('button', { name: 'View quota definition' })
+       .click();
+diff --git a/consoles/platform-console/src/EntitlementDetails.vue b/consoles/platform-console/src/EntitlementDetails.vue
+new file mode 100644
+index 0000000..3ac1fa6
+--- /dev/null
++++ b/consoles/platform-console/src/EntitlementDetails.vue
+@@ -0,0 +1,122 @@
++<script setup lang="ts">
++import { computed } from 'vue';
++import { useRoute, useRouter } from 'vue-router';
++import { ElButton, ElDrawer, ElDescriptions, ElDescriptionsItem } from 'element-plus';
++import { Problem, useRead, useMutation, readAll } from '@saas-forge/admin';
++import type { Plan, QuotaDefinition, ConsoleApiResult } from '@saas-forge/app-runtime';
++import { usePlatform } from './use-platform';
++import { readPlanGuard } from './plan-guard';
++import Recovery from './Recovery.vue';
++const props = defineProps<{ kind: 'plan' | 'quota' }>();
++const { client, t, locale } = usePlatform();
++const route = useRoute();
++const router = useRouter();
++const id = String(route.params.id);
++const base = props.kind === 'plan' ? '/plans' : '/quota-definitions';
++const read = useRead<Plan | QuotaDefinition>((signal) =>
++  props.kind === 'plan' ? client.getPlan(id, signal) : client.getQuotaDefinition(id, signal),
++);
++const guard = useRead(async (signal): Promise<ConsoleApiResult<boolean>> => {
++  if (props.kind === 'plan') return readPlanGuard(client, signal, id);
++  const result = await readAll(
++    (cursor) => client.listQuotaDefinitionOperations({ cursor, limit: 100, signal }),
++    signal,
++  );
++  return result.ok
++    ? {
++        ok: true,
++        value: !result.value.some(
++          (item) =>
++            item.operation === 'ACTIVATE' &&
++            item.quotaDefinitionId === id &&
++            item.state !== 'COMMITTED',
++        ),
++      }
++    : result;
++});
++const mutation = useMutation();
++const quotaLimit = computed(() =>
++  read.value.value && 'quotaLimits' in read.value.value
++    ? read.value.value.quotaLimits[0]?.limit
++    : undefined,
++);
++const canActivate = computed(
++  () =>
++    read.ready.value &&
++    read.value.value?.status === 'DRAFT' &&
++    (props.kind === 'quota' || (quotaLimit.value !== undefined && quotaLimit.value >= 1)) &&
++    guard.ready.value &&
++    guard.value.value &&
++    !mutation.unknown.value,
++);
++function refresh() {
++  read.refresh();
++  guard.refresh();
++}
++async function activate() {
++  if (!canActivate.value) return;
++  const result = await mutation.run<Plan | QuotaDefinition>((signal) =>
++    props.kind === 'plan'
++      ? client.activatePlan({ id, signal })
++      : client.activateQuotaDefinition({ id, signal }),
++  );
++  if (result?.ok) refresh();
++}
++function recovered(resource: string) {
++  if (resource === id) {
++    mutation.resolved();
++    refresh();
++  } else void router.replace(base + '/' + resource);
++}
++</script>
++<template>
++  <ElDrawer
++    :model-value="true"
++    :title="t(kind === 'plan' ? 'planDetail' : 'quotaDetail')"
++    class="console-drawer"
++    :before-close="() => router.push(base)"
++  >
++    <Problem :code="read.problem.value || guard.problem.value || mutation.problem.value" />
++    <ElDescriptions v-if="read.value.value" :column="1" border>
++      <ElDescriptionsItem :label="t('tenantId')">{{ read.value.value.id }}</ElDescriptionsItem
++      ><ElDescriptionsItem :label="t('quotaName')">{{ read.value.value.code }}</ElDescriptionsItem>
++      <ElDescriptionsItem v-if="'displayName' in read.value.value" :label="t('planDisplayName')">{{
++        read.value.value.displayName
++      }}</ElDescriptionsItem>
++      <ElDescriptionsItem :label="t('tenantStatus')">{{
++        read.value.value.status
++      }}</ElDescriptionsItem
++      ><ElDescriptionsItem v-if="quotaLimit !== undefined" :label="t('planLimit')">{{
++        quotaLimit
++      }}</ElDescriptionsItem>
++      <ElDescriptionsItem :label="t('tenantCreatedAt')">{{
++        read.value.value.createdAt.toLocaleString(locale)
++      }}</ElDescriptionsItem>
++    </ElDescriptions>
++    <Problem
++      v-if="quotaLimit !== undefined && quotaLimit < 1"
++      :title="t('planLegacyZero')"
++      warning
++    />
++    <Problem
++      v-if="guard.ready.value && !guard.value.value"
++      :title="t(kind === 'plan' ? 'planPendingGuard' : 'quotaPendingGuard')"
++      warning
++    />
++    <div class="console-actions">
++      <ElButton
++        :disabled="read.loading.value || guard.loading.value || mutation.busy.value"
++        @click="refresh"
++        >{{ t('tenantRetry') }}</ElButton
++      ><ElButton
++        v-if="read.value.value?.status === 'DRAFT'"
++        type="primary"
++        :disabled="!canActivate"
++        :loading="mutation.busy.value"
++        @click="activate"
++        >{{ t(kind === 'plan' ? 'planActivate' : 'quotaActivate') }}</ElButton
++      >
++    </div>
++    <Recovery :kind="kind" @view="recovered" />
++  </ElDrawer>
++</template>
+diff --git a/consoles/platform-console/src/PlanCreate.vue b/consoles/platform-console/src/PlanCreate.vue
+new file mode 100644
+index 0000000..2c1a4bc
+--- /dev/null
++++ b/consoles/platform-console/src/PlanCreate.vue
+@@ -0,0 +1,143 @@
++<script setup lang="ts">
++import { computed, ref } from 'vue';
++import { useRouter } from 'vue-router';
++import { ElButton, ElDrawer, ElForm, ElFormItem, ElInput } from 'element-plus';
++import { Problem, useRead, useMutation, useFormExitGuard } from '@saas-forge/admin';
++import { usePlatform } from './use-platform';
++import { readPlanGuard } from './plan-guard';
++import Recovery from './Recovery.vue';
++const { client, t } = usePlatform();
++const router = useRouter();
++const code = ref('');
++const name = ref('');
++const limit = ref('1');
++const invalid = ref(false);
++const done = ref(false);
++const definition = useRead((signal) =>
++  client.listQuotaDefinitions({ code: 'max_users', status: 'ACTIVE', signal }),
++);
++const quota = computed(() =>
++  definition.value.value?.items.find(
++    (item) => item.code === 'max_users' && item.status === 'ACTIVE',
++  ),
++);
++const guard = useRead(
++  (signal) => readPlanGuard(client, signal, undefined, code.value),
++  () => code.value,
++);
++const mutation = useMutation();
++useFormExitGuard(
++  () =>
++    !done.value &&
++    !mutation.busy.value &&
++    !mutation.unknown.value &&
++    (code.value !== '' || name.value !== '' || limit.value !== '1'),
++);
++async function submit() {
++  invalid.value = !(
++    /^[a-z][a-z0-9-]{1,62}$/.test(code.value) &&
++    name.value.trim().length > 0 &&
++    name.value.length <= 200 &&
++    /^\d+$/.test(limit.value) &&
++    Number.isSafeInteger(Number(limit.value)) &&
++    Number(limit.value) >= 1 &&
++    Number(limit.value) <= 2147483647
++  );
++  if (
++    invalid.value ||
++    !quota.value ||
++    !definition.ready.value ||
++    !guard.ready.value ||
++    !guard.value.value
++  )
++    return;
++  const result = await mutation.run((signal) =>
++    client.createPlan({
++      request: {
++        code: code.value,
++        displayName: name.value,
++        quotaLimits: [{ quotaDefinitionId: quota.value!.id, limit: Number(limit.value) }],
++      },
++      signal,
++    }),
++  );
++  if (result?.ok) {
++    done.value = true;
++    await router.replace('/plans/' + result.value.id);
++  }
++}
++</script>
++<template>
++  <ElDrawer
++    :model-value="true"
++    :title="t('planCreate')"
++    class="console-drawer"
++    :before-close="() => router.push('/plans')"
++  >
++    <Problem :code="definition.problem.value || guard.problem.value" /><Problem
++      v-if="definition.ready.value && !quota"
++      :title="t('planDefinitionRequired')"
++      warning
++    />
++    <Problem
++      v-if="guard.ready.value && !guard.value.value"
++      :title="t('planPendingGuard')"
++      warning
++    />
++    <div class="console-actions">
++      <ElButton
++        v-if="!definition.ready.value || !guard.ready.value"
++        @click="
++          definition.refresh();
++          guard.refresh();
++        "
++        >{{ t('planRetry') }}</ElButton
++      >
++    </div>
++    <ElForm :aria-label="t('planCreate')" label-position="top" @submit.prevent="submit">
++      <ElFormItem :label="t('planName')"
++        ><ElInput
++          v-model="code"
++          :aria-label="t('planName')"
++          :disabled="mutation.busy.value || mutation.unknown.value"
++          required
++      /></ElFormItem>
++      <ElFormItem :label="t('planDisplayName')"
++        ><ElInput
++          v-model="name"
++          :aria-label="t('planDisplayName')"
++          :disabled="mutation.busy.value || mutation.unknown.value"
++          required
++          maxlength="200"
++      /></ElFormItem>
++      <ElFormItem :label="t('planLimit')" :error="invalid ? t('planInvalid') : undefined"
++        ><ElInput
++          v-model="limit"
++          inputmode="numeric"
++          :aria-label="t('planLimit')"
++          :disabled="mutation.busy.value || mutation.unknown.value"
++          required
++      /></ElFormItem>
++      <div class="console-actions">
++        <ElButton
++          type="primary"
++          native-type="submit"
++          :loading="mutation.busy.value"
++          :disabled="mutation.unknown.value || !quota || !guard.ready.value || !guard.value.value"
++          >{{ t('planCreate') }}</ElButton
++        >
++      </div> </ElForm
++    ><Problem
++      :code="mutation.problem.value"
++      :title="mutation.unknown.value ? t('planUnknown') : undefined"
++      warning
++    />
++    <Recovery
++      kind="plan"
++      @view="
++        done = true;
++        router.replace('/plans/' + $event);
++      "
++    />
++  </ElDrawer>
++</template>
+diff --git a/consoles/platform-console/src/QuotaCreate.vue b/consoles/platform-console/src/QuotaCreate.vue
+new file mode 100644
+index 0000000..a657f96
+--- /dev/null
++++ b/consoles/platform-console/src/QuotaCreate.vue
+@@ -0,0 +1,67 @@
++<script setup lang="ts">
++import { computed } from 'vue';
++import { useRouter } from 'vue-router';
++import { ElButton, ElDrawer } from 'element-plus';
++import { Problem, useRead, useMutation, readAll } from '@saas-forge/admin';
++import { usePlatform } from './use-platform';
++import Recovery from './Recovery.vue';
++const { client, t } = usePlatform();
++const router = useRouter();
++const read = useRead((signal) => client.listQuotaDefinitions({ code: 'max_users', signal }));
++const guard = useRead((signal) =>
++  readAll((cursor) => client.listQuotaDefinitionOperations({ cursor, limit: 100, signal }), signal),
++);
++const mutation = useMutation();
++const existing = computed(() => read.value.value?.items.find((item) => item.code === 'max_users'));
++const allowed = computed(
++  () =>
++    read.ready.value &&
++    !existing.value &&
++    guard.ready.value &&
++    !guard.value.value?.some((item) => item.state !== 'COMMITTED') &&
++    !mutation.unknown.value,
++);
++async function create() {
++  if (!allowed.value) return;
++  const result = await mutation.run((signal) => client.createQuotaDefinition({ signal }));
++  if (result?.ok) await router.replace('/quota-definitions/' + result.value.id);
++}
++</script>
++<template>
++  <ElDrawer
++    :model-value="true"
++    :title="t('quotaCreate')"
++    class="console-drawer"
++    :before-close="() => router.push('/quota-definitions')"
++  >
++    <Problem :code="read.problem.value || guard.problem.value || mutation.problem.value" />
++    <p>max_users</p>
++    <div class="console-actions">
++      <ElButton
++        @click="
++          read.refresh();
++          guard.refresh();
++        "
++        >{{ t('quotaRetry') }}</ElButton
++      ><ElButton
++        v-if="existing"
++        type="primary"
++        @click="router.replace('/quota-definitions/' + existing.id)"
++        >{{ t('quotaReuse') }}</ElButton
++      ><ElButton
++        v-else
++        type="primary"
++        :disabled="!allowed"
++        :loading="mutation.busy.value"
++        @click="create"
++        >{{ t('quotaCreate') }}</ElButton
++      >
++    </div>
++    <Problem
++      v-if="guard.ready.value && guard.value.value?.some((item) => item.state !== 'COMMITTED')"
++      :title="t('quotaPendingGuard')"
++      warning
++    />
++    <Recovery kind="quota" @view="router.replace('/quota-definitions/' + $event)" />
++  </ElDrawer>
++</template>
+diff --git a/consoles/platform-console/src/plan-guard.ts b/consoles/platform-console/src/plan-guard.ts
+new file mode 100644
+index 0000000..885b955
+--- /dev/null
++++ b/consoles/platform-console/src/plan-guard.ts
+@@ -0,0 +1,25 @@
++import { readAll } from '@saas-forge/admin';
++import type { ConsoleApiClient, ConsoleApiResult } from '@saas-forge/app-runtime';
++export async function readPlanGuard(
++  client: ConsoleApiClient,
++  signal: AbortSignal,
++  targetId?: string,
++  code = '',
++): Promise<ConsoleApiResult<boolean>> {
++  const result = await readAll(
++    (cursor) => client.listPlanOperations({ cursor, limit: 100, signal }),
++    signal,
++  );
++  if (!result.ok) return result;
++  return {
++    ok: true,
++    value: !result.value.some(
++      (operation) =>
++        operation.state !== 'COMMITTED' &&
++        (targetId === undefined
++          ? operation.operation === 'CREATE' &&
++            (code === '' || operation.code === undefined || operation.code === code)
++          : operation.operation === 'ACTIVATE' && operation.planId === targetId),
++    ),
++  };
++}

@@ -114,6 +114,22 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     routeKey: 'tenants' as const,
                     routePath: '/tenants' as const,
                     icon: () => h('span', { class: 'i-mdi-domain' })
+                  },
+                  {
+                    key: 'quota-definitions',
+                    label: $t('entitlements.quota.title'),
+                    i18nKey: 'entitlements.quota.title' as const,
+                    routeKey: 'quota-definitions' as const,
+                    routePath: '/quota-definitions' as const,
+                    icon: () => h('span', { class: 'i-mdi-counter' })
+                  },
+                  {
+                    key: 'plans',
+                    label: $t('entitlements.plan.title'),
+                    i18nKey: 'entitlements.plan.title' as const,
+                    routeKey: 'plans' as const,
+                    routePath: '/plans' as const,
+                    icon: () => h('span', { class: 'i-mdi-package-variant' })
                   }
                 ]
               : [])

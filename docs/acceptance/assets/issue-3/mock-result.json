@@ -1,0 +1,27 @@
+{
+  "kind": "synthetic authentication and entitlement HTTP; real Chrome UI",
+  "chrome": "154.0.8037.57",
+  "viewports": ["1440x1000", "1100x800"],
+  "creates": 1,
+  "recoveries": 1,
+  "activations": 1,
+  "checks": [
+    "dirty-recovery-cancel",
+    "close-focus",
+    "keyboard-trap",
+    "zero-rejected",
+    "max-int-exact",
+    "unknown-create-lock",
+    "incomplete-pages",
+    "same-key-recovery",
+    "unknown-activation-lock",
+    "committed-check",
+    "deep-link-reload",
+    "English",
+    "dark",
+    "legacy-zero-readonly",
+    "missing-positive-fail-closed",
+    "no-pageerror",
+    "no-overlay"
+  ]
+}
