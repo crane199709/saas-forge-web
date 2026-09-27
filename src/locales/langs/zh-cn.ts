@@ -1,5 +1,7 @@
 const local: App.I18n.Schema = {
   entitlements: {
+    codeHint: '以小写字母开头，使用 2–63 位小写字母、数字或连字符，例如 plan-1001。',
+    codeExample: '例如 plan-1001',
     plan: {
       title: '套餐管理',
       create: '创建套餐',
@@ -42,6 +44,9 @@ const local: App.I18n.Schema = {
       ACTIVATE: '激活'
     },
     errors: {
+      codeInvalid: '编码必须以小写字母开头，长度为 2–63 位，仅支持小写字母、数字和连字符，例如 plan-1001。',
+      nameInvalid: '套餐名称为 1–200 个字符，不能全部为空白。',
+      limitInvalid: 'max_users 上限必须为 1–2147483647 的整数。',
       invalid: '服务返回的记录不完整或不一致，相关操作已锁定。',
       unavailable: '服务或网络不可用，请重试读取并核查原操作。',
       forbidden: '当前会话无权执行此操作，请核查会话与权限。',

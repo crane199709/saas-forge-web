@@ -293,6 +293,8 @@ declare namespace App {
 
     type Schema = {
       entitlements: {
+        codeHint: string;
+        codeExample: string;
         plan: {
           title: string;
           create: string;
@@ -335,6 +337,9 @@ declare namespace App {
           ACTIVATE: string;
         };
         errors: {
+          codeInvalid: string;
+          nameInvalid: string;
+          limitInvalid: string;
           invalid: string;
           unavailable: string;
           forbidden: string;

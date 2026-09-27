@@ -14,7 +14,7 @@ import GlobalFooter from '../modules/global-footer/index.vue';
 import ThemeDrawer from '../modules/theme-drawer/index.vue';
 import { setupMixMenuContext } from '../context';
 
-defineOptions({ name: 'BaseLayout' });
+defineOptions({ name: 'BaseLayout', inheritAttrs: false });
 
 const appStore = useAppStore();
 const themeStore = useThemeStore();
@@ -142,8 +142,10 @@ function getSiderCollapsedWidth() {
   >
     <div class="size-full flex-center" role="status" aria-live="polite">{{ $t('console.loading') }}</div>
   </dialog>
+  <!-- 布局含模态层等多个根节点，父级属性只传给实际布局容器。 -->
   <AdminLayout
     v-if="['authenticated', 'checking'].includes(consoleState.status) && Boolean(consoleState.snapshot?.activeContext)"
+    v-bind="$attrs"
     v-model:sider-collapse="appStore.siderCollapse"
     :inert="checking"
     :style="checking ? { visibility: 'hidden' } : undefined"

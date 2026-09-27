@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
+import { computed, onMounted, onUnmounted, ref, shallowRef, useTemplateRef } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import type { QuotaDefinition } from '@crane199709/saas-forge-api-client';
 import { entitlementFailure, positiveLimit } from '@/service/forge/entitlements';
@@ -14,7 +14,13 @@ const { workspace, state, enabled } = useEntitlements(props.kind);
 const code = ref('');
 const name = ref('');
 const limit = ref('1');
-const invalid = ref(false);
+const attempted = ref(false);
+const codeInput = useTemplateRef<{ focus(): void }>('codeInput');
+const nameInput = useTemplateRef<{ focus(): void }>('nameInput');
+const limitInput = useTemplateRef<{ focus(): void }>('limitInput');
+const invalidCode = computed(() => attempted.value && !/^[a-z][a-z0-9-]{1,62}$/.test(code.value));
+const invalidName = computed(() => attempted.value && (!name.value.trim() || name.value.length > 200));
+const invalidLimit = computed(() => attempted.value && positiveLimit(limit.value) === undefined);
 const complete = ref(false);
 const submitting = ref(false);
 const definition = shallowRef<QuotaDefinition>();
@@ -86,13 +92,22 @@ async function viewRecord(id: string) {
   if (await canLeave()) view(id);
 }
 async function submit() {
-  invalid.value =
-    props.kind === 'plan' &&
-    (!/^[a-z][a-z0-9-]{1,62}$/.test(code.value) ||
-      !name.value.trim() ||
-      name.value.length > 200 ||
-      positiveLimit(limit.value) === undefined);
-  if (invalid.value || !allowed.value) return;
+  if (props.kind === 'plan') {
+    attempted.value = true;
+    if (invalidCode.value) {
+      codeInput.value?.focus();
+      return;
+    }
+    if (invalidName.value) {
+      nameInput.value?.focus();
+      return;
+    }
+    if (invalidLimit.value) {
+      limitInput.value?.focus();
+      return;
+    }
+  }
+  if (!allowed.value) return;
   submitting.value = true;
   const id =
     props.kind === 'plan'
@@ -148,36 +163,49 @@ onUnmounted(() => {
       <template v-if="kind === 'plan'">
         <ElFormItem :label="$t('entitlements.code')">
           <ElInput
+            ref="codeInput"
             v-model="code"
             :aria-label="$t('entitlements.code')"
-            :aria-invalid="invalid"
-            :aria-describedby="invalid ? 'entitlement-input-error' : undefined"
+            :aria-invalid="invalidCode"
+            :aria-describedby="invalidCode ? 'plan-code-error' : 'plan-code-hint'"
+            :placeholder="$t('entitlements.codeExample')"
             maxlength="63"
             :disabled="!enabled || locked || state.busy"
           />
+          <p v-if="invalidCode" id="plan-code-error" class="mt-4px text-error" role="alert">
+            {{ $t('entitlements.errors.codeInvalid') }}
+          </p>
+          <p v-else id="plan-code-hint" class="mt-4px text-sm text-gray-500">{{ $t('entitlements.codeHint') }}</p>
         </ElFormItem>
         <ElFormItem :label="$t('entitlements.name')">
           <ElInput
+            ref="nameInput"
             v-model="name"
             :aria-label="$t('entitlements.name')"
-            :aria-invalid="invalid"
-            :aria-describedby="invalid ? 'entitlement-input-error' : undefined"
+            :aria-invalid="invalidName"
+            :aria-describedby="invalidName ? 'plan-name-error' : undefined"
             maxlength="200"
             :disabled="!enabled || locked || state.busy"
           />
+          <p v-if="invalidName" id="plan-name-error" class="mt-4px text-error" role="alert">
+            {{ $t('entitlements.errors.nameInvalid') }}
+          </p>
         </ElFormItem>
         <ElFormItem :label="$t('entitlements.limit')">
           <ElInput
+            ref="limitInput"
             v-model="limit"
             :aria-label="$t('entitlements.limit')"
-            :aria-invalid="invalid"
-            :aria-describedby="invalid ? 'entitlement-input-error' : undefined"
+            :aria-invalid="invalidLimit"
+            :aria-describedby="invalidLimit ? 'plan-limit-error' : undefined"
             inputmode="numeric"
             maxlength="10"
             :disabled="!enabled || locked || state.busy"
           />
+          <p v-if="invalidLimit" id="plan-limit-error" class="mt-4px text-error" role="alert">
+            {{ $t('entitlements.errors.limitInvalid') }}
+          </p>
         </ElFormItem>
-        <p v-if="invalid" id="entitlement-input-error" role="alert">{{ $t('entitlements.errors.input') }}</p>
       </template>
       <p v-else>max_users</p>
       <p v-if="state.checked && !allowed && !loading && !locked" role="status">{{ $t('entitlements.requirements') }}</p>

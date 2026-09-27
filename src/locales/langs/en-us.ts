@@ -1,5 +1,7 @@
 const local: App.I18n.Schema = {
   entitlements: {
+    codeHint: 'Start with a lowercase letter; use 2–63 lowercase letters, digits or hyphens, e.g. plan-1001.',
+    codeExample: 'e.g. plan-1001',
     plan: {
       title: 'Plans',
       create: 'Create plan',
@@ -44,6 +46,10 @@ const local: App.I18n.Schema = {
       ACTIVATE: 'Activate'
     },
     errors: {
+      codeInvalid:
+        'Code must start with a lowercase letter and contain 2–63 lowercase letters, digits or hyphens, e.g. plan-1001.',
+      nameInvalid: 'Plan name must contain 1–200 characters and cannot be only whitespace.',
+      limitInvalid: 'max_users must be an integer from 1 to 2147483647.',
       invalid: 'Incomplete or inconsistent server records. Related actions are locked.',
       unavailable: 'Service or network unavailable. Retry reads and check the original operation.',
       forbidden: 'The current session cannot perform this action. Check session and permissions.',
