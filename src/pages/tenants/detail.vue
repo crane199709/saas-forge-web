@@ -6,6 +6,7 @@ import { failureCode } from '@/service/forge/tenants';
 import type { TenantFailure } from '@/service/forge/tenants';
 import { tenantWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
+import Subscription from './subscription.vue';
 import { useTenantDisplay } from './shared';
 defineOptions({ name: 'TenantDetail' });
 const route = useRoute();
@@ -21,7 +22,6 @@ async function read() {
   const current = new AbortController();
   controller = current;
   busy.value = true;
-  tenant.value = undefined;
   problem.value = undefined;
   try {
     const result = await tenantWorkspace().detail(String(route.params.id), current.signal);
@@ -63,6 +63,7 @@ onUnmounted(() => controller?.abort());
       <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(tenant.createdAt) }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(tenant.updatedAt) }}</ElDescriptionsItem>
     </ElDescriptions>
-    <!-- #2：后续订阅、管理员初始化和生命周期页面在权威详情后接入，各自业务票实现前不展示动作。 -->
+    <Subscription :key="String(route.params.id)" :tenant-id="String(route.params.id)" />
+    <!-- 管理员初始化和生命周期由各自业务票接入。 -->
   </ElCard>
 </template>

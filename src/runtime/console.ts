@@ -1,4 +1,5 @@
 import { shallowRef } from 'vue';
+import { SubscriptionWorkspace } from '@/service/forge/subscriptions';
 import { OAuthWorkspace } from '@/service/forge/oauth-clients';
 import { EntitlementWorkspace } from '@/service/forge/entitlements';
 import type { EntitlementKind } from '@/service/forge/entitlements';
@@ -14,6 +15,7 @@ import { createBrowserCoordination, operationKey } from './browser-coordination'
 export const consoleState = shallowRef<SessionView>({ status: 'loading' });
 let runtime: ConsoleSessionRuntime | undefined;
 let tenants: TenantWorkspace | undefined;
+let subscriptions: SubscriptionWorkspace | undefined;
 let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let startup: Promise<void> | undefined;
@@ -33,6 +35,12 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     };
     oauth = new OAuthWorkspace(transport.oauth, { session: runtime, key: operationKey, storage: sessionStorage });
     tenants = new TenantWorkspace(transport.tenants, runtime, operationKey);
+    subscriptions = new SubscriptionWorkspace(transport.entitlements, {
+      session: runtime,
+      key: operationKey,
+      tenants,
+      plans: entitlements.plan
+    });
     runtime.subscribe(value => {
       consoleState.value = value;
     });
@@ -43,6 +51,11 @@ export function consoleRuntime(): ConsoleSessionRuntime {
 export function oauthWorkspace(): OAuthWorkspace {
   consoleRuntime();
   return oauth!;
+}
+
+export function subscriptionWorkspace(): SubscriptionWorkspace {
+  consoleRuntime();
+  return subscriptions!;
 }
 
 export function tenantWorkspace(): TenantWorkspace {
@@ -87,6 +100,7 @@ if (import.meta.hot)
     clearInterval(timer);
     oauth?.dispose();
     tenants?.dispose();
+    subscriptions?.dispose();
     entitlements?.plan.dispose();
     entitlements?.quota.dispose();
     runtime?.dispose();

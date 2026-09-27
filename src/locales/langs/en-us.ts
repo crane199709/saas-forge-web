@@ -62,6 +62,49 @@ const local: App.I18n.Schema = {
       input: 'Check the name and runtime scopes.'
     }
   },
+  subscriptions: {
+    title: 'Subscription configuration',
+    configure: 'Configure subscription',
+    close: 'Close subscription configuration',
+    submit: 'Confirm subscription',
+    refresh: 'Check subscription and operations',
+    immediate:
+      'The first subscription takes effect immediately. Scheduled activation and replacement are not supported.',
+    stale: 'Showing the last successful snapshot. The latest state is unconfirmed; dependent actions are disabled.',
+    unknown:
+      'Submission outcome is unknown. Do not submit again. Check the original operation and continue only when authorized.',
+    unchecked: 'Subscription state has not been confirmed.',
+    absent: 'The authoritative read confirms there is no subscription.',
+    observedAt: 'Observed at',
+    id: 'Subscription ID',
+    plan: 'Plan',
+    effective: 'Currently effective',
+    yes: 'Effective',
+    no: 'Not effective',
+    startsAt: 'Effective from',
+    endsAt: 'Expires at',
+    used: 'max_users usage',
+    noPlans: 'No ACTIVE plan with a positive quota is available for a new subscription.',
+    managePlans: 'Manage plans',
+    operations: 'Subscription operations',
+    operationId: 'Operation ID',
+    replayUntil: 'Recovery deadline',
+    noOperations: 'No subscription operations',
+    recoveryHint:
+      'Check all original operations for this tenant. Unknown or uncommitted operations never authorize a new request. Recovery requires the original actor and server permission.',
+    planInvalid: 'Select an available ACTIVE plan with a positive quota.',
+    expiryHint:
+      'Leave blank for no expiry. Enter a future timestamp including seconds and timezone, for example 2099-01-01T08:00:00+08:00.',
+    expiryInvalid: 'Enter a real future date and time with seconds and an explicit timezone.',
+    errors: {
+      invalid: 'Server records are incomplete or inconsistent. Actions are disabled.',
+      unavailable: 'Read or submission failed. Check the original operation.',
+      forbidden: 'Not authorized. Restore the original actor’s platform session.',
+      stale: 'The session changed. Check again.',
+      input: 'The subscription, plan or expiry no longer meets the requirements. Check again.',
+      pending: 'An original operation exists. Check and continue that operation.'
+    }
+  },
   entitlements: {
     codeHint: 'Start with a lowercase letter; use 2–63 lowercase letters, digits or hyphens, e.g. plan-1001.',
     codeExample: 'e.g. plan-1001',

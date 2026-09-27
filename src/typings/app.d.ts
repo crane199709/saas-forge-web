@@ -352,6 +352,45 @@ declare namespace App {
           input: string;
         };
       };
+      subscriptions: {
+        title: string;
+        configure: string;
+        close: string;
+        submit: string;
+        refresh: string;
+        immediate: string;
+        stale: string;
+        unknown: string;
+        unchecked: string;
+        absent: string;
+        observedAt: string;
+        id: string;
+        plan: string;
+        effective: string;
+        yes: string;
+        no: string;
+        startsAt: string;
+        endsAt: string;
+        used: string;
+        noPlans: string;
+        managePlans: string;
+        operations: string;
+        operationId: string;
+        replayUntil: string;
+        noOperations: string;
+        recoveryHint: string;
+        planInvalid: string;
+        expiryHint: string;
+        expiryInvalid: string;
+        errors: {
+          invalid: string;
+          unavailable: string;
+          forbidden: string;
+          stale: string;
+          input: string;
+          pending: string;
+        };
+      };
       entitlements: {
         codeHint: string;
         codeExample: string;

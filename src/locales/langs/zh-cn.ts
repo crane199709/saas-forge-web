@@ -60,6 +60,46 @@ const local: App.I18n.Schema = {
       input: '请检查名称与运行时 Scope。'
     }
   },
+  subscriptions: {
+    title: '订阅配置',
+    configure: '配置订阅',
+    close: '关闭订阅配置抽屉',
+    submit: '确认配置订阅',
+    refresh: '核查订阅与原操作',
+    immediate: '首次订阅立即生效；当前不支持预约生效或替换已有订阅。',
+    stale: '当前显示上次成功快照，最新状态尚未确认；依赖该状态的操作已禁用。',
+    unknown: '提交结果未知，禁止重新提交。请核查原操作，仅在服务端允许时继续。',
+    unchecked: '订阅状态尚未确认。',
+    absent: '权威读取确认当前没有订阅。',
+    observedAt: '权威观察时间',
+    id: '订阅 ID',
+    plan: '套餐',
+    effective: '当前是否有效',
+    yes: '有效',
+    no: '无效',
+    startsAt: '生效时间',
+    endsAt: '到期时间',
+    used: 'max_users 已用量',
+    noPlans: '没有可用于新订阅的 ACTIVE 正额度套餐。',
+    managePlans: '管理套餐',
+    operations: '订阅操作记录',
+    operationId: '操作 ID',
+    replayUntil: '可恢复截止时间',
+    noOperations: '没有订阅操作记录',
+    recoveryHint:
+      '完整核查当前租户的原操作；未知或未提交记录不允许使用新请求替代。恢复由原操作者权限和服务端许可决定。',
+    planInvalid: '请选择当前可用的 ACTIVE 正额度套餐。',
+    expiryHint: '留空表示永不到期。填写未来时间，必须包含秒和时区，例如 2099-01-01T08:00:00+08:00。',
+    expiryInvalid: '请输入真实的未来日期时间，并包含秒和明确时区。',
+    errors: {
+      invalid: '服务端记录不完整或不一致，操作已禁用。',
+      unavailable: '读取或提交失败，请核查原操作。',
+      forbidden: '当前身份无权操作，请恢复原操作者的平台会话。',
+      stale: '会话已变化，请重新核查。',
+      input: '订阅、套餐或到期时间不再满足配置条件，请重新核查。',
+      pending: '存在原操作记录，请核查并继续原操作。'
+    }
+  },
   entitlements: {
     codeHint: '以小写字母开头，使用 2–63 位小写字母、数字或连字符，例如 plan-1001。',
     codeExample: '例如 plan-1001',
