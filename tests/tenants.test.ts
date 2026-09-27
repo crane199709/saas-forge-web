@@ -24,6 +24,31 @@ const record = {
   replayUntil: '2099-09-28T01:00:00Z',
   idempotencyKey: key
 };
+
+test('tenant create and recovery carry the Gateway CSRF marker through the shared client', async () => {
+  const request = mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    assert.equal(headers.get('Authorization'), 'Bearer test-memory-token');
+    assert.equal(headers.get('Idempotency-Key'), key);
+    assert.equal(init.credentials, 'omit');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site']) assert.equal(headers.get(name), null);
+    return Response.json(_url.endsWith('/recovery') ? record : tenant);
+  });
+  try {
+    const transport = createConsoleTransport('https://api.example.test');
+    transport.useToken('test-memory-token');
+    await transport.tenants.createPlatformTenant({
+      idempotencyKey: key,
+      createTenantRequest: { displayName: 'Example' }
+    });
+    await transport.tenants.recoverTenantCreation({ creationId, idempotencyKey: key, requestBody: {} });
+    assert.equal(request.mock.callCount(), 2);
+  } finally {
+    request.mock.restore();
+  }
+});
+
 function setup() {
   let view = {
     status: 'authenticated',

@@ -35,7 +35,12 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   }
   return {
     tenants: new PlatformTenantsApi(
-      new Configuration({ basePath, credentials: 'omit', accessToken: () => token ?? '' })
+      new Configuration({
+        basePath,
+        credentials: 'omit',
+        accessToken: () => token ?? '',
+        headers: { 'X-SF-CSRF': '1' }
+      })
     ),
     bootstrap: () => call(() => api.bootstrapConsoleSession({ xSFCSRF: '1', body: {} }, options())),
     session: () => call(() => api.getConsoleSession(options())),
