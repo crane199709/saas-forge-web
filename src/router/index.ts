@@ -69,6 +69,24 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/oauth-clients',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'oauth-clients',
+          component: () => import('@/pages/oauth-clients/index.vue'),
+          meta: { title: 'OAuth Clients', i18nKey: 'oauth.title' }
+        },
+        {
+          path: ':id',
+          name: 'oauth-client-detail',
+          component: () => import('@/pages/oauth-clients/detail.vue'),
+          meta: { title: 'OAuth Client', i18nKey: 'oauth.detail' }
+        }
+      ]
+    },
+    {
       path: '/plans',
       component: () => import('@/layouts/base-layout/index.vue'),
       children: [
@@ -144,7 +162,17 @@ export async function setupRouter(app: App) {
     if (!active && to.name !== 'login') return '/login';
     const allowed =
       active === 'PLATFORM'
-        ? ['home', 'tenants', 'tenant-detail', 'plans', 'plan-detail', 'quota-definitions', 'quota-detail']
+        ? [
+            'oauth-clients',
+            'oauth-client-detail',
+            'home',
+            'tenants',
+            'tenant-detail',
+            'plans',
+            'plan-detail',
+            'quota-definitions',
+            'quota-detail'
+          ]
         : ['workbench'];
     if (active && !allowed.includes(String(to.name))) return home;
     return true;
@@ -160,7 +188,17 @@ export async function setupRouter(app: App) {
     if (['password-setup', 'gateway-connection'].includes(name)) return;
     const allowed =
       active === 'PLATFORM'
-        ? ['home', 'tenants', 'tenant-detail', 'plans', 'plan-detail', 'quota-definitions', 'quota-detail']
+        ? [
+            'oauth-clients',
+            'oauth-client-detail',
+            'home',
+            'tenants',
+            'tenant-detail',
+            'plans',
+            'plan-detail',
+            'quota-definitions',
+            'quota-detail'
+          ]
         : ['workbench'];
     if (!active || !allowed.includes(name)) router.replace(active ? home : '/login');
   });

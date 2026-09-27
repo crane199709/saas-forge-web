@@ -124,6 +124,14 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     icon: () => h('span', { class: 'i-mdi-counter' })
                   },
                   {
+                    key: 'oauth-clients',
+                    label: $t('oauth.title'),
+                    i18nKey: 'oauth.title' as const,
+                    routeKey: 'oauth-clients' as const,
+                    routePath: '/oauth-clients' as const,
+                    icon: () => h('span', { class: 'i-mdi-key-outline' })
+                  },
+                  {
                     key: 'plans',
                     label: $t('entitlements.plan.title'),
                     i18nKey: 'entitlements.plan.title' as const,

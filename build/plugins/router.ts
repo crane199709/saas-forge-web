@@ -11,6 +11,8 @@ export function setupElegantRouter() {
     customRoutes: {
       names: [
         'workbench',
+        'oauth-clients',
+        'oauth-client-detail',
         'tenants',
         'tenant-detail',
         'plans',
@@ -34,6 +36,7 @@ export function setupElegantRouter() {
     routePathTransformer(routeName, routePath) {
       const key = routeName as RouteKey;
 
+      if (key === 'oauth-client-detail') return '/oauth-clients/:id';
       if (key === 'plan-detail') return '/plans/:id';
       if (key === 'quota-detail') return '/quota-definitions/:id';
       if (key === 'tenant-detail') return '/tenants/:id';

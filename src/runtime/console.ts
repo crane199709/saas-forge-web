@@ -1,4 +1,5 @@
 import { shallowRef } from 'vue';
+import { OAuthWorkspace } from '@/service/forge/oauth-clients';
 import { EntitlementWorkspace } from '@/service/forge/entitlements';
 import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
@@ -13,6 +14,7 @@ import { createBrowserCoordination, operationKey } from './browser-coordination'
 export const consoleState = shallowRef<SessionView>({ status: 'loading' });
 let runtime: ConsoleSessionRuntime | undefined;
 let tenants: TenantWorkspace | undefined;
+let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -29,12 +31,18 @@ export function consoleRuntime(): ConsoleSessionRuntime {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
       quota: new EntitlementWorkspace('quota', transport.entitlements, { session: runtime, key: operationKey })
     };
+    oauth = new OAuthWorkspace(transport.oauth, { session: runtime, key: operationKey, storage: sessionStorage });
     tenants = new TenantWorkspace(transport.tenants, runtime, operationKey);
     runtime.subscribe(value => {
       consoleState.value = value;
     });
   }
   return runtime;
+}
+
+export function oauthWorkspace(): OAuthWorkspace {
+  consoleRuntime();
+  return oauth!;
 }
 
 export function tenantWorkspace(): TenantWorkspace {
@@ -77,6 +85,7 @@ if (import.meta.hot)
     window.removeEventListener('focus', verify);
     document.removeEventListener('visibilitychange', verify);
     clearInterval(timer);
+    oauth?.dispose();
     tenants?.dispose();
     entitlements?.plan.dispose();
     entitlements?.quota.dispose();

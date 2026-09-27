@@ -1,4 +1,65 @@
 const local: App.I18n.Schema = {
+  oauth: {
+    title: 'OAuth Client 管理',
+    detail: 'OAuth Client 详情',
+    create: '创建 OAuth Client',
+    back: '返回 Client 列表',
+    name: '名称',
+    id: 'Client ID',
+    type: 'Client 类型',
+    reservedKey: '保留服务键',
+    scopes: '允许的 Scope',
+    filters: '筛选 OAuth Client',
+    empty: '没有匹配的 Client',
+    secretTitle: '一次性 Secret',
+    secretHint:
+      'Secret 仅展示一次。请保存到受控密钥管理器；关闭、离开、刷新或退出后无法再次查看。复制后请妥善处理系统剪贴板。',
+    copy: '复制 Secret',
+    copied: '已复制',
+    copyFailed: '复制失败，请手动保存。',
+    recovery: '原操作与恢复入口',
+    recoveryHint: '请先核查原操作。未知创建或轮换不能以新请求替代；此处只查询原操作信息，替代签发由后续恢复功能提供。',
+    unknown: '操作结果未知，已保留原操作信息并锁定替代请求。',
+    unchecked: '尚未完整核查操作记录，签发操作暂不可用。',
+    noOperations: '没有操作记录',
+    operationId: '操作 ID',
+    completedAt: '完成时间',
+    recoveryUntil: '可恢复截止时间',
+    recoverable: '后端允许恢复',
+    yes: '是',
+    no: '否',
+    nameInvalid: '请输入 1–200 个字符的非空名称。',
+    scopesInvalid: '请至少选择一个运行时 Scope。',
+    rotateWarning: '确认轮换此 Client 的 Secret？旧凭据有效期以服务器返回的重叠窗口为准。',
+    revokeWarning: '确认吊销此 Client？吊销后其凭据将不可用，此操作不可撤销。',
+    revokedAt: '吊销时间',
+    overlap: '重叠截止时间',
+    noOverlap: '无重叠窗口',
+    authorityHint: '轮换与吊销许可由服务器决定。刷新可重新核查；本机时间不会自动放行轮换。',
+    states: {
+      ACTIVE: '有效',
+      REVOKED: '已吊销'
+    },
+    types: {
+      RUNTIME_SERVICE: '运行时服务',
+      RESERVED_SERVICE: '保留服务'
+    },
+    actions: {
+      CREATE: '创建',
+      ROTATE: '轮换 Secret',
+      RECOVER: '恢复签发',
+      REVOKE: '吊销'
+    },
+    errors: {
+      invalid: '服务响应无法确认，请刷新核查。',
+      unavailable: '请求未能确认，请核查原操作，不要重复签发。',
+      forbidden: '当前身份或凭据状态不允许此操作。',
+      notFound: 'Client 不存在或不可访问。',
+      stale: '会话或页面已改变，请重新核查。',
+      pending: '存在待核查的原操作，不能发起替代请求。',
+      input: '请检查名称与运行时 Scope。'
+    }
+  },
   entitlements: {
     codeHint: '以小写字母开头，使用 2–63 位小写字母、数字或连字符，例如 plan-1001。',
     codeExample: '例如 plan-1001',
@@ -313,6 +374,8 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    'oauth-clients': 'OAuth Client 管理',
+    'oauth-client-detail': 'OAuth Client 详情',
     plans: '套餐管理',
     'plan-detail': '套餐详情',
     'quota-definitions': '额度定义',

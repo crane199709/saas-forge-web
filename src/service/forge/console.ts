@@ -1,6 +1,7 @@
 import {
   Configuration,
   Console,
+  OAuthClientsApi,
   PlatformEntitlementBootstrapApi,
   PlatformTenantsApi
 } from '@crane199709/saas-forge-api-client';
@@ -9,9 +10,11 @@ import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
-export function createConsoleTransport(
-  apiOrigin: unknown
-): ConsoleTransport & { tenants: PlatformTenantsApi; entitlements: PlatformEntitlementBootstrapApi } {
+export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
+  tenants: PlatformTenantsApi;
+  entitlements: PlatformEntitlementBootstrapApi;
+  oauth: OAuthClientsApi;
+} {
   const basePath = requireHttpsOrigin(apiOrigin);
   let token: string | undefined;
   const api = new Console.ConsoleAuthenticationApi(
@@ -47,6 +50,7 @@ export function createConsoleTransport(
     headers: { 'X-SF-CSRF': '1' }
   });
   return {
+    oauth: new OAuthClientsApi(businessConfiguration),
     entitlements: new PlatformEntitlementBootstrapApi(businessConfiguration),
     tenants: new PlatformTenantsApi(businessConfiguration),
     bootstrap: () => call(() => api.bootstrapConsoleSession({ xSFCSRF: '1', body: {} }, options())),

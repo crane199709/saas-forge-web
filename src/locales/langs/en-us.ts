@@ -1,4 +1,67 @@
 const local: App.I18n.Schema = {
+  oauth: {
+    title: 'OAuth Clients',
+    detail: 'OAuth Client details',
+    create: 'Create OAuth Client',
+    back: 'Back to clients',
+    name: 'Name',
+    id: 'Client ID',
+    type: 'Client type',
+    reservedKey: 'Reserved service key',
+    scopes: 'Allowed scopes',
+    filters: 'Filter OAuth Clients',
+    empty: 'No matching clients',
+    secretTitle: 'One-time Secret',
+    secretHint:
+      'This Secret is shown once. Save it in a controlled secret manager. Closing, leaving, reloading or signing out clears it. Handle your system clipboard securely after copying.',
+    copy: 'Copy Secret',
+    copied: 'Copied',
+    copyFailed: 'Copy failed. Save the Secret manually.',
+    recovery: 'Original operations and recovery',
+    recoveryHint:
+      'Check the original operation first. Never replace an unknown creation or rotation with a new request. This view is read-only; replacement issuance belongs to the follow-up recovery feature.',
+    unknown: 'Outcome unknown. Original operation information is retained and replacement requests are blocked.',
+    unchecked: 'Operation history has not been fully checked. Issuance is unavailable.',
+    noOperations: 'No operation records',
+    operationId: 'Operation ID',
+    completedAt: 'Completed at',
+    recoveryUntil: 'Recovery deadline',
+    recoverable: 'Server permits recovery',
+    yes: 'Yes',
+    no: 'No',
+    nameInvalid: 'Enter a nonblank name of 1–200 characters.',
+    scopesInvalid: 'Select at least one runtime scope.',
+    rotateWarning: 'Rotate this Client Secret? The server determines the overlap window for the old credential.',
+    revokeWarning: 'Revoke this Client? Its credentials will become unusable. This cannot be undone.',
+    revokedAt: 'Revoked at',
+    overlap: 'Overlap ends at',
+    noOverlap: 'No overlap window',
+    authorityHint:
+      'The server controls rotation and revocation. Refresh to recheck; the local clock does not enable rotation.',
+    states: {
+      ACTIVE: 'Active',
+      REVOKED: 'Revoked'
+    },
+    types: {
+      RUNTIME_SERVICE: 'Runtime service',
+      RESERVED_SERVICE: 'Reserved service'
+    },
+    actions: {
+      CREATE: 'Create',
+      ROTATE: 'Rotate Secret',
+      RECOVER: 'Recover issuance',
+      REVOKE: 'Revoke'
+    },
+    errors: {
+      invalid: 'The service response could not be verified. Refresh to check.',
+      unavailable: 'The result could not be confirmed. Check the original operation; do not issue again.',
+      forbidden: 'Your identity or credential state does not permit this operation.',
+      notFound: 'The Client does not exist or is inaccessible.',
+      stale: 'The session or page changed. Check again.',
+      pending: 'An original operation needs checking. Replacement requests are blocked.',
+      input: 'Check the name and runtime scopes.'
+    }
+  },
   entitlements: {
     codeHint: 'Start with a lowercase letter; use 2–63 lowercase letters, digits or hyphens, e.g. plan-1001.',
     codeExample: 'e.g. plan-1001',
@@ -325,6 +388,8 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    'oauth-clients': 'OAuth Clients',
+    'oauth-client-detail': 'OAuth Client details',
     plans: 'Plans',
     'plan-detail': 'Plan details',
     'quota-definitions': 'Quota definitions',

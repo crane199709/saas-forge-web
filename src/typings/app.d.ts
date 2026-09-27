@@ -292,6 +292,66 @@ declare namespace App {
     };
 
     type Schema = {
+      oauth: {
+        title: string;
+        detail: string;
+        create: string;
+        back: string;
+        name: string;
+        id: string;
+        type: string;
+        reservedKey: string;
+        scopes: string;
+        filters: string;
+        empty: string;
+        secretTitle: string;
+        secretHint: string;
+        copy: string;
+        copied: string;
+        copyFailed: string;
+        recovery: string;
+        recoveryHint: string;
+        unknown: string;
+        unchecked: string;
+        noOperations: string;
+        operationId: string;
+        completedAt: string;
+        recoveryUntil: string;
+        recoverable: string;
+        yes: string;
+        no: string;
+        nameInvalid: string;
+        scopesInvalid: string;
+        rotateWarning: string;
+        revokeWarning: string;
+        revokedAt: string;
+        overlap: string;
+        noOverlap: string;
+        authorityHint: string;
+        states: {
+          ACTIVE: string;
+          REVOKED: string;
+        };
+        types: {
+          RUNTIME_SERVICE: string;
+          RESERVED_SERVICE: string;
+        };
+        actions: {
+          CREATE: string;
+          ROTATE: string;
+          RECOVER: string;
+          REVOKE: string;
+        };
+        errors: {
+          invalid: string;
+          unavailable: string;
+          forbidden: string;
+          notFound: string;
+          stale: string;
+          pending: string;
+          input: string;
+        };
+      };
       entitlements: {
         codeHint: string;
         codeExample: string;
