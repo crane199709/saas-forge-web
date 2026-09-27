@@ -60,6 +60,44 @@ const local: App.I18n.Schema = {
       input: '请检查名称与运行时 Scope。'
     }
   },
+  initialization: {
+    title: 'Tenant 管理员初始化',
+    refresh: '核查初始化状态',
+    start: '初始化管理员',
+    continue: '继续原初始化',
+    close: '关闭管理员初始化表单',
+    submit: '确认初始化',
+    hint: '仅在订阅有效且服务端允许时操作。处理中或补偿中请等待并核查；只有原管理员可继续待恢复的初始化。',
+    formHint: '提交后会清除邮箱和名称。中断或结果未知时，请核查并继续原初始化，不要重新创建尝试。',
+    email: '管理员邮箱',
+    name: '管理员名称（可选）',
+    emailInvalid: '请输入有效邮箱，长度不超过 320 个字符。',
+    nameInvalid: '名称不能超过 200 个字符。',
+    result: '初始化结果',
+    membership: '初始管理员 Membership',
+    notification: '密码设置通知',
+    notificationHint:
+      '通知状态独立于初始化结果。“邮件服务已接收”不表示邮件已到达；初始化成功以服务端结果和初始 Membership 为准。',
+    unchecked: '尚未确认',
+    stale: '当前为上次读取结果，最新状态尚未确认，操作已禁用。',
+    unknown: '结果尚未确认，不能开始新尝试。请核查原初始化，仅在服务端允许时继续。',
+    states: {
+      NOT_STARTED: '尚未开始',
+      PROCESSING: '初始化处理中',
+      RECOVERY_REQUIRED: '等待原管理员恢复',
+      COMPENSATING: '补偿处理中',
+      RETRY_REQUIRED: '补偿完成，可在服务端允许后重新尝试',
+      SUCCEEDED: '初始化成功',
+      FAILED: '初始化失败'
+    },
+    notifications: {
+      NOT_APPLICABLE: '无需通知',
+      PENDING: '通知待处理',
+      MAIL_SERVICE_ACCEPTED: '邮件服务已接收',
+      PASSWORD_READY: '密码已就绪',
+      ACTION_REQUIRED: '通知需要处理'
+    }
+  },
   subscriptions: {
     title: '订阅配置',
     configure: '配置订阅',

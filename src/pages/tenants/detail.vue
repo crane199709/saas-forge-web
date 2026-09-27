@@ -64,8 +64,7 @@ onUnmounted(() => controller?.abort());
       <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(tenant.createdAt) }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(tenant.updatedAt) }}</ElDescriptionsItem>
     </ElDescriptions>
-    <Subscription :key="String(route.params.id)" :tenant-id="String(route.params.id)" />
+    <Subscription :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
     <Lifecycle :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
-    <!-- 管理员初始化由独立业务票接入。 -->
   </ElCard>
 </template>

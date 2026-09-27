@@ -352,6 +352,43 @@ declare namespace App {
           input: string;
         };
       };
+      initialization: {
+        title: string;
+        refresh: string;
+        start: string;
+        continue: string;
+        close: string;
+        submit: string;
+        hint: string;
+        formHint: string;
+        email: string;
+        name: string;
+        emailInvalid: string;
+        nameInvalid: string;
+        result: string;
+        membership: string;
+        notification: string;
+        notificationHint: string;
+        unchecked: string;
+        stale: string;
+        unknown: string;
+        states: {
+          NOT_STARTED: string;
+          PROCESSING: string;
+          RECOVERY_REQUIRED: string;
+          COMPENSATING: string;
+          RETRY_REQUIRED: string;
+          SUCCEEDED: string;
+          FAILED: string;
+        };
+        notifications: {
+          NOT_APPLICABLE: string;
+          PENDING: string;
+          MAIL_SERVICE_ACCEPTED: string;
+          PASSWORD_READY: string;
+          ACTION_REQUIRED: string;
+        };
+      };
       subscriptions: {
         title: string;
         configure: string;

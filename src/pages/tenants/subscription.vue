@@ -5,9 +5,11 @@ import { parseSubscriptionExpiry } from '@/service/forge/subscriptions';
 import { useAppStore } from '@/store/modules/app';
 import { subscriptionWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
+import Initialization from './initialization.vue';
 import { useTenantDisplay } from './shared';
 defineOptions({ name: 'TenantSubscription' });
 const props = defineProps<{ tenantId: string }>();
+const emit = defineEmits<{ changed: [] }>();
 const workspace = subscriptionWorkspace();
 const state = shallowRef(workspace.state);
 const stop = workspace.subscribe(value => {
@@ -188,6 +190,13 @@ onUnmounted(() => {
         </ElTableColumn>
       </ElTable>
     </section>
+    <Initialization
+      :tenant-id="tenantId"
+      @changed="
+        workspace.read(tenantId);
+        emit('changed');
+      "
+    />
     <ElDrawer
       v-model="open"
       :title="$t('subscriptions.configure')"

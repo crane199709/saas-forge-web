@@ -62,6 +62,46 @@ const local: App.I18n.Schema = {
       input: 'Check the name and runtime scopes.'
     }
   },
+  initialization: {
+    title: 'Tenant administrator initialization',
+    refresh: 'Check initialization',
+    start: 'Initialize administrator',
+    continue: 'Continue original initialization',
+    close: 'Close administrator initialization form',
+    submit: 'Confirm initialization',
+    hint: 'Actions require an effective subscription and server permission. Check progress while processing or compensating. Only the original administrator can continue recovery.',
+    formHint:
+      'Email and name are cleared on submission. If interrupted or uncertain, check and continue the original initialization instead of starting another attempt.',
+    email: 'Administrator email',
+    name: 'Administrator name (optional)',
+    emailInvalid: 'Enter a valid email of at most 320 characters.',
+    nameInvalid: 'Name must not exceed 200 characters.',
+    result: 'Initialization result',
+    membership: 'Initial administrator Membership',
+    notification: 'Password setup notification',
+    notificationHint:
+      'Notification status is separate from initialization. Mail service acceptance does not confirm delivery. Server progress and the initial Membership establish initialization success.',
+    unchecked: 'Not yet confirmed',
+    stale: 'Showing the previous result. Current state is unconfirmed and actions are disabled.',
+    unknown:
+      'The result is unconfirmed. Do not start a new attempt. Check the original initialization and continue only when the server allows it.',
+    states: {
+      NOT_STARTED: 'Not started',
+      PROCESSING: 'Initialization processing',
+      RECOVERY_REQUIRED: 'Original administrator recovery required',
+      COMPENSATING: 'Compensation processing',
+      RETRY_REQUIRED: 'Compensated; a new attempt requires server permission',
+      SUCCEEDED: 'Initialization succeeded',
+      FAILED: 'Initialization failed'
+    },
+    notifications: {
+      NOT_APPLICABLE: 'Not applicable',
+      PENDING: 'Notification pending',
+      MAIL_SERVICE_ACCEPTED: 'Mail service accepted',
+      PASSWORD_READY: 'Password ready',
+      ACTION_REQUIRED: 'Notification action required'
+    }
+  },
   subscriptions: {
     title: 'Subscription configuration',
     configure: 'Configure subscription',
