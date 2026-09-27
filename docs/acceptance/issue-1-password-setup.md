@@ -1,6 +1,8 @@
 # Issue #1：首次改密与密码设置
 
-状态：2026-09-22，代码与有界验证完成；真实初始凭据和 Password Setup Challenge 验收未执行，Issue 保持开放。
+最新验证：见 [2026-09-27 真实 Chrome 验收](issue-1-password-setup-20260927.md)。下文保留 2026-09-22 的历史结果，不代表当前缺口。
+
+历史状态：2026-09-22，代码与有界验证完成；真实初始凭据和 Password Setup Challenge 验收未执行，Issue 保持开放。
 
 ## 实现边界
 

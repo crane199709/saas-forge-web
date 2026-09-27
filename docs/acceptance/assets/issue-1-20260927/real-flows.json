@@ -1,0 +1,156 @@
+{
+  "round": "issue1-20260927-a29c7502",
+  "checks": [
+    "initial restricted; protected route redirects to change password",
+    "initial change 204; returns to login with empty inputs",
+    "new password logs into platform",
+    "consumed initial rejected",
+    "wrong password rejected",
+    "expired initial rejected",
+    "challenge 204 through real Gateway; no Cookie/Authorization; URL and form cleared",
+    "established password logs into platform",
+    "consumed challenge rejected",
+    "expired challenge rejected",
+    "existing credential rejected"
+  ],
+  "responses": [
+    {
+      "stage": "initial restricted login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "initial restricted login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "initial restricted login",
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "PASSWORD_CHANGE_REQUIRED"
+    },
+    {
+      "stage": "initial restricted login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "initial restricted login",
+      "path": "/api/v2/auth/session",
+      "status": 200,
+      "state": "PASSWORD_CHANGE_REQUIRED"
+    },
+    {
+      "stage": "initial password change",
+      "path": "/api/v2/auth/password-changes",
+      "status": 204
+    },
+    {
+      "stage": "new password login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "new password login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "new password login",
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "AUTHENTICATED"
+    },
+    {
+      "stage": "consumed initial",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "consumed initial",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "consumed initial",
+      "path": "/api/v2/auth/login",
+      "status": 401,
+      "code": "AUTHENTICATION_FAILED"
+    },
+    {
+      "stage": "wrong password",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "wrong password",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "wrong password",
+      "path": "/api/v2/auth/login",
+      "status": 401,
+      "code": "AUTHENTICATION_FAILED"
+    },
+    {
+      "stage": "expired initial",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "expired initial",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "expired initial",
+      "path": "/api/v2/auth/login",
+      "status": 401,
+      "code": "AUTHENTICATION_FAILED"
+    },
+    {
+      "stage": "challenge establish",
+      "path": "/api/v1/auth/password-setups",
+      "status": 204
+    },
+    {
+      "stage": "setup password login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "setup password login",
+      "path": "/api/v2/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "stage": "setup password login",
+      "path": "/api/v2/auth/login",
+      "status": 200,
+      "state": "AUTHENTICATED"
+    },
+    {
+      "stage": "consumed challenge",
+      "path": "/api/v1/auth/password-setups",
+      "status": 400,
+      "code": "PASSWORD_SETUP_TOKEN_INVALID"
+    },
+    {
+      "stage": "expired challenge",
+      "path": "/api/v1/auth/password-setups",
+      "status": 400,
+      "code": "PASSWORD_SETUP_TOKEN_INVALID"
+    },
+    {
+      "stage": "existing credential",
+      "path": "/api/v1/auth/password-setups",
+      "status": 400,
+      "code": "PASSWORD_SETUP_TOKEN_INVALID"
+    }
+  ],
+  "pageErrors": 0,
+  "chrome": "154.0.8037.57",
+  "result": "passed"
+}

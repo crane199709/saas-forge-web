@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import LoginShell from '@/views/_builtin/login/index.vue';
 import { consoleRuntime, consoleState } from '@/runtime/console';
 import { $t } from '@/locales';
@@ -9,6 +9,14 @@ import InitialPassword from './initial-password.vue';
 const email = ref('');
 const password = ref('');
 const invalid = ref(false);
+function clearPassword() {
+  password.value = '';
+}
+onMounted(() => window.addEventListener('pagehide', clearPassword));
+onUnmounted(() => {
+  clearPassword();
+  window.removeEventListener('pagehide', clearPassword);
+});
 const unavailable = computed(() =>
   ['GATEWAY_CONFIGURATION_INVALID', 'SESSION_COORDINATION_UNAVAILABLE'].includes(consoleState.value.problem ?? '')
 );

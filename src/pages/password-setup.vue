@@ -23,6 +23,9 @@ function openLink() {
   } catch {
     /* 配置错误不能发出请求；Challenge 已从 URL 和交接状态清除。 */
   }
+  nextTick(() => {
+    if (['invalid', 'unavailable'].includes(state.value)) result.value?.focus();
+  });
 }
 openLink();
 const stopLinks = onPasswordSetupLink(openLink);
