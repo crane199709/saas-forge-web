@@ -1,0 +1,959 @@
+From b49abfee0f4e2620755ba6202a3b74e15d4e86fe Mon Sep 17 00:00:00 2001
+From: Crane <crane0927@163.com>
+Date: Sun, 13 Sep 2026 21:24:03 +0800
+Subject: [PATCH 1/3] =?UTF-8?q?=E4=BA=A4=E4=BB=98=E5=8E=9F=E7=94=9F?=
+ =?UTF-8?q?=E5=BC=80=E5=8F=91=E6=B5=81=E7=A8=8B=E4=B8=8E=20Platform=20?=
+ =?UTF-8?q?=E7=A7=9F=E6=88=B7=E5=88=9D=E5=A7=8B=E5=8C=96=E9=97=AD=E7=8E=AF?=
+ =?UTF-8?q?=20(#179)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+* feat(consoles): 支持原生开发与独立 HTTPS 入口
+
+分离正式 API Client 生成与日常启动，校验生成物并明确显示受控 HTTPS 浏览器入口。复用独立 Edge 生命周期，补充原生启动、HMR、独立停止及真实认证验收记录。
+
+Refs #162
+
+* feat(dev): 支持 Gateway 与 IAM 原生本地启动
+
+新增个人配置模板、本地配置加载与 IAM HTTP 服务发现，补齐开发身份自身发现权限。记录已通过的模块验证及待完成的实际 IDE 和认证链路验收。
+
+Refs #163
+
+* fix(dev): 从 resources 加载本地配置并排除发布打包
+
+Refs #163
+
+* docs(dev): 记录 Issue 163 实际验证结果
+
+* refactor(iam): 改为内部签发自身服务令牌
+
+* docs(dev): 更新 Issue 163 登录刷新验收状态
+
+* docs(dev): 确认 Issue 163 全部验收完成
+
+* feat(local): 支持 Tenant Access 原生启动与双向服务发现
+
+补齐个人配置、按次 Nacos HTTP/gRPC 发现、失败关闭与调用超时，保留非 local 配置行为。相关模块 449 项测试通过；真实 IDE 与浏览器验收待完成。
+
+Refs #164
+
+* docs(local): 记录 Tenant Access 现场验收与剩余证据
+
+* docs(local): 完成 Issue 164 受保护双向联调验收
+
+* feat(local): 支持 Entitlement 原生配置与权益协作发现
+
+Refs #165。补齐 local HTTP/gRPC 服务发现、个人配置模板和聚焦回归。相关模块 516 项测试通过；真实 IDEA、Tenant 初始化及 Quota 现场验收待补齐。
+
+* feat(audit): 支持原生本地配置与消费验收流程
+
+Refs #166
+
+* docs(audit): 补齐真实事件消费与 IDE 重启验收证据
+
+Refs #166
+
+* build(verification): 支持按影响范围进行本地验证
+
+新增 backend-local 与前端包级验证入口，保留默认完整门禁；补充真实 CLI 回归、范围升级文档与前后实测记录。
+
+Refs #167
+
+* docs(local): 记录 Entitlement 原生启动与发现验收
+
+Refs #165
+
+* ci(verification): 合并重复完整门禁并保留独有覆盖
+
+将 JDK 17 完整验证与五浏览器认证验收置于同一 reusable job，
+复用当前构建制品，保留 JDK 21、独立浏览器、Tenant 和 Nacos 门禁。
+补充制品失败传播回归、覆盖映射和本机复现说明。
+
+Refs #168
+
+* docs(ci): 补齐 Issue 168 实际完整门禁验收证据
+
+记录源码 2a1d7ae 的八项 CI 门禁、五渠道安全证据与负向入口回归，
+补齐前后执行次数和阶段耗时，区分累计 job 时间与整体墙钟时间。
+
+Refs #168
+
+* fix(test): 隔离撤销索引探针与自动恢复的竞争
+
+IAM 定时重建可能在未就绪断言前把 Ready 改回 1。临时限制隔离 Redis 的 SET，保留 JWKS 和读取，并在退出时恢复权限；增加竞争及失败传播回归。Refs #168。
+
+* docs(console): 明确身份与租户初始化闭环设计
+
+Refs #170
+
+* feat(console): 补齐平台当前身份读取与会话隔离
+
+新增 IAM Current Session 正式契约、共享 Client 和双语身份授权展示。
+复用认证 Runtime，隔离迟到响应与错误正文，并拒绝不合法的授权快照。
+修复语言选择器遮挡登出，补充 HTTP、Runtime、页面和浏览器回归。
+
+真实 HTTPS 服务链路及 Fresh Compose 浏览器验收仍待环境就绪。
+Refs #171
+
+* docs(console): 记录当前身份真实浏览器验收结果
+
+* ci: 将开发阶段兼容范围收缩为 Chrome 与 JDK 17
+
+保留 Chromium 日常功能与视觉测试，将真实产品验收统一为 Chrome。迁移契约基线保护并保留安全及 Fresh Compose 检查，同步项目规范、ADR 和操作说明。
+
+验证：Chrome 31 项通过、6 项视觉跳过；Chromium 37 项通过；CLI 回归 32 项通过；JDK 17 根 validate 与相关静态检查通过。完整 Fresh Compose 和远端 CI 未执行。
+
+Refs #103, #161
+
+* test(console): 修正语言切换焦点并完成身份验收
+
+* feat(tenant): 实现查询创建与服务端恢复
+
+新增正式契约、原操作者恢复记录和双语 Console 页面，覆盖事务回滚、24 小时边界、并发与响应丢失。真实 Chrome/Fresh Compose 验收因本机 443 占用待完成，详见验收记录。
+
+Refs #172
+
+* fix(console): 保持路由异常隔离并完成 Tenant 产品验收
+
+在 Data Router 内复用安全错误边界，防止默认错误页暴露原异常。修正验收脚本在导航期间误匹配旧字段和下拉层的问题，补充存储检查与最终截图。
+
+最终 Fresh Compose 产品测试 34/34、重置后 Chrome 浏览器门禁与前端完整验证通过。保留 Remote 一次未分类错误及迁移独立校验入口缺失的记录。
+
+Refs #172
+
+* feat(console): 落地 A 方案租户管理界面与共享侧栏
+
+* feat(console): 重构共享登录页并添加入口角标
+
+* docs(tenant): 移除失效校验要求并完成 #172 关闭审核
+
+* feat(entitlement): 实现额度定义查询与创建激活恢复
+
+Refs #173
+
+* fix(console): 保持刷新后额度未决操作的原始身份
+
+修复 #173 审查发现，补充回滚恢复与过期语义。
+
+* fix(entitlement): 为浏览器额度激活声明 JSON 请求
+
+* fix(entitlement): 校验额度激活与恢复的空请求正文
+
+* test(console): 通过窄屏抽屉执行产品导航验收
+
+* test(console): 在抽屉打开时核验旧导航已移除
+
+* test(console): 打开抽屉后验证 Remote 品牌继承
+
+* test(console): 按主题验证品牌对比度调整后的颜色
+
+* test(console): 为品牌并发回读打开新窗口导航
+
+* docs(entitlement): 归档额度定义 Chrome 与 Fresh 验收证据
+
+* docs(entitlement): 补充现有环境恢复记录迁移与关闭核验
+
+* feat(entitlement)!: 实现 Plan 管理与最小额度规则
+
+新增 Plan 查询、创建激活页面与原操作恢复，保留历史零额度和稳定响应。通过前后端完整验证、两轴复审及生命周期 Fresh Compose 13/13；Chrome 页面验收仍受本地 443 占用阻断。
+
+BREAKING CHANGE: 新 Plan max_users 下限由 0 收紧为 1；Java CreatePlanRequest 使用 NewPlanQuotaLimit 请求元素类型。历史响应模型与既有权益保持不变。
+
+Refs #174
+
+* test(console): 完成 Plan 真实 Chrome 验收
+
+等待创建路由并限定表单，避免同名列表筛选框截获输入；保留请求状态断言及失败截图。记录 Chrome/Fresh 产品 36/36、重置后浏览器门禁通过，以及本地 V6 升级复核。
+
+Refs #174
+
+* test(design-system): 在真实浏览器验证表格操作确认
+
+CI 的 jsdom 可访问名称查询耗尽表格集成测试的 15 秒上限。迁移完整用例到独立浏览器测试，保留原断言并增强菜单可见性及 Escape 取消，避免输入状态污染既有矩阵。
+
+完整前端门禁及最终真实 Chrome 用例通过。Refs #174
+
+* feat(entitlement): 实现 Tenant 首个订阅与权威权益读取
+
+Refs #175
+
+* feat(tenant): 实现管理员初始化进度与安全恢复
+
+补齐正式读取与恢复契约、共享 Runtime 和 Tenant 详情入口，保留持久根工作流并独立回读额度。
+
+完整前后端验证通过；Chrome/Fresh 验收待受信证书与 443 环境条件满足后执行。
+
+Refs #176
+
+* test(tenant): 完成管理员初始化 Chrome Fresh 验收
+
+修正隔离管理员夹具与响应式布局等待，补充浏览器回归和真实恢复、权限拒绝、Quota 补偿验收记录。
+
+Refs #176
+
+* feat(console): 实现密码设置通知状态与重发恢复
+
+新增 IAM 权威通知读取、Tenant 独立查询和原操作者恢复，复用共享 Client 与双语详情面板。
+
+补齐无请求体重发的 JSON Content-Type 并保留原授权和幂等键，修复真实浏览器请求被 Gateway 拒绝的问题。
+
+验证包含后端集成、前端工作区、两轴审查和 Fresh Chrome 39 项产品测试；详细结果见验收记录。
+
+Refs #177
+
+* feat(console): 实现 OAuth Client 列表与详情读取
+
+关联 Issue #178。复用 IAM 平台授权、正式生成 Client 与共享 Runtime，增加筛选、游标分页和双语详情。记录自动化验证及尚未完成的真实服务验收。
+
+* fix(console): 修复 OAuth Client 完整验收发现的问题
+
+* docs(console): 汇总 Issue #170 验收并同步完成状态
+
+Refs #170
+
+* docs(entitlement): 补齐原生联调验收与端口配置说明
+
+Refs #165
+
+* docs(development): 切换原生开发默认入口并汇总验收证据
+
+统一日常启动与分层验证文档，保留旧编排的集成验收职责。记录父规格映射及启动耗时、资源和 IDE 交互的待补证据。
+
+Refs #169
+
+* docs(acceptance): 补充原生开发现场验收确认
+
+Refs #169
+---
+ .../tenant-creation-acceptance.mjs            | 211 ++++++++++++++++++
+ 1 file changed, 211 insertions(+)
+ create mode 100644 consoles/integration-test/tenant-creation-acceptance.mjs
+
+diff --git a/consoles/integration-test/tenant-creation-acceptance.mjs b/consoles/integration-test/tenant-creation-acceptance.mjs
+new file mode 100644
+index 0000000..3a89971
+--- /dev/null
++++ b/consoles/integration-test/tenant-creation-acceptance.mjs
+@@ -0,0 +1,211 @@
++import assert from 'node:assert/strict';
++import { mkdtemp, rm } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { randomUUID } from 'node:crypto';
++import { execFileSync } from 'node:child_process';
++import { chromium } from 'playwright';
++
++// 所有成功响应来自真实服务；仅在服务端提交后丢弃一次创建响应。
++export async function verifyTenantCreation({
++  rootDomain,
++  email,
++  password,
++  login,
++  selectLocale,
++  accessibility,
++  safeStorage,
++  capture,
++}) {
++  const profile = await mkdtemp(path.join(tmpdir(), 'sf-tenant-creation-'));
++  let context;
++  const launch = () =>
++    chromium.launchPersistentContext(profile, {
++      channel: 'chrome',
++      headless: true,
++      ignoreHTTPSErrors: false,
++      locale: 'zh-CN',
++      viewport: { width: 1440, height: 960 },
++    });
++  const base = `https://platform.${rootDomain}`;
++  const name = `Tenant recovery ${randomUUID()}`;
++  let creates = 0;
++  let committedId;
++  const errors = [];
++  try {
++    context = await launch();
++    let page = await context.newPage();
++    page.on('pageerror', () => errors.push('pageerror'));
++    await page.goto(base);
++    await accessibility(page, '登录 SaaS Forge');
++    await login(page, email, password, 'zh-CN');
++    await page.getByRole('link', { name: 'Tenant', exact: true }).click();
++    await accessibility(page, 'Tenant');
++    await page.getByRole('button', { name: '创建 Tenant', exact: true }).click();
++    await accessibility(page, '创建 Tenant');
++    await page
++      .getByRole('form', { name: '创建 Tenant', exact: true })
++      .getByRole('textbox', { name: '名称', exact: true })
++      .fill('Unsaved draft');
++    assert.equal(
++      await page.getByRole('textbox', { name: '名称', exact: true }).inputValue(),
++      'Unsaved draft',
++    );
++    await page.getByRole('link', { name: '首页', exact: true }).click();
++    await page.getByRole('dialog', { name: '放弃未保存的修改？' }).waitFor();
++    await page.getByRole('button', { name: '继续编辑', exact: true }).click();
++    assert.equal(
++      await page.getByRole('textbox', { name: '名称', exact: true }).inputValue(),
++      'Unsaved draft',
++    );
++    await page.getByRole('textbox', { name: '名称', exact: true }).fill(name);
++    await page.route('**/api/v1/platform/tenants', async (route) => {
++      if (route.request().method() !== 'POST') return route.continue();
++      creates += 1;
++      const response = await route.fetch();
++      assert.equal(response.status(), 201);
++      committedId = (await response.json()).id;
++      await route.abort('failed');
++    });
++    await page.getByRole('button', { name: '创建 Tenant', exact: true }).dblclick();
++    await page.getByText('创建结果待确认', { exact: true }).waitFor();
++    assert.equal(creates, 1);
++    await page.unroute('**/api/v1/platform/tenants');
++    await capture(page, 'issue-172-response-lost');
++    await safeStorage(page);
++    await page.reload();
++    await page.getByRole('textbox', { name: '名称', exact: true }).waitFor();
++    assert.equal(await page.getByRole('textbox', { name: '名称', exact: true }).inputValue(), '');
++    await page.getByRole('button', { name: '读取创建记录', exact: true }).click();
++    const attempt = page.getByRole('listitem').filter({ hasText: name });
++    await attempt.getByRole('button', { name: '查看 Tenant' }).click();
++    await accessibility(page, 'Tenant 详情');
++    await page.getByText(committedId, { exact: true }).waitFor();
++    await page.getByText('待初始化', { exact: true }).waitFor();
++    await page.reload();
++    await page.getByText(committedId, { exact: true }).waitFor();
++    await capture(page, 'issue-172-authoritative-detail');
++    await page.getByRole('button', { name: '返回 Tenant 列表', exact: true }).click();
++    await page.getByRole('textbox', { name: '名称', exact: true }).fill(name);
++    await page.getByRole('combobox', { name: '生命周期状态', exact: true }).press('Enter');
++    await page
++      .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option')
++      .filter({ hasText: '待初始化' })
++      .click();
++    const filteredResponse = page.waitForResponse((response) => {
++      const url = new URL(response.url());
++      return (
++        url.pathname === '/api/v1/platform/tenants' &&
++        url.searchParams.get('name') === name &&
++        url.searchParams.get('status') === 'PENDING'
++      );
++    });
++    await page.getByRole('button', { name: '查询', exact: true }).click();
++    assert.equal((await filteredResponse).status(), 200);
++    await page
++      .getByRole('table', { name: 'Tenant', exact: true })
++      .getByText(name, { exact: true })
++      .waitFor();
++    await selectLocale(page, 'English');
++    await page.getByRole('heading', { name: 'Tenants', exact: true }).waitFor();
++    await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: name })
++      .getByRole('button', { name: 'View Tenant' })
++      .click();
++    await page.getByRole('heading', { name: 'Tenant details', exact: true }).waitFor();
++    await page.getByText(committedId, { exact: true }).waitFor();
++    await capture(page, 'issue-172-english-detail');
++    await safeStorage(page);
++    await context.close();
++    context = await launch();
++    page = await context.newPage();
++    page.on('pageerror', () => errors.push('pageerror'));
++    await page.goto(`${base}/tenants`);
++    await page.getByRole('heading', { name: 'Tenants', exact: true }).waitFor();
++    await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: name })
++      .getByRole('button', { name: 'View Tenant' })
++      .click();
++    await page.getByText(committedId, { exact: true }).waitFor();
++    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
++    await login(page, email, password, 'en-US');
++    await page.goto(`${base}/tenants`);
++    await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: name })
++      .getByRole('button', { name: 'View Tenant' })
++      .click();
++    await page.getByText(committedId, { exact: true }).waitFor();
++    // 本次隔离项目的真实数据库拒绝写入；恢复后仍通过页面继续原操作。
++    const project = process.env.SF_ACCEPTANCE_PROJECT;
++    assert.match(project ?? '', /^saas-forge-console-\d+-\d+-[a-f0-9]{6}$/);
++    function allowTenantWrites(allow) {
++      execFileSync(
++        'docker',
++        [
++          'exec',
++          '-i',
++          `${project}-postgres-1`,
++          'psql',
++          '-U',
++          'saasforge_console_e2e',
++          '-d',
++          'tenant_access_db',
++          '-v',
++          'ON_ERROR_STOP=1',
++        ],
++        {
++          input: allow
++            ? 'GRANT INSERT ON tenants TO tenant_access_app;'
++            : 'REVOKE INSERT ON tenants FROM tenant_access_app;',
++          stdio: ['pipe', 'pipe', 'pipe'],
++        },
++      );
++    }
++    const rollbackName = `${name} rollback`;
++    await page.goto(`${base}/tenants/new`);
++    await accessibility(page, 'Create Tenant');
++    await page.getByRole('textbox', { name: 'Name', exact: true }).fill(rollbackName);
++    allowTenantWrites(false);
++    try {
++      await page.getByRole('button', { name: 'Create Tenant', exact: true }).click();
++      await page.getByText('Creation result needs confirmation', { exact: true }).waitFor();
++    } finally {
++      allowTenantWrites(true);
++    }
++    await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
++    const recoverResponse = page.waitForResponse(
++      (response) =>
++        new URL(response.url()).pathname.endsWith('/recovery') &&
++        response.request().method() === 'POST',
++    );
++    await page
++      .getByRole('listitem')
++      .filter({ hasText: rollbackName })
++      .getByRole('button', { name: 'Continue original creation' })
++      .click();
++    const recovered = await recoverResponse;
++    assert.equal(recovered.status(), 200);
++    assert.match(await recovered.request().headerValue('content-type'), /^application\/json/);
++    await page.getByRole('heading', { name: 'Tenant details', exact: true }).waitFor();
++    await page.getByText(rollbackName, { exact: true }).waitFor();
++    await capture(page, 'issue-172-replayed-after-rollback');
++    await page.goto(`${base}/tenants/new`);
++    await accessibility(page, 'Create Tenant');
++    await page.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
++    await page.getByRole('button', { name: 'Create Tenant', exact: true }).click();
++    await page.getByRole('heading', { name: 'Tenant details', exact: true }).waitFor();
++    await page.getByText(name, { exact: true }).waitFor();
++    assert.notEqual(new URL(page.url()).pathname, `/tenants/${committedId}`);
++    await safeStorage(page);
++    assert.deepEqual(errors, []);
++  } finally {
++    await context?.close();
++    await rm(profile, { recursive: true, force: true });
++  }
++}
+
+From f0f46229b8d841907f09f0895226f6eaa2eabd22 Mon Sep 17 00:00:00 2001
+From: liuhuan <crane0927@163.com>
+Date: Mon, 14 Sep 2026 16:51:52 +0800
+Subject: [PATCH 2/3] =?UTF-8?q?refactor(namespace)!:=20=E7=BB=9F=E4=B8=80?=
+ =?UTF-8?q?=E4=BD=BF=E7=94=A8=20saas.forge=20=E5=91=BD=E5=90=8D?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+同步 Java 包和源码目录、协议标识、配置键、域名、消息主题及相关脚本和文档。
+按明确授权重建现有契约基线，以完整目录树哈希限定 CI 例外，并记录 ADR 0048。
+
+BREAKING CHANGE: Java import、gRPC 服务名、事件标识和运行配置采用新名称；现有环境需单独迁移，未提供旧命名兼容层。
+---
+ consoles/integration-test/tenant-creation-acceptance.mjs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/consoles/integration-test/tenant-creation-acceptance.mjs b/consoles/integration-test/tenant-creation-acceptance.mjs
+index 3a89971..768591f 100644
+--- a/consoles/integration-test/tenant-creation-acceptance.mjs
++++ b/consoles/integration-test/tenant-creation-acceptance.mjs
+@@ -153,7 +153,7 @@ export async function verifyTenantCreation({
+           `${project}-postgres-1`,
+           'psql',
+           '-U',
+-          'saasforge_console_e2e',
++          'saas.forge_console_e2e',
+           '-d',
+           'tenant_access_db',
+           '-v',
+
+From 8d4c5707e410a5de6220ab8f88a1c5b912590b54 Mon Sep 17 00:00:00 2001
+From: liuhuan <crane0927@163.com>
+Date: Tue, 15 Sep 2026 09:50:42 +0800
+Subject: [PATCH 3/3] =?UTF-8?q?refactor(consoles):=20=E5=88=87=E6=8D=A2?=
+ =?UTF-8?q?=E6=AD=A3=E5=BC=8F=E4=B8=9A=E5=8A=A1=E9=A1=B5=E9=9D=A2=E8=87=B3?=
+ =?UTF-8?q?=20Vue=20=E5=B9=B6=E6=B8=85=E9=99=A4=E6=97=A7=20UI?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+基于 Soybean Element Plus 迁移平台端、租户端与共享认证流程，保留类型化 Client 和原操作恢复边界。移除 React UI、旧共享壳及专属依赖，更新设计文档、浏览器回归和视觉基线。
+
+本地类型、Lint、构建与相关测试通过；真实后端、四域联调及 Fresh Compose 未执行。
+---
+ .../tenant-creation-acceptance.mjs            |  38 ++---
+ .../platform-console/src/TenantCreate.vue     |  72 ++++++++
+ .../platform-console/src/TenantDetails.vue    |  87 ++++++++++
+ .../src/components/OperationRecovery.vue      | 160 ++++++++++++++++++
+ 4 files changed, 337 insertions(+), 20 deletions(-)
+ create mode 100644 consoles/platform-console/src/TenantCreate.vue
+ create mode 100644 consoles/platform-console/src/TenantDetails.vue
+ create mode 100644 consoles/shared/admin/src/components/OperationRecovery.vue
+
+diff --git a/consoles/integration-test/tenant-creation-acceptance.mjs b/consoles/integration-test/tenant-creation-acceptance.mjs
+index 768591f..4b7d3a0 100644
+--- a/consoles/integration-test/tenant-creation-acceptance.mjs
++++ b/consoles/integration-test/tenant-creation-acceptance.mjs
+@@ -39,26 +39,27 @@ export async function verifyTenantCreation({
+     await page.goto(base);
+     await accessibility(page, '登录 SaaS Forge');
+     await login(page, email, password, 'zh-CN');
+-    await page.getByRole('link', { name: 'Tenant', exact: true }).click();
++    await page.getByRole('menuitem', { name: 'Tenant', exact: true }).click();
+     await accessibility(page, 'Tenant');
+     await page.getByRole('button', { name: '创建 Tenant', exact: true }).click();
+     await accessibility(page, '创建 Tenant');
++    const drawer = page.getByRole('dialog', { name: '创建 Tenant', exact: true });
+     await page
+       .getByRole('form', { name: '创建 Tenant', exact: true })
+       .getByRole('textbox', { name: '名称', exact: true })
+       .fill('Unsaved draft');
+     assert.equal(
+-      await page.getByRole('textbox', { name: '名称', exact: true }).inputValue(),
++      await drawer.getByRole('textbox', { name: '名称', exact: true }).inputValue(),
+       'Unsaved draft',
+     );
+-    await page.getByRole('link', { name: '首页', exact: true }).click();
+-    await page.getByRole('dialog', { name: '放弃未保存的修改？' }).waitFor();
++    await page.keyboard.press('Escape');
++    await page.getByRole('dialog', { name: '离开页面' }).waitFor();
+     await page.getByRole('button', { name: '继续编辑', exact: true }).click();
+     assert.equal(
+-      await page.getByRole('textbox', { name: '名称', exact: true }).inputValue(),
++      await drawer.getByRole('textbox', { name: '名称', exact: true }).inputValue(),
+       'Unsaved draft',
+     );
+-    await page.getByRole('textbox', { name: '名称', exact: true }).fill(name);
++    await drawer.getByRole('textbox', { name: '名称', exact: true }).fill(name);
+     await page.route('**/api/v1/platform/tenants', async (route) => {
+       if (route.request().method() !== 'POST') return route.continue();
+       creates += 1;
+@@ -67,17 +68,17 @@ export async function verifyTenantCreation({
+       committedId = (await response.json()).id;
+       await route.abort('failed');
+     });
+-    await page.getByRole('button', { name: '创建 Tenant', exact: true }).dblclick();
++    await drawer.getByRole('button', { name: '创建 Tenant', exact: true }).dblclick();
+     await page.getByText('创建结果待确认', { exact: true }).waitFor();
+     assert.equal(creates, 1);
+     await page.unroute('**/api/v1/platform/tenants');
+     await capture(page, 'issue-172-response-lost');
+     await safeStorage(page);
+     await page.reload();
+-    await page.getByRole('textbox', { name: '名称', exact: true }).waitFor();
+-    assert.equal(await page.getByRole('textbox', { name: '名称', exact: true }).inputValue(), '');
+-    await page.getByRole('button', { name: '读取创建记录', exact: true }).click();
+-    const attempt = page.getByRole('listitem').filter({ hasText: name });
++    await drawer.getByRole('textbox', { name: '名称', exact: true }).waitFor();
++    assert.equal(await drawer.getByRole('textbox', { name: '名称', exact: true }).inputValue(), '');
++    await drawer.getByRole('button', { name: '读取创建记录', exact: true }).click();
++    const attempt = drawer.getByRole('row').filter({ hasText: name });
+     await attempt.getByRole('button', { name: '查看 Tenant' }).click();
+     await accessibility(page, 'Tenant 详情');
+     await page.getByText(committedId, { exact: true }).waitFor();
+@@ -88,10 +89,7 @@ export async function verifyTenantCreation({
+     await page.getByRole('button', { name: '返回 Tenant 列表', exact: true }).click();
+     await page.getByRole('textbox', { name: '名称', exact: true }).fill(name);
+     await page.getByRole('combobox', { name: '生命周期状态', exact: true }).press('Enter');
+-    await page
+-      .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option')
+-      .filter({ hasText: '待初始化' })
+-      .click();
++    await page.locator('.el-select-dropdown__item:visible').filter({ hasText: '待初始化' }).click();
+     const filteredResponse = page.waitForResponse((response) => {
+       const url = new URL(response.url());
+       return (
+@@ -103,14 +101,14 @@ export async function verifyTenantCreation({
+     await page.getByRole('button', { name: '查询', exact: true }).click();
+     assert.equal((await filteredResponse).status(), 200);
+     await page
+-      .getByRole('table', { name: 'Tenant', exact: true })
++      .getByRole('region', { name: 'Tenant', exact: true })
+       .getByText(name, { exact: true })
+       .waitFor();
+     await selectLocale(page, 'English');
+     await page.getByRole('heading', { name: 'Tenants', exact: true }).waitFor();
+     await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: name })
+       .getByRole('button', { name: 'View Tenant' })
+       .click();
+@@ -126,7 +124,7 @@ export async function verifyTenantCreation({
+     await page.getByRole('heading', { name: 'Tenants', exact: true }).waitFor();
+     await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: name })
+       .getByRole('button', { name: 'View Tenant' })
+       .click();
+@@ -136,7 +134,7 @@ export async function verifyTenantCreation({
+     await page.goto(`${base}/tenants`);
+     await page.getByRole('button', { name: 'Read creation records', exact: true }).click();
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: name })
+       .getByRole('button', { name: 'View Tenant' })
+       .click();
+@@ -185,7 +183,7 @@ export async function verifyTenantCreation({
+         response.request().method() === 'POST',
+     );
+     await page
+-      .getByRole('listitem')
++      .getByRole('row')
+       .filter({ hasText: rollbackName })
+       .getByRole('button', { name: 'Continue original creation' })
+       .click();
+diff --git a/consoles/platform-console/src/TenantCreate.vue b/consoles/platform-console/src/TenantCreate.vue
+new file mode 100644
+index 0000000..9dfbfb1
+--- /dev/null
++++ b/consoles/platform-console/src/TenantCreate.vue
+@@ -0,0 +1,72 @@
++<script setup lang="ts">
++import { ref } from 'vue';
++import { useRouter } from 'vue-router';
++import { ElButton, ElDrawer, ElForm, ElFormItem, ElInput } from 'element-plus';
++import { Problem, useFormExitGuard, useMutation } from '@saas-forge/admin';
++import { usePlatform } from './use-platform';
++import Recovery from './Recovery.vue';
++const { client, t } = usePlatform();
++const router = useRouter();
++const name = ref('');
++const invalid = ref(false);
++const done = ref(false);
++const mutation = useMutation();
++useFormExitGuard(
++  () => !done.value && !mutation.busy.value && !mutation.unknown.value && name.value !== '',
++);
++async function submit() {
++  invalid.value = name.value.trim() === '' || name.value.length > 200;
++  if (invalid.value) return;
++  const result = await mutation.run((signal) =>
++    client.createTenant({ request: { displayName: name.value }, signal }),
++  );
++  if (result?.ok) {
++    done.value = true;
++    await router.replace('/tenants/' + result.value.id);
++  }
++}
++function close() {
++  void router.push('/tenants');
++}
++</script>
++<template>
++  <ElDrawer
++    :model-value="true"
++    :title="t('tenantCreate')"
++    class="console-drawer"
++    :before-close="close"
++    destroy-on-close
++  >
++    <ElForm :aria-label="t('tenantCreate')" label-position="top" @submit.prevent="submit"
++      ><ElFormItem :label="t('tenantName')" :error="invalid ? t('tenantNameError') : undefined"
++        ><ElInput
++          v-model="name"
++          :aria-label="t('tenantName')"
++          :disabled="mutation.busy.value || mutation.unknown.value"
++          required
++          maxlength="200"
++      /></ElFormItem>
++      <div class="console-actions">
++        <ElButton
++          type="primary"
++          native-type="submit"
++          :loading="mutation.busy.value"
++          :disabled="mutation.unknown.value"
++          >{{ t('tenantCreate') }}</ElButton
++        >
++      </div></ElForm
++    >
++    <Problem
++      :code="mutation.problem.value"
++      :warning="mutation.unknown.value"
++      :title="mutation.unknown.value ? t('tenantUnknown') : undefined"
++    />
++    <Recovery
++      kind="tenant"
++      @view="
++        done = true;
++        router.replace('/tenants/' + $event);
++      "
++    />
++  </ElDrawer>
++</template>
+diff --git a/consoles/platform-console/src/TenantDetails.vue b/consoles/platform-console/src/TenantDetails.vue
+new file mode 100644
+index 0000000..0750ad7
+--- /dev/null
++++ b/consoles/platform-console/src/TenantDetails.vue
+@@ -0,0 +1,87 @@
++<script setup lang="ts">
++import { PageHeading } from '@saas-forge/admin';
++import { ref, computed } from 'vue';
++import { useRouter, useRoute } from 'vue-router';
++import { ElButton, ElCard, ElDescriptions, ElDescriptionsItem, ElTooltip } from 'element-plus';
++import { Back } from '@element-plus/icons-vue';
++import { useRead, Problem } from '@saas-forge/admin';
++import { usePlatform } from './use-platform';
++import SubscriptionSection from './SubscriptionSection.vue';
++import InitializationSection from './InitializationSection.vue';
++import NotificationSection from './NotificationSection.vue';
++import LifecycleSection from './LifecycleSection.vue';
++const { client, t, locale } = usePlatform();
++const route = useRoute();
++const router = useRouter();
++const id = String(route.params.id);
++const revision = ref(0);
++const tenant = useRead(
++  (signal) => client.getTenant(id, signal),
++  () => revision.value,
++  true,
++);
++const subscription = useRead(
++  (signal) => client.getTenantSubscription(id, signal),
++  () => revision.value,
++  true,
++);
++const effective = computed(
++  () =>
++    tenant.ready.value && subscription.ready.value && subscription.value.value?.effective === true,
++);
++const refresh = () => {
++  revision.value++;
++};
++</script>
++<template>
++  <PageHeading :title="t('tenantDetail')" />
++  <div class="console-actions">
++    <ElTooltip :content="t('tenantBack')"
++      ><ElButton
++        :icon="Back"
++        :aria-label="t('tenantBack')"
++        @click="router.push('/tenants')" /></ElTooltip
++    ><ElButton :disabled="tenant.loading.value || subscription.loading.value" @click="refresh">{{
++      t('tenantRetry')
++    }}</ElButton>
++  </div>
++  <ElCard shadow="never"
++    ><Problem :code="tenant.problem.value" /><ElDescriptions
++      v-if="tenant.value.value"
++      :column="1"
++      border
++    >
++      <ElDescriptionsItem :label="t('tenantName')">{{
++        tenant.value.value.displayName
++      }}</ElDescriptionsItem
++      ><ElDescriptionsItem :label="t('tenantId')">{{ id }}</ElDescriptionsItem
++      ><ElDescriptionsItem :label="t('tenantStatus')">{{
++        tenant.value.value.status
++      }}</ElDescriptionsItem
++      ><ElDescriptionsItem :label="t('tenantExpiresAt')">{{
++        tenant.value.value.expiresAt?.toLocaleString(locale) ?? t('tenantNoExpiry')
++      }}</ElDescriptionsItem
++      ><ElDescriptionsItem :label="t('tenantCreatedAt')">{{
++        tenant.value.value.createdAt.toLocaleString(locale)
++      }}</ElDescriptionsItem>
++    </ElDescriptions></ElCard
++  >
++  <SubscriptionSection
++    v-if="tenant.value.value"
++    :tenant="tenant.value.value"
++    :tenant-known="tenant.ready.value"
++    :subscription="subscription.value.value"
++    :read-problem="subscription.problem.value"
++    :loading="subscription.loading.value"
++    :revision="revision"
++    @changed="refresh"
++  />
++  <InitializationSection
++    :id="id"
++    :subscription-effective="effective"
++    :revision="revision"
++    @changed="refresh"
++  />
++  <NotificationSection :id="id" :revision="revision" />
++  <LifecycleSection :id="id" :revision="revision" @changed="refresh" />
++</template>
+diff --git a/consoles/shared/admin/src/components/OperationRecovery.vue b/consoles/shared/admin/src/components/OperationRecovery.vue
+new file mode 100644
+index 0000000..58616dd
+--- /dev/null
++++ b/consoles/shared/admin/src/components/OperationRecovery.vue
+@@ -0,0 +1,160 @@
++<script
++  setup
++  lang="ts"
++  generic="
++    T extends {
++      id: string;
++      state: 'COMMITTED' | 'PROCESSING' | 'NOT_COMMITTED' | 'UNKNOWN';
++      createdAt: Date;
++      canReplay: boolean;
++    }
++  "
++>
++import { onScopeDispose, ref, shallowRef, toRaw } from 'vue';
++import { ElButton, ElCard, ElTable, ElTableColumn, ElTag } from 'element-plus';
++import type { ConsoleApiResult } from '@saas-forge/app-runtime';
++import { computed } from 'vue';
++import { createTranslator } from '@saas-forge/i18n';
++import { recoveryMessages } from '../messages/recovery';
++import { useConsole } from '../runtime/context';
++import Problem from './Problem.vue';
++const props = withDefaults(
++  defineProps<{
++    kind?: 'creation' | 'plan' | 'quota' | 'subscription';
++    load: (input: {
++      cursor?: string;
++      signal: AbortSignal;
++    }) => Promise<
++      ConsoleApiResult<{ items: readonly T[]; hasMore: boolean; nextCursor: string | null }>
++    >;
++    replay: (operation: T, signal: AbortSignal) => Promise<ConsoleApiResult<T>>;
++    label: (operation: T) => string;
++    resourceId: (operation: T) => string | null | undefined;
++  }>(),
++  { kind: 'creation' },
++);
++const emit = defineEmits<{ view: [id: string] }>();
++const { locale } = useConsole();
++const translator = computed(() =>
++  createTranslator({
++    namespace: '@saas-forge/admin/recovery',
++    locale: locale.value,
++    messages: recoveryMessages,
++  }),
++);
++const t = (key: keyof (typeof recoveryMessages)['zh-CN']) => translator.value.translate(key);
++const rows = shallowRef<readonly T[]>();
++const nextCursor = ref<string | null>(null);
++const cursors = ref<(string | undefined)[]>([undefined]);
++const busy = ref(false);
++const problem = ref<string>();
++let controller: AbortController | undefined;
++onScopeDispose(() => controller?.abort());
++const operationText = (row: T) => {
++  const value = props.label(row);
++  return (props.kind === 'plan' || props.kind === 'quota') &&
++    (value === 'CREATE' || value === 'ACTIVATE')
++    ? t(`${props.kind}Recovery${value === 'CREATE' ? 'Create' : 'Activate'}`)
++    : value;
++};
++const stateText = (state: T['state']) => t(`creationRecovery${state}`);
++const text = (suffix: 'Title' | 'Read' | 'Continue' | 'View' | 'Empty' | 'Previous' | 'Next') =>
++  t(`${props.kind}Recovery${suffix}`);
++async function read(next = cursors.value) {
++  if (busy.value) return;
++  controller = new AbortController();
++  busy.value = true;
++  problem.value = undefined;
++  try {
++    const result = await props.load({ cursor: next.at(-1), signal: controller.signal });
++    if (controller.signal.aborted) return;
++    if (result.ok) {
++      rows.value = result.value.items;
++      cursors.value = next;
++      nextCursor.value = result.value.hasMore ? result.value.nextCursor : null;
++      if (result.value.hasMore && !result.value.nextCursor)
++        problem.value = 'INVALID_SERVICE_RESPONSE';
++    } else problem.value = result.problem.code;
++  } catch {
++    if (!controller.signal.aborted) problem.value = 'NETWORK_UNAVAILABLE';
++  } finally {
++    if (!controller.signal.aborted) {
++      busy.value = false;
++      controller = undefined;
++    }
++  }
++}
++async function recover(row: T) {
++  if (busy.value || row.state !== 'NOT_COMMITTED' || !row.canReplay) return;
++  controller = new AbortController();
++  busy.value = true;
++  problem.value = undefined;
++  let committedId: string | null | undefined;
++  try {
++    const result = await props.replay(toRaw(row), controller.signal);
++    if (controller.signal.aborted) return;
++    if (!result.ok) {
++      problem.value = result.problem.code;
++      return;
++    }
++    if (result.value.state === 'COMMITTED') committedId = props.resourceId(result.value);
++  } catch {
++    if (!controller.signal.aborted) problem.value = 'NETWORK_UNAVAILABLE';
++    return;
++  } finally {
++    if (!controller.signal.aborted) {
++      busy.value = false;
++      controller = undefined;
++    }
++  }
++  if (committedId) emit('view', committedId);
++  else await read();
++}
++</script>
++<template>
++  <ElCard shadow="never">
++    <template #header
++      ><div class="flex items-center justify-between gap-16px">
++        <h2>{{ text('Title') }}</h2>
++        <ElButton :loading="busy" @click="read()">{{ text('Read') }}</ElButton>
++      </div></template
++    >
++    <Problem :code="problem" />
++    <p v-if="rows?.length === 0" role="status">{{ text('Empty') }}</p>
++    <ElTable v-else-if="rows" :data="[...rows]" row-key="id" :aria-label="text('Title')">
++      <ElTableColumn :label="text('Title')"
++        ><template #default="{ row }"
++          >{{ operationText(row) }} · {{ row.createdAt.toLocaleString(locale) }}</template
++        ></ElTableColumn
++      >
++      <ElTableColumn
++        ><template #default="{ row }"
++          ><ElTag>{{ stateText(row.state) }}</ElTag></template
++        ></ElTableColumn
++      >
++      <ElTableColumn align="right"
++        ><template #default="{ row }"
++          ><ElButton
++            v-if="row.state === 'COMMITTED' && resourceId(row)"
++            :disabled="busy"
++            @click="emit('view', resourceId(row)!)"
++            >{{ text('View') }}</ElButton
++          ><ElButton
++            v-else-if="row.state === 'NOT_COMMITTED' && row.canReplay"
++            :disabled="busy"
++            @click="recover(row)"
++            >{{ text('Continue') }}</ElButton
++          ></template
++        ></ElTableColumn
++      >
++    </ElTable>
++    <div v-if="rows" class="console-actions">
++      <ElButton :disabled="busy || cursors.length < 2" @click="read(cursors.slice(0, -1))">{{
++        text('Previous')
++      }}</ElButton
++      ><ElButton :disabled="busy || !nextCursor" @click="read([...cursors, nextCursor!])">{{
++        text('Next')
++      }}</ElButton>
++    </div>
++  </ElCard>
++</template>

@@ -1,4 +1,58 @@
 const local: App.I18n.Schema = {
+  tenants: {
+    title: 'Tenants',
+    create: 'Create tenant',
+    closeCreate: 'Close create tenant drawer',
+    name: 'Tenant name',
+    status: 'Status',
+    createdAt: 'Created at',
+    updatedAt: 'Updated at',
+    expiresAt: 'Expires at',
+    noExpiry: 'No expiry',
+    id: 'Tenant ID',
+    detail: 'Tenant details',
+    view: 'View details',
+    back: 'Back to tenants',
+    filters: 'Filter tenants',
+    search: 'Search',
+    reset: 'Reset',
+    empty: 'No matching tenants',
+    loading: 'Loading…',
+    previous: 'Previous',
+    next: 'Next',
+    page: 'Page {page}',
+    recovery: 'My creation records',
+    check: 'Check original operation',
+    continue: 'Continue original operation',
+    noCreations: 'No creation records',
+    unchecked: 'Records have not been fully checked. Creation and recovery are unavailable.',
+    recoveryHint:
+      'Only your own creation records are shown. Continue the original operation only when the server permits it; this never starts a new creation.',
+    unknown:
+      'The creation result is unknown. Check the original operation. A missing record never permits a new creation.',
+    leaveTitle: 'Leave creation form',
+    leaveWarning:
+      'Unsaved input will be lost. Sent operations are not cancelled. If the result is unknown, return to check the original operation instead of creating again.',
+    leave: 'Leave',
+    states: {
+      PENDING: 'Pending initialization',
+      ACTIVE: 'Active',
+      SUSPENDED: 'Suspended',
+      CLOSED: 'Closed',
+      COMMITTED: 'Completed',
+      PROCESSING: 'Processing',
+      NOT_COMMITTED: 'Not committed',
+      UNKNOWN: 'Unknown'
+    },
+    errors: {
+      unavailable: 'The service or network is unavailable. Check the connection and retry reading.',
+      invalid: 'The service returned incomplete or inconsistent records. Related actions are locked.',
+      forbidden: 'This session cannot perform the operation. Recheck your session and permissions.',
+      notFound: 'The record was not found. This does not permit a new creation.',
+      nameInvalid: 'Enter a name of 1–200 characters, not only whitespace.',
+      stale: 'The session or request changed. Read again.'
+    }
+  },
   console: {
     setupTitle: 'Establish your password',
     setupIntro:
@@ -208,6 +262,8 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    tenants: 'Tenants',
+    'tenant-detail': 'Tenant details',
     workbench: 'Company workspace',
     login: 'Login',
     403: 'No Permission',

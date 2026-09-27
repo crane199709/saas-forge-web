@@ -11,6 +11,8 @@ export function setupElegantRouter() {
     customRoutes: {
       names: [
         'workbench',
+        'tenants',
+        'tenant-detail',
         'exception_403',
         'exception_404',
         'exception_500',
@@ -27,6 +29,8 @@ export function setupElegantRouter() {
     },
     routePathTransformer(routeName, routePath) {
       const key = routeName as RouteKey;
+
+      if (key === 'tenant-detail') return '/tenants/:id';
 
       if (key === 'login') {
         const modules: UnionKey.LoginModule[] = ['pwd-login', 'code-login', 'register', 'reset-pwd', 'bind-wechat'];

@@ -292,6 +292,57 @@ declare namespace App {
     };
 
     type Schema = {
+      tenants: {
+        title: string;
+        create: string;
+        closeCreate: string;
+        name: string;
+        status: string;
+        createdAt: string;
+        updatedAt: string;
+        expiresAt: string;
+        noExpiry: string;
+        id: string;
+        detail: string;
+        view: string;
+        back: string;
+        filters: string;
+        search: string;
+        reset: string;
+        empty: string;
+        loading: string;
+        previous: string;
+        next: string;
+        page: string;
+        recovery: string;
+        check: string;
+        continue: string;
+        noCreations: string;
+        unchecked: string;
+        recoveryHint: string;
+        unknown: string;
+        leaveTitle: string;
+        leaveWarning: string;
+        leave: string;
+        states: {
+          PENDING: string;
+          ACTIVE: string;
+          SUSPENDED: string;
+          CLOSED: string;
+          COMMITTED: string;
+          PROCESSING: string;
+          NOT_COMMITTED: string;
+          UNKNOWN: string;
+        };
+        errors: {
+          unavailable: string;
+          invalid: string;
+          forbidden: string;
+          notFound: string;
+          nameInvalid: string;
+          stale: string;
+        };
+      };
       console: {
         company: string;
         chooseWorkspace: string;

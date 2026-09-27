@@ -18,6 +18,8 @@ declare module "@elegant-router/types" {
     "root": "/";
     "not-found": "/:pathMatch(.*)*";
     "workbench": "/workbench";
+    "tenants": "/tenants";
+    "tenant-detail": "/tenants/:id";
     "exception": "/exception";
     "exception_403": "/exception/403";
     "exception_404": "/exception/404";
@@ -109,6 +111,8 @@ declare module "@elegant-router/types" {
     | "root"
     | "not-found"
     | "workbench"
+    | "tenants"
+    | "tenant-detail"
     | "exception"
     | "exception_403"
     | "exception_404"
@@ -158,6 +162,8 @@ declare module "@elegant-router/types" {
     | "root"
     | "not-found"
     | "workbench"
+    | "tenants"
+    | "tenant-detail"
     | "exception"
     | "document"
   >;
@@ -221,6 +227,8 @@ declare module "@elegant-router/types" {
     | "root"
     | "not-found"
     | "workbench"
+    | "tenants"
+    | "tenant-detail"
     | "exception_403"
     | "exception_404"
     | "exception_500"

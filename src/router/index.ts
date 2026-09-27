@@ -51,6 +51,24 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/tenants',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'tenants',
+          component: () => import('@/pages/tenants/index.vue'),
+          meta: { title: 'Tenants', i18nKey: 'tenants.title' }
+        },
+        {
+          path: ':id',
+          name: 'tenant-detail',
+          component: () => import('@/pages/tenants/detail.vue'),
+          meta: { title: 'Tenant details', i18nKey: 'tenants.detail' }
+        }
+      ]
+    },
+    {
       path: '/workbench',
       component: () => import('@/layouts/base-layout/index.vue'),
       children: [
@@ -84,16 +102,21 @@ export async function setupRouter(app: App) {
       consoleState.value.status === 'authenticated' ? consoleState.value.snapshot?.activeContext?.type : undefined;
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
     if (!active && to.name !== 'login') return '/login';
-    if (active && (to.name === 'login' || to.path !== home)) return home;
+    const allowed = active === 'PLATFORM' ? ['home', 'tenants', 'tenant-detail'] : ['workbench'];
+    if (active && !allowed.includes(String(to.name))) return home;
     return true;
   });
   watch(consoleState, state => {
+    // 首次导航由 beforeEach 处理，避免恢复会话时把深链接抢先改为首页。
+    if (!router.currentRoute.value.matched.length) return;
     // Remove protected content as soon as a transition starts; the page also checks state directly.
     if (state.status === 'loading' || state.status === 'checking') return;
     const active = state.status === 'authenticated' ? state.snapshot?.activeContext?.type : undefined;
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
-    if (!['password-setup', 'gateway-connection'].includes(String(router.currentRoute.value.name)))
-      router.replace(active ? home : '/login');
+    const name = String(router.currentRoute.value.name);
+    if (['password-setup', 'gateway-connection'].includes(name)) return;
+    const allowed = active === 'PLATFORM' ? ['home', 'tenants', 'tenant-detail'] : ['workbench'];
+    if (!active || !allowed.includes(name)) router.replace(active ? home : '/login');
   });
   await router.isReady();
 }

@@ -104,7 +104,19 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
               routeKey: tenant ? 'workbench' : 'home',
               routePath: tenant ? '/workbench' : '/home',
               icon: () => h('span', { class: 'i-mdi-home-outline' })
-            }
+            },
+            ...(!tenant
+              ? [
+                  {
+                    key: 'tenants',
+                    label: $t('tenants.title'),
+                    i18nKey: 'tenants.title' as const,
+                    routeKey: 'tenants' as const,
+                    routePath: '/tenants' as const,
+                    icon: () => h('span', { class: 'i-mdi-domain' })
+                  }
+                ]
+              : [])
           ]
         : [];
     },
