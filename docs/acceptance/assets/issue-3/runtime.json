@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-09-27T12:13:55.472Z",
+  "backendSourceHead": "da4567c859b200d375b4eed6d69e9d557cf60048",
+  "services": [
+    {
+      "pid": 83213,
+      "application": "io.saas.forge.iam.IamServiceApplication",
+      "javaVersion": "java version \"17.0.12\" 2024-07-16 LTS"
+    },
+    {
+      "pid": 83216,
+      "application": "io.saas.forge.gateway.GatewayApplication",
+      "javaVersion": "java version \"17.0.12\" 2024-07-16 LTS"
+    },
+    {
+      "pid": 83240,
+      "application": "io.saas.forge.audit.AuditServiceApplication",
+      "javaVersion": "java version \"17.0.12\" 2024-07-16 LTS"
+    },
+    {
+      "pid": 83252,
+      "application": "io.saas.forge.tenantaccess.TenantAccessServiceApplication",
+      "javaVersion": "java version \"17.0.12\" 2024-07-16 LTS"
+    },
+    {
+      "pid": 83276,
+      "application": "io.saas.forge.entitlement.EntitlementServiceApplication",
+      "javaVersion": "java version \"17.0.12\" 2024-07-16 LTS"
+    }
+  ],
+  "limitation": "Existing native processes were not restarted. Source HEAD identifies checkout only, not the loaded JVM artifact."
+}

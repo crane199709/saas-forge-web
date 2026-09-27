@@ -41,17 +41,21 @@ async function resume(id: string) {
     >
       <ElTableColumn :label="$t('entitlements.operation')" min-width="130">
         <template #default="{ row }">
-          {{ $t(`entitlements.actions.${row.operation as 'CREATE' | 'ACTIVATE'}`) }}
+          <template v-if="row.operation">
+            {{ $t(`entitlements.actions.${row.operation as 'CREATE' | 'ACTIVATE'}`) }}
+          </template>
         </template>
       </ElTableColumn>
       <ElTableColumn :label="$t('entitlements.target')" min-width="180">
         <template #default="{ row }">{{ row.code || resourceId(row) || 'max_users' }}</template>
       </ElTableColumn>
       <ElTableColumn :label="$t('tenants.createdAt')" min-width="210">
-        <template #default="{ row }">{{ instant(row.createdAt) }}</template>
+        <template #default="{ row }">{{ row.createdAt ? instant(row.createdAt) : '' }}</template>
       </ElTableColumn>
       <ElTableColumn :label="$t('tenants.status')" min-width="120">
-        <template #default="{ row }">{{ $t(`tenants.states.${row.state as OperationView['state']}`) }}</template>
+        <template #default="{ row }">
+          <template v-if="row.state">{{ $t(`tenants.states.${row.state as OperationView['state']}`) }}</template>
+        </template>
       </ElTableColumn>
       <ElTableColumn :label="$t('common.action')" align="right" fixed="right" width="160">
         <template #default="{ row }">

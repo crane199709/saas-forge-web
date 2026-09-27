@@ -118,11 +118,13 @@ onUnmounted(() => controller?.abort());
         <ElTableColumn v-if="kind === 'plan'" prop="displayName" :label="$t('entitlements.name')" min-width="180" />
         <ElTableColumn :label="$t('tenants.status')" min-width="100">
           <template #default="{ row }">
-            {{ $t(`entitlements.states.${row.status as 'DRAFT' | 'ACTIVE' | 'RETIRED'}`) }}
+            <template v-if="row.status">
+              {{ $t(`entitlements.states.${row.status as 'DRAFT' | 'ACTIVE' | 'RETIRED'}`) }}
+            </template>
           </template>
         </ElTableColumn>
         <ElTableColumn :label="$t('tenants.createdAt')" min-width="210">
-          <template #default="{ row }">{{ instant(row.createdAt) }}</template>
+          <template #default="{ row }">{{ row.createdAt ? instant(row.createdAt) : '' }}</template>
         </ElTableColumn>
         <ElTableColumn :label="$t('common.action')" align="right" width="130">
           <template #default="{ row }">
