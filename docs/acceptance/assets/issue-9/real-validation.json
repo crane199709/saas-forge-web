@@ -1,0 +1,141 @@
+{
+  "runId": "issue9-real-1790578495228",
+  "scenarios": [
+    {
+      "label": "create committed before delivery loss",
+      "tokenStatus": 200,
+      "consumeStatus": 200
+    },
+    {
+      "label": "creation replacement valid",
+      "tokenStatus": 200,
+      "consumeStatus": 200
+    },
+    {
+      "label": "creation replaced Secret rejected",
+      "tokenStatus": 401,
+      "code": "CLIENT_CREDENTIALS_INVALID"
+    },
+    {
+      "label": "second replacement rejected by backend",
+      "status": 409,
+      "code": "CLIENT_SECRET_RECOVERY_NOT_ALLOWED"
+    },
+    {
+      "label": "rotation overlap unchanged",
+      "before": "2026-09-29T06:55:06.829Z",
+      "after": "2026-09-29T06:55:06.829Z"
+    },
+    {
+      "label": "rotation replacement valid",
+      "tokenStatus": 200,
+      "consumeStatus": 200
+    },
+    {
+      "label": "rotation replaced Secret rejected",
+      "tokenStatus": 401,
+      "code": "CLIENT_CREDENTIALS_INVALID"
+    },
+    {
+      "label": "stable Secret remains valid in original overlap",
+      "tokenStatus": 200,
+      "consumeStatus": 200
+    },
+    {
+      "label": "committed recovery response lost, reload remains locked and no Secret stored",
+      "passed": true
+    }
+  ],
+  "created": [
+    "01a0e6cb-a781-7861-82c0-472953a2cf39",
+    "01a0e6cb-b63f-7f10-a02d-7e58f296624f",
+    "01a0e6cb-c916-79d8-88c5-ab47017c7316"
+  ],
+  "cleanup": [
+    {
+      "clientId": "01a0e6cb-a781-7861-82c0-472953a2cf39",
+      "revoked": true
+    },
+    {
+      "clientId": "01a0e6cb-b63f-7f10-a02d-7e58f296624f",
+      "revoked": true
+    },
+    {
+      "clientId": "01a0e6cb-c916-79d8-88c5-ab47017c7316",
+      "revoked": true
+    }
+  ],
+  "expectedLosses": [
+    {
+      "stage": "lost-create",
+      "path": "/api/v1/platform/oauth-clients",
+      "status": 201
+    },
+    {
+      "stage": "lost-rotate",
+      "path": "/api/v1/platform/oauth-clients/01a0e6cb-b63f-7f10-a02d-7e58f296624f/secret-rotations",
+      "status": 200
+    },
+    {
+      "stage": "lost-recovery-create",
+      "path": "/api/v1/platform/oauth-clients",
+      "status": 201
+    },
+    {
+      "stage": "lost-recovery",
+      "path": "/api/v1/platform/oauth-clients/01a0e6cb-c916-79d8-88c5-ab47017c7316/secret-issuance-recoveries",
+      "status": 200
+    }
+  ],
+  "problems": [],
+  "browserErrors": [],
+  "backend": "local running services",
+  "receiver": "127.0.0.1:8096",
+  "chrome": "154.0.8037.57",
+  "passed": true,
+  "logout": true,
+  "frontendBaseline": "ea19959",
+  "backendBaseline": "da4567c859b200d375b4eed6d69e9d557cf60048",
+  "jdk": "Oracle 17.0.12",
+  "receiverStopped": true,
+  "missing": [
+    "second platform administrator real rejection",
+    "isolated ten-minute expiry",
+    "stable Secret rejection after original overlap deadline"
+  ],
+  "receiverJarSha256": "0518ed2d39665c6564cd81ff450a0c16370168f80d26c0b34a6b290ceabcae61",
+  "priorAttemptCleanup": [
+    {
+      "runId": "issue9-real-1790578350741",
+      "cleanup": [
+        {
+          "clientId": "01a0e6c9-71cd-75d1-96df-16add88442d9",
+          "revoked": true
+        },
+        {
+          "clientId": "01a0e6c9-84c7-70f8-ad8f-c2f964242f84",
+          "revoked": true
+        }
+      ],
+      "logout": true
+    },
+    {
+      "runId": "issue9-real-1790578429483",
+      "cleanup": [
+        {
+          "clientId": "01a0e6ca-a83d-71ed-8c85-8103b0674d93",
+          "revoked": true
+        },
+        {
+          "clientId": "01a0e6ca-b459-7dea-ab7b-8dc59605b7f0",
+          "revoked": true
+        },
+        {
+          "clientId": "01a0e6ca-caa1-705b-b4d3-7d5b980bac06",
+          "revoked": true
+        }
+      ],
+      "logout": true
+    }
+  ]
+}
