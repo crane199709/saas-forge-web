@@ -127,11 +127,21 @@ async function verify(handoffPath, outputDirectory) {
     report.frontend = { ...report.frontend, versionSource: 'served-html-provenance-matched' };
     passed('served-frontend-and-client-match-checkout');
     phase = 'login-page';
+    await page.getByLabel('切换语言', { exact: true }).locator('svg').waitFor();
+    await page
+      .getByRole('button', { name: /Theme Schema|切换主题模式|主题模式/i })
+      .locator('svg')
+      .waitFor();
+    await page.locator('#nprogress').waitFor({ state: 'detached' });
     await page.screenshot({ path: resolve(outputDirectory, 'login-zh.png'), animations: 'disabled' });
     await page.getByLabel('切换语言', { exact: true }).click();
     await page.getByRole('menuitem', { name: 'English' }).click();
     await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     await page.getByRole('button', { name: /Theme Schema|切换主题模式|主题模式/i }).click();
+    await page
+      .getByRole('button', { name: /Theme Schema|切换主题模式|主题模式/i })
+      .locator('svg')
+      .waitFor();
     await page.screenshot({ path: resolve(outputDirectory, 'login-en.png'), animations: 'disabled' });
     passed('login-language-theme-and-visual-captures');
     phase = 'login';
