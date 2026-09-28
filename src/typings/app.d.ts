@@ -352,6 +352,18 @@ declare namespace App {
           input: string;
         };
       };
+      notification: {
+        title: string;
+        refresh: string;
+        resend: string;
+        continue: string;
+        confirm: string;
+        hint: string;
+        unknown: string;
+        operation: string;
+        pending: string;
+        operations: { NONE: string; PENDING: string; COMPLETED: string; UNKNOWN: string };
+      };
       initialization: {
         title: string;
         refresh: string;

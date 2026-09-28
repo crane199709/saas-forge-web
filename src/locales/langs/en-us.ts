@@ -62,6 +62,25 @@ const local: App.I18n.Schema = {
       input: 'Check the name and runtime scopes.'
     }
   },
+  notification: {
+    title: 'Password setup notification',
+    refresh: 'Check notification and original operation',
+    resend: 'Resend notification',
+    continue: 'Continue original notification',
+    confirm:
+      'Resend the password setup notification to the initial administrator? This does not reinitialize the administrator or change Membership or Quota.',
+    hint: 'Notification status is confirmed by the server. Resending is independent of initialization; only the original actor can recover their pending notification.',
+    unknown:
+      'The original result is unconfirmed. Keep this page open and check the original notification; continue only when allowed. If it cannot be located after reloading, the server record needs to be checked before any new resend.',
+    operation: 'Current actor notification operation',
+    pending: 'The original notification is still processing or recovery is not currently allowed. Check again later.',
+    operations: {
+      NONE: 'No resend operation',
+      PENDING: 'Original operation pending',
+      COMPLETED: 'Original operation ended',
+      UNKNOWN: 'Original result unknown'
+    }
+  },
   initialization: {
     title: 'Tenant administrator initialization',
     refresh: 'Check initialization',

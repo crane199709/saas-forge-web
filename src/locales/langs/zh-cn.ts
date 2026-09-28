@@ -60,6 +60,24 @@ const local: App.I18n.Schema = {
       input: '请检查名称与运行时 Scope。'
     }
   },
+  notification: {
+    title: '密码设置通知',
+    refresh: '核查通知与原操作',
+    resend: '重新发送通知',
+    continue: '继续原通知操作',
+    confirm: '确认向初始管理员重新发送密码设置通知？此操作不会重新初始化管理员，也不会更改 Membership 或 Quota。',
+    hint: '通知状态由服务端确认。重发独立于初始化；只有原操作者可恢复其待处理通知。',
+    unknown:
+      '原操作结果尚未确认，不能开始新重发。请保留当前页面核查原通知，仅在服务端允许时继续；若刷新后仍无法定位原操作，需要核对服务端记录。',
+    operation: '当前操作者的通知操作',
+    pending: '原通知仍在处理中，或暂不允许恢复。请稍后核查。',
+    operations: {
+      NONE: '无通知重发操作',
+      PENDING: '原操作待处理',
+      COMPLETED: '原操作已结束',
+      UNKNOWN: '原操作结果未知'
+    }
+  },
   initialization: {
     title: 'Tenant 管理员初始化',
     refresh: '核查初始化状态',

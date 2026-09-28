@@ -4,6 +4,7 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
 import { validAdministratorInput } from '@/service/forge/initialization';
 import { initializationWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
+import Notification from './notification.vue';
 import { useTenantDisplay } from './shared';
 defineOptions({ name: 'TenantInitialization' });
 const props = defineProps<{ tenantId: string }>();
@@ -154,13 +155,8 @@ onUnmounted(() => {
       <ElDescriptionsItem v-if="progress.initialAdministratorMembershipId" :label="$t('initialization.membership')">
         {{ progress.initialAdministratorMembershipId }}
       </ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('initialization.notification')">
-        {{
-          state.notification ? $t(`initialization.notifications.${state.notification}`) : $t('initialization.unchecked')
-        }}
-      </ElDescriptionsItem>
     </ElDescriptions>
-    <p>{{ $t('initialization.notificationHint') }}</p>
+    <Notification :tenant-id="tenantId" :initialization-state="progress?.state" />
     <ElDrawer
       v-model="open"
       :title="$t('initialization.start')"
