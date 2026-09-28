@@ -1,0 +1,141 @@
+{
+  "runId": "issue9-closure-1790581078097",
+  "scenarios": [
+    {
+      "label": "B history and recovery UI exclude A operation",
+      "passed": true
+    },
+    {
+      "label": "B cannot recover A operation",
+      "status": 409,
+      "code": "CLIENT_SECRET_RECOVERY_NOT_ALLOWED",
+      "operationId": "01a0e6f3-0b0f-7cf9-b7f3-2cd795e82842"
+    },
+    {
+      "label": "A unknown recovery is neither exposed nor adopted after switching to B",
+      "passed": true
+    },
+    {
+      "label": "A relogin retains unknown recovery lock with no Secret display",
+      "passed": true
+    },
+    {
+      "label": "original actor recovery rejected after natural ten-minute expiry",
+      "status": 409,
+      "code": "CLIENT_SECRET_RECOVERY_NOT_ALLOWED",
+      "operationId": "01a0e6f3-0b0f-7cf9-b7f3-2cd795e82842"
+    }
+  ],
+  "created": ["01a0e6f3-0b0b-75a9-819f-f29c9f42d00d", "01a0e6f3-29e7-7f86-b80d-42535eea5b27"],
+  "cleanup": [
+    {
+      "clientId": "01a0e6f3-0b0b-75a9-819f-f29c9f42d00d",
+      "revoked": true
+    },
+    {
+      "clientId": "01a0e6f3-29e7-7f86-b80d-42535eea5b27",
+      "revoked": true
+    }
+  ],
+  "expectedLosses": [
+    {
+      "stage": "create-unknown",
+      "path": "/api/v1/platform/oauth-clients",
+      "status": 201
+    },
+    {
+      "stage": "lose-recovery",
+      "path": "/api/v1/platform/oauth-clients/01a0e6f3-29e7-7f86-b80d-42535eea5b27/secret-issuance-recoveries",
+      "status": 200
+    }
+  ],
+  "problems": [],
+  "browserErrors": [],
+  "backend": "local running services",
+  "relatedRunId": "issue9-real-1790578495228",
+  "timeInjection": false,
+  "logouts": ["A", "B", "A", "B", "A"],
+  "chrome": "154.0.8037.57",
+  "activeAccount": null,
+  "expiry": {
+    "operationId": "01a0e6f3-0b0f-7cf9-b7f3-2cd795e82842",
+    "completedAt": "2026-09-28T07:38:02.89Z",
+    "recoveryUntil": "2026-09-28T07:48:02.89Z",
+    "initialCanRecover": true,
+    "checkedAt": "2026-09-28T07:48:06.703Z",
+    "finalCanRecover": false
+  },
+  "waitUntil": "2026-09-28T07:48:05.890Z",
+  "passed": true,
+  "logout": true,
+  "priorAttempt": {
+    "runId": "issue9-closure-1790581015452",
+    "failedStage": "create-unknown",
+    "reason": "Test sequence attempted another creation while the expected unknown-create lock was active. Corrected expiry fixture to an acknowledged creation before rerun.",
+    "cleanup": [
+      {
+        "clientId": "01a0e6f2-17f7-7e79-b6c9-004515f3fcd8",
+        "revoked": true
+      }
+    ],
+    "logout": true
+  },
+  "lifecycleSupplement": {
+    "runId": "issue9-lifecycle-1790581328738",
+    "scenarios": [
+      {
+        "label": "A unknown recovery is neither exposed nor adopted after switching to B",
+        "passed": true
+      },
+      {
+        "label": "A relogin retains unknown recovery lock with no Secret display",
+        "passed": true
+      }
+    ],
+    "created": ["01a0e6f6-e35a-7900-a4c3-d167b7b6c0c2"],
+    "cleanup": [
+      {
+        "clientId": "01a0e6f6-e35a-7900-a4c3-d167b7b6c0c2",
+        "revoked": true
+      }
+    ],
+    "expectedLosses": [
+      {
+        "stage": "create-unknown",
+        "path": "/api/v1/platform/oauth-clients",
+        "status": 201
+      },
+      {
+        "stage": "lose-recovery",
+        "path": "/api/v1/platform/oauth-clients/01a0e6f6-e35a-7900-a4c3-d167b7b6c0c2/secret-issuance-recoveries",
+        "status": 200
+      }
+    ],
+    "problems": [],
+    "browserErrors": [],
+    "backend": "local running services",
+    "relatedRunId": "issue9-real-1790578495228",
+    "timeInjection": false,
+    "logouts": ["A", "B", "A"],
+    "chrome": "154.0.8037.57",
+    "activeAccount": null,
+    "expectedConsoleLosses": 2,
+    "reloginUi": {
+      "matchingRows": 2,
+      "recoveryButtons": 2,
+      "allDisabled": true,
+      "secretTextboxCount": 0
+    },
+    "passed": true,
+    "logout": true
+  },
+  "frontendCommit": "dd8362c0f66d2511d74484c0f0f1d3ffdab1d41d",
+  "ci": {
+    "url": "https://github.com/crane199709/saas-forge-web/actions/runs/36392295758",
+    "conclusion": "success"
+  },
+  "accountB": {
+    "provisioning": "User-authorized dedicated local test identity and PLATFORM_ADMIN role; credentials stored only in restricted secret files",
+    "retained": true
+  }
+}
