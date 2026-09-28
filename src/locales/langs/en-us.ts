@@ -1,4 +1,23 @@
 const local: App.I18n.Schema = {
+  remote: {
+    acceptance: 'Remote consumption acceptance',
+    title: 'Design System Remote consumer fixture',
+    form: 'Remote consumption verification',
+    name: 'Display name',
+    submit: 'Verify shared feedback',
+    success: '{name} inherited the host theme.',
+    brand: 'Current brand',
+    number: 'Exact number',
+    money: 'Exact amount',
+    date: 'Calendar date',
+    instant: 'Local instant',
+    load: 'Load {version}',
+    unload: 'Unload Remote',
+    idle: 'Select a version',
+    loading: '{version} loading',
+    ready: '{version} ready',
+    failed: '{version} failed; check trusted HTTPS and static artifacts, then retry.'
+  },
   oauth: {
     title: 'OAuth Clients',
     detail: 'OAuth Client details',

@@ -1,4 +1,23 @@
 const local: App.I18n.Schema = {
+  remote: {
+    acceptance: 'Remote 消费验收',
+    title: 'Design System Remote 消费夹具',
+    form: 'Remote 消费验证',
+    name: '显示名称',
+    submit: '验证共享反馈',
+    success: '{name} 已继承宿主主题。',
+    brand: '当前品牌',
+    number: '精确数字',
+    money: '精确金额',
+    date: '日历日期',
+    instant: '本地时间点',
+    load: '加载 {version}',
+    unload: '卸载 Remote',
+    idle: '请选择版本',
+    loading: '{version} 加载中',
+    ready: '{version} 已就绪',
+    failed: '{version} 加载失败，请检查受信 HTTPS 和静态制品后重试。'
+  },
   oauth: {
     title: 'OAuth Client 管理',
     detail: 'OAuth Client 详情',

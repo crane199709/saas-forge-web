@@ -1,0 +1,261 @@
+{
+  "rendering": [
+    {
+      "version": "v1",
+      "border": "7px",
+      "dimensions": [24, 16]
+    },
+    {
+      "version": "v2",
+      "border": "11px",
+      "dimensions": [32, 20]
+    }
+  ],
+  "lifecycle": {
+    "cancelled": true,
+    "remounted": true,
+    "cleanup": true
+  },
+  "retry": {
+    "injectedNetworkFailure": true,
+    "retryWithRealResources": true,
+    "retainedDuringSessionCheck": true
+  },
+  "requests": [
+    {
+      "path": "/static-acceptance/v1/remote.js",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v1/styles.css",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v1/image.svg",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v2/remote.js",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v2/styles.css",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v2/image.svg",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v1/remote.js",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v1/styles.css",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v1/image.svg",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v2/remote.js",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v2/styles.css",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    },
+    {
+      "path": "/static-acceptance/v2/image.svg",
+      "request": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      },
+      "status": 200,
+      "allowedOrigin": "https://console.saas.forge.test",
+      "allowCredentials": false,
+      "extra": {
+        "cookie": false,
+        "authorization": false,
+        "csrf": false
+      }
+    }
+  ],
+  "isolation": [
+    {
+      "source": "https://api.saas.forge.test",
+      "target": "https://remote.saas.forge.test/static-acceptance/v1/remote.js",
+      "readable": false,
+      "status": 200,
+      "allowed": false
+    },
+    {
+      "source": "null",
+      "target": "https://remote.saas.forge.test/static-acceptance/v1/remote.js",
+      "readable": false,
+      "status": 200,
+      "allowed": false
+    },
+    {
+      "source": "https://platform.saas.forge.test",
+      "target": "https://remote.saas.forge.test/static-acceptance/v1/remote.js",
+      "readable": false,
+      "status": 200,
+      "allowed": false
+    },
+    {
+      "source": "https://tenant.saas.forge.test",
+      "target": "https://remote.saas.forge.test/static-acceptance/v1/remote.js",
+      "readable": false,
+      "status": 200,
+      "allowed": false
+    },
+    {
+      "source": "https://evil.saas.forge.test",
+      "target": "https://remote.saas.forge.test/static-acceptance/v1/remote.js",
+      "readable": false,
+      "status": 200,
+      "allowed": false
+    },
+    {
+      "source": "https://remote.saas.forge.test",
+      "target": "https://api.saas.forge.test/.well-known/jwks.json",
+      "readable": false,
+      "status": 403,
+      "allowed": false
+    },
+    {
+      "source": "https://evil.saas.forge.test",
+      "target": "https://api.saas.forge.test/.well-known/jwks.json",
+      "readable": false,
+      "status": 403,
+      "allowed": false
+    }
+  ],
+  "chrome": "154.0.8037.57"
+}

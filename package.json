@@ -33,6 +33,7 @@
   },
   "scripts": {
     "build": "vite build --mode prod",
+    "build:static-remote": "node scripts/build-static-remote.mjs",
     "build:test": "vite build --mode test",
     "cleanup": "sa cleanup",
     "commit": "sa git-commit",

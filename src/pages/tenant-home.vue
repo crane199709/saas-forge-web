@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, useTemplateRef } from 'vue';
+import { computed, defineAsyncComponent, nextTick, onMounted, useTemplateRef } from 'vue';
 import { consoleState } from '@/runtime/console';
 import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
+
+const RemoteAcceptance =
+  import.meta.env.DEV || import.meta.env.MODE === 'static-acceptance'
+    ? defineAsyncComponent(() => import('./remote-acceptance.vue'))
+    : undefined;
 
 const heading = useTemplateRef<HTMLElement>('heading');
 const company = computed(() =>
@@ -32,6 +37,11 @@ onMounted(async () => {
         {{ consoleState.snapshot.identity?.email }}
       </ElDescriptionsItem>
     </ElDescriptions>
+    <RemoteAcceptance
+      v-if="RemoteAcceptance"
+      :key="`${consoleState.snapshot.sessionId}:${consoleState.snapshot.revision}`"
+      :enabled="consoleState.status === 'authenticated'"
+    />
     <ElDivider />
     <h2 class="mb-16px text-18px font-semibold">{{ $t('console.chooseWorkspace') }}</h2>
     <WorkContexts />

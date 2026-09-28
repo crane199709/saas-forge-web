@@ -1,0 +1,21 @@
+{
+  "url": "https://console.saas.forge.test/workbench",
+  "title": "SaaS Forge",
+  "first": {
+    "text": "当前品牌: Issue205 Azure",
+    "color": "rgb(22, 78, 99)"
+  },
+  "second": {
+    "text": "Current brand: SaaS Forge",
+    "color": "rgb(100, 108, 255)"
+  },
+  "language": true,
+  "dark": true,
+  "precision": true,
+  "form": true,
+  "resetOnTenantChange": true,
+  "staticCleanupOnTenantChange": true,
+  "keyboardFocus": true,
+  "retainedDuringSessionCheck": true,
+  "errors": []
+}

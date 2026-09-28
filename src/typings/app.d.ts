@@ -292,6 +292,25 @@ declare namespace App {
     };
 
     type Schema = {
+      remote: {
+        acceptance: string;
+        title: string;
+        form: string;
+        name: string;
+        submit: string;
+        success: string;
+        brand: string;
+        number: string;
+        money: string;
+        date: string;
+        instant: string;
+        load: string;
+        unload: string;
+        idle: string;
+        loading: string;
+        ready: string;
+        failed: string;
+      };
       oauth: {
         title: string;
         detail: string;
