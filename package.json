@@ -42,13 +42,17 @@
     "dev:prod": "vite --mode prod",
     "gen-route": "sa gen-route",
     "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "postbuild": "sa print-soybean",
     "prepare": "simple-git-hooks",
     "preview": "vite preview",
     "release": "sa release",
     "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "vue-tsc --noEmit --skipLibCheck",
-    "update-pkg": "sa update-pkg"
+    "update-pkg": "sa update-pkg",
+    "verify": "pnpm run typecheck && pnpm run lint:check && pnpm run test && pnpm run build",
+    "verify:browser": "node scripts/verify-browser.mjs --run",
+    "verify:handoff": "node scripts/verify-browser.mjs --check-handoff"
   },
   "dependencies": {
     "@antv/data-set": "0.11.8",

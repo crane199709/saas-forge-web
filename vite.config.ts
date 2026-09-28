@@ -3,6 +3,7 @@ import { URL, fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import type { Plugin } from 'vite';
 import { setupVitePlugins } from './build/plugins';
+import { frontendProvenance } from './build/provenance';
 import { getBuildTime } from './build/config';
 import { requireHttpsOrigin } from './src/service/forge/config';
 
@@ -23,6 +24,11 @@ export default defineConfig(configEnv => {
 
   const browserEntry: Plugin = {
     name: 'forge-browser-entry',
+    transformIndexHtml() {
+      return [
+        { tag: 'meta', attrs: { name: 'sf-build', content: JSON.stringify(frontendProvenance()) }, injectTo: 'head' }
+      ];
+    },
     configureServer(server) {
       server.printUrls = () => {
         server.config.logger.info(`浏览器入口 / Browser entry: ${developmentOrigin}`);

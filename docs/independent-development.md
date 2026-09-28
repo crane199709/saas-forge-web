@@ -6,7 +6,7 @@
 
 运行 `pnpm install --frozen-lockfile`、`pnpm run typecheck`、`pnpm run test`、`pnpm run build`。Client 使用 npm 官方公开包 `@crane199709/saas-forge-api-client`，精确版本与完整性见 `package.json`、`pnpm-lock.yaml`；构建不调用 Maven/JDK，也不要求后端在线。缺少 API 配置时仍可构建，页面连接检查会明确提示。
 
-既有底座的 workspace 包属于本仓库自身，并非后端兄弟目录依赖。保留底座的安装、主题、国际化、组件和构建能力；本票正式入口仅为匿名连接检查，不启用演示登录或演示管理路由。受保护业务由后续票接入正式统一认证。
+既有底座的 workspace 包属于本仓库自身，并非后端兄弟目录依赖。保留底座的安装、主题、国际化、组件和构建能力；正式入口已接入统一 Console 登录、权威上下文选择与已迁业务页面；匿名连接检查继续用于诊断，不启用演示登录或演示认证。
 
 ## 原生开发与 HTTPS
 
@@ -29,3 +29,5 @@ HTTPS 入口和已启动 Gateway 由开发者管理，前端不启动、替换�
 使用 `pnpm add --save-exact @crane199709/saas-forge-api-client@<版本>` 升级（自有 scope 已在 `.npmrc` 固定到 npm 官方 registry），审查并提交 manifest 和 lockfile。先有兼容后端和可消费包，再升级前端；每次记录后端、Client 和前端的可复现基线。页面发布可以独立于后端发布；破坏性协议变更必须显式版本化，不覆盖既有发布版本。
 
 验证结果记录到 `docs/acceptance/`，区分构建、模拟与真实 Chrome/Gateway 结果。
+
+可重复执行的独立检查、真实 Chrome 与同轮证据交接见 [独立验证](independent-verification.md)。
