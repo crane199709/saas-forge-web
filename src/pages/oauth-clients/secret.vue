@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import { $t } from '@/locales';
 import { useOAuth } from './shared';
@@ -8,6 +8,19 @@ const emit = defineEmits<{ closed: [] }>();
 const { workspace, state, enabled } = useOAuth();
 const copied = ref(false);
 const failed = ref(false);
+let recovery = false;
+watch(
+  () => state.value.secret,
+  value => {
+    if (value) recovery = value.source === 'recovery';
+  }
+);
+function closed() {
+  // 等关闭动画结束再恢复焦点，避免被父页面的默认签发入口覆盖。
+  if (recovery) document.getElementById('oauth-recovery-heading')?.focus();
+  else emit('closed');
+  recovery = false;
+}
 function clear() {
   workspace.clearSecret();
   copied.value = false;
@@ -39,7 +52,7 @@ onUnmounted(() => {
     :close-on-click-modal="false"
     destroy-on-close
     @close="clear"
-    @closed="emit('closed')"
+    @closed="closed"
   >
     <template v-if="state.secret">
       <ElAlert :title="$t('oauth.secretHint')" type="warning" :closable="false" />

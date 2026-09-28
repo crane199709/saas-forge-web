@@ -18,7 +18,12 @@ const local: App.I18n.Schema = {
     copied: '已复制',
     copyFailed: '复制失败，请手动保存。',
     recovery: '原操作与恢复入口',
-    recoveryHint: '请先核查原操作。未知创建或轮换不能以新请求替代；此处只查询原操作信息，替代签发由后续恢复功能提供。',
+    recoveryHint: '只显示当前操作者的原操作。请先核查，再显式恢复；恢复许可、十分钟期限与一次替代限制由后端校验。',
+    recoveryWarning:
+      '恢复会签发新的 Secret，并立即使本次原签发的 Secret 失效。不会回读旧 Secret；轮换前的旧稳定 Secret 仍按原重叠截止时间生效，窗口不会延长。新 Secret 仅展示一次。',
+    recoveryOriginalHint:
+      '本标签页有同类待核查请求时，将由后端校验原请求与此 Client 的关联，并恢复该原请求；关联不成立时不会改为恢复另一笔操作。',
+    recoveryUnknown: '恢复请求结果未知，不能再次恢复或发起替代签发。请刷新核查原操作；查询不会回读已签发的 Secret。',
     unknown: '操作结果未知，已保留原操作信息并锁定替代请求。',
     unchecked: '尚未完整核查操作记录，签发操作暂不可用。',
     noOperations: '没有操作记录',

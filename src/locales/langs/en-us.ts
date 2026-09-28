@@ -19,7 +19,13 @@ const local: App.I18n.Schema = {
     copyFailed: 'Copy failed. Save the Secret manually.',
     recovery: 'Original operations and recovery',
     recoveryHint:
-      'Check the original operation first. Never replace an unknown creation or rotation with a new request. This view is read-only; replacement issuance belongs to the follow-up recovery feature.',
+      'Only your original operations are shown. Check first, then explicitly recover. The server enforces ownership, the ten-minute deadline and one replacement.',
+    recoveryWarning:
+      'Recovery issues a new Secret and immediately invalidates the Secret from the selected issuance. No old plaintext is replayed. For rotation, the earlier stable Secret keeps its original overlap deadline; the window is not extended. The replacement is shown once.',
+    recoveryOriginalHint:
+      'If this tab has a matching pending request, the server verifies its original request key against this Client and recovers that request. A mismatch never falls back to a different operation.',
+    recoveryUnknown:
+      'The recovery result is unknown. Another recovery or replacement issuance is blocked. Refresh to check the original operation; queries cannot replay an issued Secret.',
     unknown: 'Outcome unknown. Original operation information is retained and replacement requests are blocked.',
     unchecked: 'Operation history has not been fully checked. Issuance is unavailable.',
     noOperations: 'No operation records',

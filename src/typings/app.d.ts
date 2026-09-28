@@ -311,6 +311,9 @@ declare namespace App {
         copyFailed: string;
         recovery: string;
         recoveryHint: string;
+        recoveryWarning: string;
+        recoveryOriginalHint: string;
+        recoveryUnknown: string;
         unknown: string;
         unchecked: string;
         noOperations: string;

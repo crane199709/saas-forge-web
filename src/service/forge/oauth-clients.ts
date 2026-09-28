@@ -56,14 +56,16 @@ export interface OAuthState {
   checked: boolean;
   operations: OAuthClientOperation[];
   pending: Pending[];
-  secret?: { clientId: string; value: string };
+  recoveryPending: string[];
+  secret?: { clientId: string; value: string; source?: 'recovery' };
   problem?: OAuthProblem;
 }
 /** Secret 只存在于当前展示状态；原操作键独立保留，不能用新签发替代未知结果。 */
 export class OAuthWorkspace {
-  private view: OAuthState = { busy: false, checked: false, operations: [], pending: [] };
+  private view: OAuthState = { busy: false, checked: false, operations: [], pending: [], recoveryPending: [] };
   private attempts = new Map<string, Pending & { key: string }>();
   private acknowledged = new Set<string>();
+  private recoveries = new Map<string, { clientId: string; delivered: boolean }>();
   private listeners = new Set<(state: OAuthState) => void>();
   private controller = new AbortController();
   private generation = 0;
@@ -87,7 +89,7 @@ export class OAuthWorkspace {
       const owner = platform ? `${actor}:${state.snapshot?.sessionId}:${state.snapshot?.revision}` : undefined;
       const interrupted = ['loading', 'blocked'].includes(state.status);
       const retain = interrupted || (actor !== undefined && actor === this.actor);
-      if (owner !== this.owner || (!retain && this.attempts.size)) {
+      if (owner !== this.owner || (!retain && (this.attempts.size || this.recoveries.size))) {
         this.owner = owner;
         this.generation += 1;
         this.controller.abort();
@@ -96,6 +98,7 @@ export class OAuthWorkspace {
         if (!retain) {
           this.attempts.clear();
           this.acknowledged.clear();
+          this.recoveries.clear();
         }
         this.publish({ busy: false, checked: false, operations: [], problem: undefined });
       }
@@ -111,10 +114,10 @@ export class OAuthWorkspace {
   private saveAttempts() {
     if (!this.context.storage || !this.actor) return;
     try {
-      if (this.actor && this.attempts.size)
+      if (this.actor && (this.attempts.size || this.recoveries.size))
         this.context.storage.setItem(
           `sf.oauth.pending.${this.actor}`,
-          JSON.stringify({ actor: this.actor, attempts: [...this.attempts] })
+          JSON.stringify({ actor: this.actor, attempts: [...this.attempts], recoveries: [...this.recoveries] })
         );
       else this.context.storage.removeItem(`sf.oauth.pending.${this.actor}`);
     } catch {
@@ -148,6 +151,11 @@ export class OAuthWorkspace {
           startedAt
         });
       }
+      valid(value.recoveries === undefined || Array.isArray(value.recoveries));
+      for (const [operationId, row] of value.recoveries ?? []) {
+        valid(uuid.test(operationId) && uuid.test(row.clientId) && typeof row.delivered === 'boolean');
+        this.recoveries.set(operationId, { clientId: row.clientId, delivered: row.delivered });
+      }
       this.publish({});
     } catch {
       this.storageFailed = true;
@@ -166,7 +174,8 @@ export class OAuthWorkspace {
     this.view = {
       ...this.view,
       ...update,
-      pending: [...this.attempts.values()].map(({ key: _key, ...record }) => record)
+      pending: [...this.attempts.values()].map(({ key: _key, ...record }) => record),
+      recoveryPending: [...this.recoveries].filter(([, row]) => !row.delivered).map(([id]) => id)
     };
     this.listeners.forEach(listener => listener(this.view));
   }
@@ -180,6 +189,7 @@ export class OAuthWorkspace {
     this.generation += 1;
     this.attempts.clear();
     this.acknowledged.clear();
+    this.recoveries.clear();
     this.clearSecret();
     this.listeners.clear();
   }
@@ -256,6 +266,104 @@ export class OAuthWorkspace {
     } while (cursor);
     this.publish({ operations: [...records.values()], checked: true });
   }
+  canRecover(operationId: string) {
+    return Boolean(
+      !this.storageFailed &&
+      this.owner &&
+      this.context.session.state.status === 'authenticated' &&
+      this.view.checked &&
+      !this.view.busy &&
+      !this.view.secret &&
+      !this.recoveries.has(operationId) &&
+      this.view.operations.some(
+        row =>
+          row.operationId === operationId &&
+          row.canRecover &&
+          ['CREATE', 'ROTATE'].includes(row.action) &&
+          ![...this.recoveries.values()].some(attempt => !attempt.delivered && attempt.clientId === row.clientId)
+      )
+    );
+  }
+  /** 仅显式替代原操作者的签发，不读取或重放旧 Secret。 */
+  async recover(operationId: string) {
+    if (!this.canRecover(operationId)) return false;
+    const generation = this.generation;
+    const displayGeneration = this.displayGeneration;
+    this.publish({ busy: true, problem: undefined });
+    try {
+      await this.loadOperations();
+      const original = this.view.operations.find(row => row.operationId === operationId);
+      if (!original?.canRecover || !['CREATE', 'ROTATE'].includes(original.action)) throw new OAuthFailure('forbidden');
+      if (generation !== this.generation || displayGeneration !== this.displayGeneration)
+        throw new OAuthFailure('stale');
+      const attempt = [...this.attempts].find(
+        ([, row]) =>
+          row.action === original.action &&
+          (row.action === 'CREATE' ? row.displayName === original.displayName : row.clientId === original.clientId)
+      );
+      // 候选记录不证明本地请求关联；原键接口成功后才解除对应锁，拒绝时不回退为另一笔恢复。
+      // 新恢复标记只有原操作 ID、Client ID 与交付状态；恢复请求键始终留在内存。
+      this.recoveries.set(operationId, { clientId: original.clientId, delivered: false });
+      this.saveAttempts();
+      this.publish({});
+      const result = resource(
+        await this.call(async options => {
+          const idempotencyKey = this.context.key();
+          const response = await (
+            attempt
+              ? this.api.recoverOAuthClientSecretRaw(
+                  {
+                    clientId: original.clientId,
+                    idempotencyKey,
+                    secretIssuanceRecoveryRequest: { originalIdempotencyKey: attempt[1].key }
+                  },
+                  options
+                )
+              : this.api.recoverOAuthClientOperationRaw({ operationId, idempotencyKey }, options)
+          ).catch(async (error: unknown) => {
+            if (error instanceof ResponseError && error.response.status === 409) {
+              const problem: unknown = await error.response.json().catch(() => undefined);
+              if (
+                generation === this.generation &&
+                problem &&
+                typeof problem === 'object' &&
+                'code' in problem &&
+                problem.code === 'CLIENT_SECRET_RECOVERY_NOT_ALLOWED'
+              ) {
+                // 后端明确拒绝本次替代时，仅撤回此次恢复标记；原请求仍待核查。
+                this.recoveries.delete(operationId);
+                this.saveAttempts();
+                throw new OAuthFailure('forbidden');
+              }
+            }
+            throw error;
+          });
+          valid(response.raw.status === 200);
+          return response.value();
+        })
+      );
+      valid(
+        result.clientId === original.clientId &&
+          result.status === 'ACTIVE' &&
+          typeof result.clientSecret === 'string' &&
+          result.clientSecret.length > 0
+      );
+      if (displayGeneration !== this.displayGeneration) return false;
+      if (attempt) this.attempts.delete(attempt[0]);
+      this.recoveries.set(operationId, { clientId: original.clientId, delivered: true });
+      this.saveAttempts();
+      this.publish({
+        secret: { clientId: result.clientId, value: result.clientSecret, source: 'recovery' },
+        checked: false
+      });
+      return true;
+    } catch (error) {
+      if (generation === this.generation) this.publish({ problem: oauthFailure(error), checked: false });
+      return false;
+    } finally {
+      if (generation === this.generation) this.publish({ busy: false });
+    }
+  }
   async checkOperations() {
     if (this.view.busy) return;
     const generation = this.generation;
@@ -270,6 +378,7 @@ export class OAuthWorkspace {
   }
   private blocked(action: Action, target: string) {
     return (
+      [...this.recoveries.values()].some(row => !row.delivered && (action === 'CREATE' || row.clientId === target)) ||
       [...this.attempts.values()].some(row =>
         action === 'CREATE' ? row.action === 'CREATE' : row.clientId === target
       ) ||

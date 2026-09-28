@@ -1,0 +1,22 @@
+{
+  "evidence": "simulated API in real Chrome; not business acceptance",
+  "passed": true,
+  "writes": 2,
+  "errors": ["error"],
+  "version": "154.0.8037.57",
+  "viewports": ["1440x1000", "1100x800"],
+  "checks": [
+    "confirmation cancellation",
+    "explicit recovery",
+    "Secret once",
+    "no Secret in storage",
+    "close clears Secret",
+    "focus returns to recovery heading",
+    "reload blocks duplicate",
+    "keyboard focus stays in confirmation",
+    "unknown recovery survives reload"
+  ],
+  "expectedConsoleErrors": 1,
+  "runId": "issue-9-20260928-console-recovery",
+  "expectedFailure": "One aborted recovery response during the explicitly simulated loss scenario"
+}
