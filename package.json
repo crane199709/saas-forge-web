@@ -50,9 +50,11 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "vue-tsc --noEmit --skipLibCheck",
     "update-pkg": "sa update-pkg",
-    "verify": "pnpm run typecheck && pnpm run lint:check && pnpm run test && pnpm run build",
+    "verify": "pnpm run typecheck && pnpm run lint:check && pnpm run verify:locales && pnpm run test && pnpm run build",
     "verify:browser": "node scripts/verify-browser.mjs --run",
-    "verify:handoff": "node scripts/verify-browser.mjs --check-handoff"
+    "verify:handoff": "node scripts/verify-browser.mjs --check-handoff",
+    "verify:locales": "node --import tsx scripts/check-locales.ts",
+    "verify:ui": "node scripts/build-ui.mjs && playwright test"
   },
   "dependencies": {
     "@antv/data-set": "0.11.8",
@@ -61,6 +63,8 @@
     "@better-scroll/core": "2.5.1",
     "@crane199709/saas-forge-api-client": "0.4.0",
     "@iconify/vue": "5.0.0",
+    "@intlify/core-base": "11.3.0",
+    "@intlify/message-compiler": "11.3.0",
     "@sa/alova": "workspace:*",
     "@sa/axios": "workspace:*",
     "@sa/color": "workspace:*",
@@ -104,6 +108,7 @@
     "@amap/amap-jsapi-types": "0.0.15",
     "@elegant-router/vue": "0.3.8",
     "@iconify/json": "2.2.458",
+    "@playwright/test": "1.63.0",
     "@sa/scripts": "workspace:*",
     "@sa/uno-preset": "workspace:*",
     "@soybeanjs/eslint-config": "1.7.5",
@@ -119,6 +124,7 @@
     "@unocss/vite": "66.6.7",
     "@vitejs/plugin-vue": "6.0.5",
     "@vitejs/plugin-vue-jsx": "5.1.5",
+    "axe-core": "4.13.0",
     "consola": "3.4.2",
     "eslint": "9.39.2",
     "eslint-plugin-vue": "10.6.2",

@@ -42,3 +42,8 @@ SF_EMAIL_FILE=/absolute/path/email SF_PASSWORD_FILE=/absolute/path/password \
 继续锁定正式 `@crane199709/saas-forge-api-client@0.4.0`。脚本核对 manifest/lock/安装包来源，记录前端 Git SHA/dirty、源文件内容 SHA-256、lock SHA-256、Client 版本/源提交与 Chrome。Vite 在开发与生产 HTML 注入公开 sf-build 元数据，浏览器在提交凭据前核对实际页面与本地来源一致；缺失或不一致直接失败。该元数据不读取个人配置、环境变量或凭据，不是供应链签名。前端独立构建不调用后端生成器。兼容后端与 Client 先交付，再按需显式升级前端；不存在强制同时发布要求。
 
 旧 Console 历史在隔离目录通过 Git fast-export/import 保留相关提交，完整 bundle 只导入 `refs/remotes/legacy/console-history`，不覆盖新 main。具体命令与树哈希见 [历史复现](https://github.com/crane199709/saas-forge/blob/master/docs/acceptance/console-history-reproduction.md)。保持 Soybean 固定祖先和许可证；旧 dist/本机备份不冒充发布制品。
+
+
+## #201 检查修复
+
+语言统一、资源安全回退、生产页面视觉/axe 与键盘门禁的现行入口、历史映射和模拟边界见 [语言与页面回归检查](locale-and-ui-verification.md)。上文待迁清单保留原时点事实；本次迁入项以新文档明确范围为准，未覆盖的 Session Tabs 或真实专项仍不能据此勾选。

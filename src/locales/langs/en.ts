@@ -1,4 +1,21 @@
 const local: App.I18n.Schema = {
+  gateway: {
+    title: 'SaaS Forge',
+    description: 'Check the public service connection. This page does not verify your session.',
+    check: 'Check connection',
+    idle: 'Connection has not been checked.',
+    loading: 'Connecting to the service…',
+    ready: 'Connected and read public verification keys. This does not mean you are signed in.',
+    insecure: 'Open the trusted HTTPS Console address. The internal HTTP listener is not a browser entry point.',
+    configuration:
+      'Gateway configuration is missing or invalid. Set VITE_API_ORIGIN to a trusted HTTPS origin in your personal configuration.',
+    sourceRejected: 'The service rejected this page origin. Check the controlled Gateway origins.',
+    networkUnavailable:
+      'Cannot read the service response. Check the network, HTTPS certificate and allowed Gateway origins (CORS).',
+    serviceUnavailable: 'Public reading is unavailable. Check the Gateway and backend services.',
+    timeout: 'Connection timed out. Check the network and service status.',
+    language: '中文'
+  },
   remote: {
     acceptance: 'Remote consumption acceptance',
     title: 'Design System Remote consumer fixture',

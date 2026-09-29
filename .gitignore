@@ -35,3 +35,8 @@ yarn.lock
 .VSCodeCounter
 
 .pnpm-store/
+
+# Production UI regression build and transient results
+.ui-dist/
+.ui-results/
+playwright-report/

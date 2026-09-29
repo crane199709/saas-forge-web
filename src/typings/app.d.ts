@@ -277,7 +277,7 @@ declare namespace App {
   namespace I18n {
     type RouteKey = import('@elegant-router/types').RouteKey;
 
-    type LangType = 'en-US' | 'zh-CN';
+    type LangType = 'en' | 'zh-CN';
 
     type LangOption = {
       label: string;
@@ -292,6 +292,21 @@ declare namespace App {
     };
 
     type Schema = {
+      gateway: {
+        title: string;
+        description: string;
+        check: string;
+        idle: string;
+        loading: string;
+        ready: string;
+        insecure: string;
+        configuration: string;
+        sourceRejected: string;
+        networkUnavailable: string;
+        serviceUnavailable: string;
+        timeout: string;
+        language: string;
+      };
       remote: {
         acceptance: string;
         title: string;

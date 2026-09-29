@@ -5,7 +5,7 @@ import { useBoolean } from '@sa/hooks';
 import { router } from '@/router';
 import { localStg } from '@/utils/storage';
 import { SetupStoreId } from '@/enum';
-import { $t, setLocale } from '@/locales';
+import { $t, getLocale, setLocale } from '@/locales';
 import { setDayjsLocale } from '@/locales/dayjs';
 import { useRouteStore } from '../route';
 import { useTabStore } from '../tab';
@@ -48,11 +48,11 @@ export const useAppStore = defineStore(SetupStoreId.App, () => {
     setReloadFlag(true);
   }
 
-  const locale = ref<App.I18n.LangType>(localStg.get('lang') || 'zh-CN');
+  const locale = ref<App.I18n.LangType>(getLocale());
 
   const localeOptions: App.I18n.LangOption[] = [
     { label: '中文', key: 'zh-CN' },
-    { label: 'English', key: 'en-US' }
+    { label: 'English', key: 'en' }
   ];
 
   function changeLocale(lang: App.I18n.LangType) {

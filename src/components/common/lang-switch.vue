@@ -36,11 +36,9 @@ function changeLang(lang: App.I18n.LangType) {
 
 <template>
   <ElDropdown trigger="click">
-    <div>
-      <ButtonIcon :aria-label="$t('icon.lang')" :tooltip-content="tooltipContent" tooltip-placement="left">
-        <SvgIcon icon="heroicons:language" />
-      </ButtonIcon>
-    </div>
+    <ElButton text class="h-36px text-icon" :aria-label="$t('icon.lang')" :title="tooltipContent || undefined">
+      <SvgIcon icon="heroicons:language" class="text-lg" />
+    </ElButton>
     <template #dropdown>
       <ElDropdownMenu>
         <ElDropdownItem

@@ -1,9 +1,9 @@
 /** 从既有共享 i18n 迁移的无状态精确格式化；Locale 由宿主提供。 */
-type SupportedLocale = 'zh-CN' | 'en-US';
+type SupportedLocale = 'zh-CN' | 'en';
 
 const safeRecoveryMessage: Readonly<Record<SupportedLocale, string>> = {
   'zh-CN': '暂时无法显示此内容。',
-  'en-US': 'This content is temporarily unavailable.'
+  en: 'This content is temporarily unavailable.'
 };
 
 const decimalPattern = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?$/;

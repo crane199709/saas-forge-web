@@ -1,4 +1,19 @@
 const local: App.I18n.Schema = {
+  gateway: {
+    title: 'SaaS Forge',
+    description: '检查与服务的公开连接。此页面不验证登录状态。',
+    check: '检查连接',
+    idle: '尚未检查连接。',
+    loading: '正在连接服务…',
+    ready: '连接成功，已读取公开验证密钥。此结果不代表已登录。',
+    insecure: '请通过受信 HTTPS Console 地址访问此页面。内部 HTTP 监听地址不是浏览器入口。',
+    configuration: '缺少或错误的 Gateway 配置。请检查个人配置中的 VITE_API_ORIGIN，使用受信 HTTPS 地址。',
+    sourceRejected: '服务拒绝当前页面来源，请检查 Gateway 的受控 Origin 配置。',
+    networkUnavailable: '无法读取服务响应。请检查网络、HTTPS 证书以及 Gateway 是否允许当前页面来源（CORS）。',
+    serviceUnavailable: '服务暂时无法完成公开读取，请检查 Gateway 和后端服务状态。',
+    timeout: '连接超时，请检查网络及服务状态。',
+    language: 'English'
+  },
   remote: {
     acceptance: 'Remote 消费验收',
     title: 'Design System Remote 消费夹具',

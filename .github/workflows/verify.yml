@@ -16,5 +16,25 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run typecheck
       - run: pnpm run lint:check
+      - run: pnpm run verify:locales
       - run: pnpm run test
       - run: pnpm run build
+
+  ui:
+    name: Production UI, accessibility and visual regression
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.63.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run verify:ui
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ui-regression-failure
+          path: .ui-results/
+          retention-days: 7
