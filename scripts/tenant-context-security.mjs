@@ -82,11 +82,12 @@ export async function verifyUnauthorizedTenant({ attacker, owner, apiOrigin, gat
 
   // 由真实页面触发 Refresh，再读取权威状态，不能只凭菜单不可见认定未切换。
   const page = attacker.pages()[0];
-  const refreshed = page.waitForResponse(
-    response => new URL(response.url()).pathname === '/api/v2/auth/refresh' && response.status() === 200
-  );
-  await page.reload();
-  await refreshed;
+  await Promise.all([
+    page.waitForResponse(
+      response => new URL(response.url()).pathname === '/api/v2/auth/refresh' && response.status() === 200
+    ),
+    page.reload()
+  ]);
   await page
     .getByRole('heading', { name: /^(公司工作台|Company workspace)$/ })
     .first()

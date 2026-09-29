@@ -168,11 +168,10 @@ async function login(page, email, password) {
 }
 async function select(page, name, heading) {
   await button(page, name).click();
-  const refreshed = page.waitForResponse(
-    r => new URL(r.url()).pathname === '/api/v2/auth/refresh' && r.status() === 200
-  );
-  await button(page, '放弃未保存内容并切换').click();
-  await refreshed;
+  await Promise.all([
+    page.waitForResponse(r => new URL(r.url()).pathname === '/api/v2/auth/refresh' && r.status() === 200),
+    button(page, '放弃未保存内容并切换').click()
+  ]);
   await page.getByRole('heading', { name: heading, exact: true }).first().waitFor();
 }
 async function setupPassword(email, password) {
@@ -200,7 +199,12 @@ async function setupPassword(email, password) {
     await page.goto(link);
     await input(page, '新密码').fill(password);
     await input(page, '确认新密码').fill(password);
-    await button(page, '设置新密码').click();
+    const [established] = await Promise.all([
+      page.waitForResponse(result => new URL(result.url()).pathname === '/api/v1/auth/password-setups'),
+      button(page, '设置新密码').click()
+    ]);
+    assert.equal(established.status(), 204);
+    await page.getByText('密码已更新，请使用新密码重新登录。', { exact: true }).waitFor();
     await button(page, '返回登录').click();
     await input(page, '邮箱').waitFor();
   } finally {
@@ -282,6 +286,8 @@ try {
   const { keys } = await jwksResponse.json();
   const publicKeys = keys.map(key => ({ kid: key.kid, n: key.n, e: key.e })).sort((a, b) => a.kid.localeCompare(b.kid));
   assert.equal(createHash('sha256').update(JSON.stringify(publicKeys)).digest('hex'), handoff.jwksSha256);
+  // 先确认验收专用路由存在；缺少构建 overlay 时不能消耗一次性的 Console 前置。
+  await probe('wrong-user-token', 401, 'ACCESS_TOKEN_INVALID');
 
   const admin = await context();
   const page = await admin.newPage();
@@ -332,7 +338,6 @@ try {
     materials.add(user.password);
     await provision(page, user);
   }
-  pass('fresh-console-bootstrap-two-tenants-and-real-mail-password-setup');
   const attacker = await context();
   const owner = await context();
   const ap = await attacker.newPage();
@@ -342,6 +347,7 @@ try {
   await select(ap, users[0].name, '公司工作台');
   await login(op, users[1].email, users[1].password);
   await select(op, users[1].name, '公司工作台');
+  pass('fresh-console-bootstrap-two-tenants-and-real-mail-password-setup');
   phase = 'unauthorized-tenant-context';
   report.tenantContext = { scenario: 'unauthorized-tenant-context', status: 'failed', requests: [] };
   report.tenantContext = await verifyUnauthorizedTenant({
@@ -360,9 +366,10 @@ try {
   const cookies = await attacker.cookies(handoff.apiOrigin);
   const oldCookie = cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
   materials.add(oldCookie);
-  const rotated = ap.waitForResponse(r => new URL(r.url()).pathname === '/api/v2/auth/refresh' && r.status() === 200);
-  await ap.reload();
-  await rotated;
+  await Promise.all([
+    ap.waitForResponse(r => new URL(r.url()).pathname === '/api/v2/auth/refresh' && r.status() === 200),
+    ap.reload()
+  ]);
   await ap.getByRole('heading', { name: '公司工作台', exact: true }).first().waitFor();
   await Promise.all([...pending]);
   const rotatedCookies = (await attacker.cookies(handoff.apiOrigin))
@@ -414,10 +421,12 @@ try {
   assert.ok(JSON.parse(Buffer.from(liveToken.split('.')[1], 'base64url')).exp * 1000 > Date.now());
   await probe(liveToken, 401, 'ACCESS_TOKEN_INVALID');
   await ap.reload();
-  await ap.getByText('无法确认当前会话，已隐藏受保护内容。', { exact: true }).waitFor();
+  // Bootstrap 将已撤销的 Slot 标记为 ENDING，Console 完成登出后回到匿名登录页。
+  await input(ap, '邮箱').waitFor();
+  await button(ap, '登录').waitFor();
   assert.equal(await ap.getByRole('heading', { name: '公司工作台', exact: true }).count(), 0);
   report.replayInjection.finishedAt = new Date().toISOString();
-  pass('replay-revokes-unexpired-token-and-console-hides-workspace');
+  pass('replay-revokes-unexpired-token-and-console-hides-workspace', { consoleReturnedToLogin: true });
   await attacker.close();
   await owner.close();
   phase = 'redis-failure';
