@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { frontendProvenance } from '../build/provenance.ts';
+import { verifyStage2MainChain } from './stage2-main-chain.mjs';
 import { operationKey, verifyUnauthorizedTenant } from './tenant-context-security.mjs';
 
 // 环境方提供受限配置；此入口不准备后端、不启动应用、不直接操作 Docker 或数据库。
@@ -34,6 +35,14 @@ const report = {
   runId: handoff.runId,
   handoffSha256: createHash('sha256').update(handoffBytes).digest('hex'),
   ...frontendProvenance(),
+  driverSha256: Object.fromEntries(
+    ['verify-token-security.mjs', 'stage2-main-chain.mjs', 'tenant-context-security.mjs'].map(name => [
+      name,
+      createHash('sha256')
+        .update(readFileSync(new URL(name, import.meta.url)))
+        .digest('hex')
+    ])
+  ),
   startedAt: new Date().toISOString(),
   status: 'failed',
   checks: [
@@ -45,12 +54,25 @@ const report = {
     'redis-fails-closed-and-console-does-not-blame-password',
     'redis-restored-authoritative-probe-and-console-login'
   ].map(name => ({ name, status: 'not-run' })),
+  ...(config.stage2 ? { stage2: true } : {}),
   requests: [],
   errors: []
 };
+if (config.stage2) {
+  report.checks.push(
+    ...[
+      'same-identity-tenant-switch-and-refresh',
+      'locale-english-input-persistence-and-identity-path',
+      'suspension-rejects-old-token-resumption-requires-login'
+    ].map(name => ({ name, status: 'not-run' }))
+  );
+}
 let phase = 'launch';
 const pending = new Set();
 const materials = new Set();
+const auditObservations = [];
+const sessionActors = new Map();
+const sessionIds = new Map();
 const secret = path => {
   assert.equal(statSync(path).mode % 64, 0, 'SECRET_PERMISSIONS');
   const value = readFileSync(path, 'utf8').trim();
@@ -81,10 +103,12 @@ report.chrome = browser.version();
 const button = (p, name) => p.getByRole('button', { name, exact: true });
 const input = (p, name) => p.getByLabel(name, { exact: true });
 let contextSequence = 0;
+const contextIds = new WeakMap();
 async function context() {
   contextSequence += 1;
   const contextId = contextSequence;
   const ctx = await browser.newContext({ locale: 'zh-CN', viewport: { width: 1440, height: 1000 } });
+  contextIds.set(ctx, contextId);
   ctx.on('page', page => {
     page.setDefaultTimeout(25000);
     page.on('pageerror', () => report.errors.push({ phase, contextId, kind: 'pageerror', at: Date.now() }));
@@ -115,11 +139,63 @@ async function context() {
       phase,
       contextId,
       path: path.replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, ':id'),
+      pathSha256: createHash('sha256').update(path).digest('hex'),
       method: response.request().method(),
       status: response.status(),
       at: Date.now()
     };
     report.requests.push(record);
+    if (
+      config.stage2 &&
+      response.status() < 300 &&
+      (/^\/api\/v2\/auth\/(login|refresh)$/.test(path) ||
+        (path === '/api/v1/platform/tenants' && response.request().method() === 'POST'))
+    ) {
+      const task = response
+        .json()
+        .then(body => {
+          if (body.sessionId && body.identity?.identityId) {
+            sessionActors.set(contextId, body.identity.identityId);
+            sessionIds.set(contextId, body.sessionId);
+            if (path.endsWith('/login'))
+              auditObservations.push({
+                action: 'SESSION_STARTED',
+                phase: record.phase,
+                startedAt: new Date(response.request().timing().startTime).toISOString(),
+                finishedAt: new Date(record.at).toISOString(),
+                actor: body.identity.identityId,
+                resource: body.sessionId
+              });
+          } else if (path === '/api/v1/platform/tenants') {
+            auditObservations.push({
+              action: 'TENANT_CREATED',
+              phase: record.phase,
+              startedAt: new Date(response.request().timing().startTime).toISOString(),
+              finishedAt: new Date(record.at).toISOString(),
+              actor: sessionActors.get(contextId),
+              resource: body.id
+            });
+          }
+        })
+        .catch(() => {
+          report.errors.push({ phase, kind: 'audit-observation-failed', at: Date.now() });
+        });
+      pending.add(task);
+      task.finally(() => pending.delete(task));
+    }
+    if (config.stage2 && path === '/api/v2/auth/context-selections' && response.status() === 204) {
+      const target = response.request().postDataJSON();
+      if (target.type === 'TENANT')
+        auditObservations.push({
+          action: 'TENANT_CONTEXT_SWITCHED',
+          phase: record.phase,
+          actor: sessionActors.get(contextId),
+          resource: sessionIds.get(contextId),
+          membership: target.membershipId,
+          startedAt: new Date(response.request().timing().startTime).toISOString(),
+          finishedAt: new Date(record.at).toISOString()
+        });
+    }
     if (response.status() >= 400) {
       const task = response
         .json()
@@ -161,7 +237,9 @@ function observeToken(ctx) {
   };
 }
 async function login(page, email, password) {
-  await page.goto(`${handoff.consoleOrigin}/login`);
+  // 已在登录页时直接等待表单，避免重新导航中断正在进行的 bootstrap。
+  if (page.url() !== `${handoff.consoleOrigin}/login`)
+    await page.goto(`${handoff.consoleOrigin}/login`, { waitUntil: 'domcontentloaded' });
   await input(page, '邮箱').fill(email);
   await input(page, '密码').fill(password);
   await button(page, '登录').click();
@@ -196,7 +274,7 @@ async function setupPassword(email, password) {
   const ctx = await context();
   const page = await ctx.newPage();
   try {
-    await page.goto(link);
+    await page.goto(link, { waitUntil: 'domcontentloaded' });
     await input(page, '新密码').fill(password);
     await input(page, '确认新密码').fill(password);
     const [established] = await Promise.all([
@@ -211,8 +289,8 @@ async function setupPassword(email, password) {
     await ctx.close();
   }
 }
-async function provision(page, { name, email, password }) {
-  await page.goto(`${handoff.consoleOrigin}/tenants`);
+async function provision(page, { name, email, password }, setup = true) {
+  await page.goto(`${handoff.consoleOrigin}/tenants`, { waitUntil: 'domcontentloaded' });
   await button(page, '创建租户').click();
   const form = page.getByRole('form', { name: '创建租户', exact: true });
   await input(form, '租户名称').fill(name);
@@ -228,7 +306,9 @@ async function provision(page, { name, email, password }) {
   await input(page, '管理员邮箱').fill(email);
   await button(page, '确认初始化').click();
   await page.getByText('初始化成功', { exact: true }).waitFor();
-  await setupPassword(email, password);
+  const tenantId = new URL(page.url()).pathname.split('/').at(-1);
+  if (setup) await setupPassword(email, password);
+  return tenantId;
 }
 async function probe(token, expected, code) {
   const path = '/__test/platform-mechanism/identity';
@@ -291,7 +371,7 @@ try {
 
   const admin = await context();
   const page = await admin.newPage();
-  await page.goto(`${handoff.consoleOrigin}/login`);
+  await page.goto(`${handoff.consoleOrigin}/login`, { waitUntil: 'domcontentloaded' });
   assert.equal(await page.evaluate(() => window.isSecureContext), true);
   const browserKeys = await page.evaluate(async api => {
     const response = await fetch(`${api}/.well-known/jwks.json`, { credentials: 'omit' });
@@ -303,7 +383,7 @@ try {
 
   const email = secret(config.adminEmailFile);
   const initial = secret(config.initialPasswordFile);
-  const password = `Sf185!${randomBytes(20).toString('hex')}`;
+  const password = config.stage2 ? secret(config.passwordFile) : `Sf185!${randomBytes(20).toString('hex')}`;
   materials.add(password);
   await login(page, email, initial);
   await input(page, '新密码').fill(password);
@@ -313,13 +393,14 @@ try {
   await login(page, email, password);
   await select(page, '平台管理', '平台工作台');
   assert.deepEqual(JSON.parse(await page.locator('meta[name=sf-build]').getAttribute('content')), frontendProvenance());
-  await page.goto(`${handoff.consoleOrigin}/quota-definitions`);
+  await page.goto(`${handoff.consoleOrigin}/quota-definitions`, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle');
   await button(page, '准备额度定义').click();
   await button(page.getByRole('form', { name: '准备额度定义' }), '准备额度定义').click();
   await page.getByRole('heading', { name: '额度定义详情', exact: true }).waitFor();
   await button(page, '激活额度定义').click();
   await page.getByText('已激活', { exact: true }).first().waitFor();
-  await page.goto(`${handoff.consoleOrigin}/plans`);
+  await page.goto(`${handoff.consoleOrigin}/plans`, { waitUntil: 'domcontentloaded' });
   await button(page, '创建套餐').click();
   const form = page.getByRole('form', { name: '创建套餐', exact: true });
   await input(form, '编码').fill('issue185-plan');
@@ -336,7 +417,33 @@ try {
   }));
   for (const user of users) {
     materials.add(user.password);
-    await provision(page, user);
+    user.tenantId = await provision(page, user);
+  }
+  if (config.stage2) {
+    await verifyStage2MainChain({
+      handoff,
+      config,
+      report,
+      adminPage: page,
+      users,
+      context,
+      provision,
+      login,
+      select,
+      observeToken,
+      probe,
+      button,
+      input,
+      pass,
+      materials,
+      contextId: ctx => contextIds.get(ctx),
+      setPhase: value => {
+        report.stage2Windows ??= {};
+        if (report.stage2Windows[phase]) report.stage2Windows[phase].finishedAt = new Date().toISOString();
+        phase = value;
+        report.stage2Windows[phase] = { startedAt: new Date().toISOString() };
+      }
+    });
   }
   const attacker = await context();
   const owner = await context();
@@ -459,12 +566,52 @@ try {
   await rp.reload();
   await rp.getByRole('heading', { name: '公司工作台', exact: true }).first().waitFor();
   pass('redis-restored-authoritative-probe-and-console-login');
+  if (config.stage2) {
+    writeFileSync(config.otherActorFile, JSON.stringify({ email: users[1].email, password: users[1].password }), {
+      mode: 0o600,
+      flag: 'wx'
+    });
+  }
   await Promise.all([...pending]);
   await browser.close();
   await Promise.all([...pending]);
   const inWindow = (record, window) =>
     record.at >= Date.parse(window.startedAt) && record.at <= Date.parse(window.finishedAt);
+  const expectedSuspensionPending = record => {
+    const receipt = report.suspensionResponse;
+    return Boolean(
+      receipt?.completed &&
+      receipt.status === 503 &&
+      record.contextId === receipt.contextId &&
+      record.pathSha256 === receipt.pathSha256 &&
+      record.phase === 'stage2-suspension' &&
+      record.method === 'POST' &&
+      record.status === 503 &&
+      record.code === 'TENANT_SUSPENSION_PENDING' &&
+      record.at >= receipt.startedAt &&
+      record.at <= receipt.finishedAt
+    );
+  };
+  const expectedStage2 = record =>
+    (config.stage2 &&
+      record.contextId === report.stage2ContextId &&
+      inWindow(record, report.stage2Windows['stage2-english-login-error']) &&
+      record.phase === 'stage2-english-login-error' &&
+      record.path === '/api/v2/auth/login' &&
+      record.method === 'POST' &&
+      record.status === 401 &&
+      record.code === 'AUTHENTICATION_FAILED') ||
+    (config.stage2 &&
+      record.contextId === report.stage2ContextId &&
+      inWindow(record, report.stage2Windows['stage2-suspension']) &&
+      record.phase === 'stage2-suspension' &&
+      record.path === '/api/v2/auth/session' &&
+      record.method === 'GET' &&
+      record.status === 401 &&
+      record.code === 'SESSION_INVALID');
   const expected = record =>
+    expectedSuspensionPending(record) ||
+    expectedStage2(record) ||
     (record.phase === 'refresh-replay' &&
       inWindow(record, report.replayInjection) &&
       record.path === '/api/v2/auth/session' &&
@@ -487,7 +634,10 @@ try {
           expected(r) &&
           r.phase === error.phase &&
           r.contextId === error.contextId &&
-          r.path === error.path &&
+          r.pathSha256 ===
+            createHash('sha256')
+              .update(error.path || '')
+              .digest('hex') &&
           Math.abs(r.at - error.at) < 2000
       )
   );
@@ -500,7 +650,14 @@ try {
   );
   report.status = 'passed';
 } catch (error) {
-  report.failure = { phase, kind: error.name };
+  report.failure = {
+    phase,
+    kind: error.name,
+    location: error.stack?.match(/(?:verify-token-security|stage2-main-chain)\.mjs:\d+:\d+/)?.[0]
+  };
+  let diagnostic = String(error.message);
+  for (const value of materials) diagnostic = diagnostic.replaceAll(value, '[REDACTED]');
+  writeFileSync(resolve(output, 'diagnostic.txt'), diagnostic, { mode: 0o600 });
   const next = report.checks.find(check => check.status === 'not-run');
   if (next) next.status = 'failed';
   process.exitCode = 1;
@@ -508,6 +665,13 @@ try {
   await browser.close();
   await Promise.allSettled([...pending]);
   report.finishedAt = new Date().toISOString();
+  if (config.stage2)
+    writeFileSync(config.auditInput, JSON.stringify({ runId: handoff.runId, observations: auditObservations }), {
+      mode: 0o600,
+      flag: 'wx'
+    });
+  if (config.stage2)
+    report.auditObservationsSha256 = createHash('sha256').update(readFileSync(config.auditInput)).digest('hex');
   save();
   console.log(JSON.stringify({ status: report.status, phase, checks: report.checks.length }));
 }

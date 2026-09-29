@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { frontendProvenance } from '../build/provenance.ts';
+import { verifyStage2OAuthRecovery } from './stage2-oauth-recovery.mjs';
 
 const configPath = process.env.SF_OAUTH_CONFIG;
 assert.ok(configPath);
@@ -35,6 +36,14 @@ const report = {
   runId: handoff.runId,
   handoffSha256: alias(handoffBytes),
   ...frontendProvenance(),
+  driverSha256: Object.fromEntries(
+    ['verify-oauth-lifecycle.mjs', 'stage2-oauth-recovery.mjs', 'tenant-context-security.mjs'].map(name => [
+      name,
+      createHash('sha256')
+        .update(readFileSync(new URL(name, import.meta.url)))
+        .digest('hex')
+    ])
+  ),
   startedAt: new Date().toISOString(),
   status: 'failed',
   checks: [],
@@ -87,9 +96,10 @@ async function context() {
           phase,
           contextId,
           at: Date.now(),
-          resourceFailure: /^Failed to load resource: the server responded with a status of 409 \(.*\)$/.test(
-            message.text()
-          ),
+          resourceFailure:
+            /^(Failed to load resource: the server responded with a status of 409 \(.*\)|Failed to load resource: net::ERR_FAILED)$/.test(
+              message.text()
+            ),
           path: (() => {
             try {
               return new URL(message.location().url).pathname;
@@ -129,7 +139,9 @@ async function context() {
   return ctx;
 }
 async function login(page, email, password) {
-  await page.goto(`${handoff.consoleOrigin}/login`);
+  // 已在登录页时直接等待表单，避免重新导航中断正在进行的 bootstrap。
+  if (page.url() !== `${handoff.consoleOrigin}/login`)
+    await page.goto(`${handoff.consoleOrigin}/login`, { waitUntil: 'domcontentloaded' });
   await input(page, '邮箱').fill(email);
   await input(page, '密码').fill(password);
   await button(page, '登录').click();
@@ -153,7 +165,7 @@ async function closeSecret(page) {
   await input(page, '一次性 Secret').waitFor({ state: 'hidden' });
 }
 async function create(page, label, scope = 'runtime:read') {
-  await page.goto(`${handoff.consoleOrigin}/oauth-clients`);
+  await page.goto(`${handoff.consoleOrigin}/oauth-clients`, { waitUntil: 'domcontentloaded' });
   await button(page, '创建 OAuth Client').focus();
   await page.keyboard.press('Enter');
   const form = page.getByRole('form', { name: '创建 OAuth Client', exact: true });
@@ -187,7 +199,7 @@ async function credentials(page, id) {
       assert.equal(response.status(), 200);
       return response.json();
     });
-  await page.goto(`${handoff.consoleOrigin}/oauth-clients/${id}`);
+  await page.goto(`${handoff.consoleOrigin}/oauth-clients/${id}`, { waitUntil: 'domcontentloaded' });
   return result;
 }
 
@@ -265,7 +277,7 @@ async function storageClean(ctx) {
 }
 async function timeState(client, state) {
   const requestId = randomBytes(16).toString('hex');
-  const data = { runId: handoff.runId, requestId, clientId: client.id, state };
+  const data = { runId: handoff.runId, requestId, clientId: client.id, operationId: client.operationId, state };
   writeFileSync(resolve(config.controlDirectory, 'request.tmp'), JSON.stringify(data), { mode: 0o600 });
   renameSync(resolve(config.controlDirectory, 'request.tmp'), resolve(config.controlDirectory, 'request.json'));
   for (let i = 0; i < 120; i += 1) {
@@ -303,7 +315,7 @@ try {
     task.finally(() => pending.delete(task));
   });
   const page = await ctx.newPage();
-  await page.goto(`${handoff.consoleOrigin}/login`);
+  await page.goto(`${handoff.consoleOrigin}/login`, { waitUntil: 'domcontentloaded' });
   assert.equal(await page.evaluate(() => window.isSecureContext), true);
   assert.deepEqual(JSON.parse(await page.locator('meta[name=sf-build]').getAttribute('content')), frontendProvenance());
   const keys = await page.evaluate(async api => {
@@ -315,14 +327,16 @@ try {
   const email = secret(config.adminEmailFile);
   const initial = secret(config.initialPasswordFile);
   const password = secret(config.passwordFile);
-  await login(page, email, initial);
-  await input(page, '新密码').fill(password);
-  await input(page, '确认新密码').fill(password);
-  await button(page, '设置新密码').click();
-  await input(page, '邮箱').waitFor();
+  if (!config.stage2) {
+    await login(page, email, initial);
+    await input(page, '新密码').fill(password);
+    await input(page, '确认新密码').fill(password);
+    await button(page, '设置新密码').click();
+    await input(page, '邮箱').waitFor();
+  }
   await login(page, email, password);
   await platform(page);
-  pass('fresh-admin-initial-password-change-and-platform-context');
+  pass(config.stage2 ? 'same-run-admin-platform-context' : 'fresh-admin-initial-password-change-and-platform-context');
 
   phase = 'create-and-real-consumption';
   client = await create(page, 'rotation');
@@ -350,7 +364,7 @@ try {
   await page.reload();
   await input(page, '一次性 Secret').waitFor({ state: 'hidden' });
   await credentials(page, client.id);
-  await page.goto(`${handoff.consoleOrigin}/oauth-clients`);
+  await page.goto(`${handoff.consoleOrigin}/oauth-clients`, { waitUntil: 'domcontentloaded' });
   await page.goBack();
   await input(page, '一次性 Secret').waitFor({ state: 'hidden' });
   await page.goForward();
@@ -511,17 +525,65 @@ try {
     developerToolsExcluded: true
   });
 
+  if (config.stage2) {
+    let actorContext;
+    let otherActorToken;
+    if (config.otherActorAuthorized) {
+      assert.equal(statSync(config.otherActorFile).mode % 64, 0);
+      const actor = JSON.parse(readFileSync(config.otherActorFile));
+      remember(actor.password);
+      actorContext = await context();
+      actorContext.on('response', response => {
+        if (new URL(response.url()).pathname !== '/api/v2/auth/refresh' || response.status() !== 200) return;
+        const task = response.json().then(body => {
+          otherActorToken = remember(body.accessToken);
+        });
+        pending.add(task);
+        task.finally(() => pending.delete(task));
+      });
+      const actorPage = await actorContext.newPage();
+      await login(actorPage, actor.email, actor.password);
+      await platform(actorPage);
+      await Promise.all(pending);
+    }
+    await verifyStage2OAuthRecovery({
+      page,
+      ctx,
+      handoff,
+      button,
+      input,
+      remember,
+      displayed,
+      closeSecret,
+      credentials,
+      issue,
+      consume,
+      probe,
+      timeState,
+      pass,
+      create,
+      report,
+      otherActorToken,
+      adminToken: () => adminToken,
+      currentPhase: () => phase,
+      phase: value => {
+        phase = value;
+      }
+    });
+    await actorContext?.close();
+  }
+
   phase = 'secret-visible-refresh-leave-session-loss';
   await create(page, 'refresh');
   await page.reload();
   await input(page, '一次性 Secret').waitFor({ state: 'hidden' });
   await create(page, 'leave');
-  await page.goto(`${handoff.consoleOrigin}/plans`);
+  await page.goto(`${handoff.consoleOrigin}/plans`, { waitUntil: 'domcontentloaded' });
   await page.goBack();
   await input(page, '一次性 Secret').waitFor({ state: 'hidden' });
   await create(page, 'session');
   const logout = await ctx.newPage();
-  await logout.goto(`${handoff.consoleOrigin}/oauth-clients`);
+  await logout.goto(`${handoff.consoleOrigin}/oauth-clients`, { waitUntil: 'domcontentloaded' });
   await logout.getByText(email, { exact: true }).first().click();
   await logout.getByRole('menuitem', { name: '退出登录', exact: true }).click();
   await button(logout.getByRole('dialog'), '确认').click();
@@ -546,6 +608,14 @@ try {
   const unexpected = report.errors.filter(
     error =>
       !(
+        config.stage2 &&
+        error.kind === 'console' &&
+        error.resourceFailure &&
+        report.responseLosses?.some(
+          loss => loss.phase === error.phase && loss.path === error.path && Math.abs(loss.at - error.at) < 3000
+        )
+      ) &&
+      !(
         error.kind === 'console' &&
         error.resourceFailure &&
         error.phase === 'rotation-and-overlap-rejection' &&
@@ -562,6 +632,11 @@ try {
   assert.equal(unexpected.length, 0);
   for (const error of report.errors) error.path = error.path?.replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, ':id');
   pass('request-correlated-errors-and-no-sensitive-browser-storage-or-logs', { unexpectedErrors: 0 });
+  report.classification = { unknownErrors: 0, unexpectedRequests: 0 };
+  assert.ok(
+    report.checks.every(check => check.status === 'passed'),
+    'INCOMPLETE_SCENARIOS'
+  );
   report.status = 'passed';
 } catch (error) {
   report.failure = {
