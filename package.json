@@ -54,6 +54,7 @@
     "verify:browser": "node scripts/verify-browser.mjs --run",
     "verify:handoff": "node scripts/verify-browser.mjs --check-handoff",
     "verify:locales": "node --import tsx scripts/check-locales.ts",
+    "verify:security": "node scripts/verify-token-security.mjs",
     "verify:ui": "node scripts/build-ui.mjs && playwright test"
   },
   "dependencies": {
