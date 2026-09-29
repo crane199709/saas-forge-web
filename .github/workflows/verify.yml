@@ -32,6 +32,11 @@ jobs:
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm run verify:ui
+        # checkout 的临时 Git 配置不覆盖后续容器进程；仅信任本步骤的工作目录。
+        env:
+          GIT_CONFIG_COUNT: '1'
+          GIT_CONFIG_KEY_0: safe.directory
+          GIT_CONFIG_VALUE_0: ${{ github.workspace }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

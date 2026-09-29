@@ -40,4 +40,13 @@ axe 保留 WCAG 2 A/AA、2.1 AA 适用规则。正常页面检查整个 document
 
 2026-09-29：前端正式 `verify` 通过（类型、只读 Lint、732 个语言 key、223 项 Node 测试、生产构建）；macOS Chromium 的 13 项浏览器用例以现有截图比较通过。Linux Noble 官方 Playwright 1.63.0 镜像使用同一生产制品（136 个文件逐一 SHA-256 一致），11 张首次基线经页面审阅保存，随后不更新基线的完整 13 项比较通过。错误探针额外验证现有页面和新建页面的 Console/pageerror 监听机制。后端授权提取由 `AuthenticationHttpIT` 66 项回归验证，0 跳过。
 
-本轮 Linux 本地执行架构为 arm64，远程 GitHub CI 尚未运行；这不是真实 Gateway/Chrome/Fresh 同轮验收记录。
+上述首次 Linux 本地验证使用 arm64，当时远程 GitHub CI 尚未运行；这不是真实 Gateway/Chrome/Fresh 同轮验收记录。
+
+## 容器构建的 Git 来源读取
+
+远程运行 `36533062643` 的普通 `verify` 已通过，但 UI 作业在生产构建的 `frontendProvenance` 读取 Git 时失败：`detected dubious ownership`，因此尚未进入浏览器测试。checkout Action 的临时 Git 信任配置不覆盖后续容器进程。
+
+UI 验证步骤通过 `GIT_CONFIG_COUNT` 为本进程及子进程设置 `safe.directory=${{ github.workspace }}`；仅接受此次 checkout 的精确路径，不写全局 Git 配置、不使用通配目录，也不跳过制品来源校验。隔离容器中，原读取返回 128，应用此设置后成功，另一个异主仓库仍被拒绝。
+
+
+针对性验证直接执行实际 `frontendProvenance`：异主 checkout 修复前被拒绝；读取本工作流的步骤环境后，成功校验提交、源码 SHA-256 和固定 Client 0.4.0。Lint 与 diff 检查通过。完整容器重建因本地 OOM 未完成，不能记为构建或 UI 测试通过；远程修复后的 CI 待推送验证。
