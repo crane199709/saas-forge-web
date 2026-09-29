@@ -32,7 +32,13 @@ const DEFAULT_CLASS = 'h-[36px] text-icon';
 
 <template>
   <ElTooltip :placement="tooltipPlacement" :content="tooltipContent" :z-index="zIndex" :disabled="!tooltipContent">
-    <ElButton text quaternary :class="twMerge(DEFAULT_CLASS, props.class)" v-bind="$attrs">
+    <ElButton
+      text
+      quaternary
+      :class="twMerge(DEFAULT_CLASS, props.class)"
+      :aria-label="tooltipContent || undefined"
+      v-bind="$attrs"
+    >
       <div class="flex-center gap-8px text-lg">
         <slot>
           <SvgIcon :icon="icon" />

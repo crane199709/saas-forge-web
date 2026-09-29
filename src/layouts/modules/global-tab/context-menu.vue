@@ -43,17 +43,26 @@ const options = computed(() => {
     {
       key: 'closeOther',
       label: $t('dropdown.closeOther'),
-      icon: SvgIconVNode({ icon: 'ant-design:column-width-outlined', fontSize: 18 })
+      icon: SvgIconVNode({
+        icon: 'ant-design:column-width-outlined',
+        fontSize: 18
+      })
     },
     {
       key: 'closeLeft',
       label: $t('dropdown.closeLeft'),
-      icon: SvgIconVNode({ icon: 'mdi:format-horizontal-align-left', fontSize: 18 })
+      icon: SvgIconVNode({
+        icon: 'mdi:format-horizontal-align-left',
+        fontSize: 18
+      })
     },
     {
       key: 'closeRight',
       label: $t('dropdown.closeRight'),
-      icon: SvgIconVNode({ icon: 'mdi:format-horizontal-align-right', fontSize: 18 })
+      icon: SvgIconVNode({
+        icon: 'mdi:format-horizontal-align-right',
+        fontSize: 18
+      })
     },
     {
       key: 'closeAll',
@@ -119,9 +128,9 @@ function handleDropdown(optionKey: App.Global.DropdownKey) {
 
 <template>
   <div class="absolute" :style="{ top: `${y - 60}px`, left: `${x + 60}px` }">
-    <ElDropdown ref="dropdown" popper-class="arrow-hide" trigger="click" @command="handleDropdown">
-      <!-- Avoid waning: [ElOnlyChild] no valid child node found -->
-      <span></span>
+    <ElDropdown ref="dropdown" popper-class="arrow-hide" trigger="click" :tabindex="-1" @command="handleDropdown">
+      <!-- 菜单由页签右键操作打开；空定位节点不进入键盘顺序或可访问树。 -->
+      <span aria-hidden="true"></span>
       <template #dropdown>
         <ElDropdownMenu>
           <ElDropdownItem
