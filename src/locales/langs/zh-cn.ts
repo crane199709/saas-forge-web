@@ -90,6 +90,7 @@ const local: App.I18n.Schema = {
       REVOKE: '吊销'
     },
     errors: {
+      overlap: 'Secret 重叠窗口尚未结束，请等待服务器允许轮换后重试。',
       invalid: '服务响应无法确认，请刷新核查。',
       unavailable: '请求未能确认，请核查原操作，不要重复签发。',
       forbidden: '当前身份或凭据状态不允许此操作。',

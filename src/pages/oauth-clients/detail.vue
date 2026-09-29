@@ -53,9 +53,19 @@ async function act(action: 'ROTATE' | 'REVOKE') {
     if (action === 'ROTATE')
       await workspace.rotate(current.client.clientId, current.client.displayName, actionController.signal);
     else await workspace.revoke(current.client.clientId, current.client.displayName, actionController.signal);
+    const overlapRejected = workspace.state.problem === 'overlap';
     if (!actionController.signal.aborted) {
       await read();
       await workspace.checkOperations();
+      if (
+        !actionController.signal.aborted &&
+        overlapRejected &&
+        enabled.value &&
+        value.value &&
+        !problem.value &&
+        !workspace.state.problem
+      )
+        problem.value = 'overlap';
     }
   } catch {
     /* 取消确认不发送写请求。 */

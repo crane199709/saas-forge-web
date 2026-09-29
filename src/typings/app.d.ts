@@ -380,6 +380,7 @@ declare namespace App {
           REVOKE: string;
         };
         errors: {
+          overlap: string;
           invalid: string;
           unavailable: string;
           forbidden: string;

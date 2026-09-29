@@ -11,7 +11,15 @@ import type { SessionView } from '../../runtime/console-session';
 type Session = { readonly state: SessionView; subscribe(listener: (state: SessionView) => void): () => void };
 type Action = 'CREATE' | 'ROTATE' | 'REVOKE';
 type Pending = { action: Action; displayName: string; clientId?: string; startedAt: Date };
-export type OAuthProblem = 'invalid' | 'unavailable' | 'forbidden' | 'notFound' | 'stale' | 'pending' | 'input';
+export type OAuthProblem =
+  | 'invalid'
+  | 'unavailable'
+  | 'forbidden'
+  | 'notFound'
+  | 'stale'
+  | 'pending'
+  | 'input'
+  | 'overlap';
 export class OAuthFailure extends Error {
   constructor(readonly code: OAuthProblem) {
     super(code);
@@ -403,6 +411,12 @@ export class OAuthWorkspace {
       !this.blocked(action, target)
     );
   }
+  private discardRejectedRotation(error: unknown, target: string) {
+    // 服务端明确拒绝轮换，未签发新 Secret；其他未知结果仍保留原操作锁。
+    if (oauthFailure(error) !== 'overlap') return;
+    this.attempts.delete(`ROTATE:${target}`);
+    this.saveAttempts();
+  }
   private async mutate(
     request: { action: Action; target: string; displayName: string; scopes?: RuntimeScope[] },
     signal?: AbortSignal
@@ -441,12 +455,23 @@ export class OAuthWorkspace {
       } else {
         const result = resource(
           await this.call(async options => {
-            const response = await (action === 'CREATE'
-              ? this.api.createOAuthClientRaw(
-                  { idempotencyKey: key, createOAuthClientRequest: { displayName, allowedScopes: new Set(scopes) } },
-                  options
-                )
-              : this.api.rotateOAuthClientSecretRaw({ clientId: target, idempotencyKey: key }, options));
+            const response = await (
+              action === 'CREATE'
+                ? this.api.createOAuthClientRaw(
+                    { idempotencyKey: key, createOAuthClientRequest: { displayName, allowedScopes: new Set(scopes) } },
+                    options
+                  )
+                : this.api.rotateOAuthClientSecretRaw({ clientId: target, idempotencyKey: key }, options)
+            ).catch(async error => {
+              if (action === 'ROTATE' && error instanceof ResponseError && error.response.status === 409) {
+                const problem = await error.response
+                  .clone()
+                  .json()
+                  .catch(() => undefined);
+                if (problem?.code === 'CLIENT_SECRET_ROTATION_OVERLAP_ACTIVE') throw new OAuthFailure('overlap');
+              }
+              throw error;
+            });
             valid(response.raw.status === (action === 'CREATE' ? 201 : 200));
             return response.value();
           }, signal)
@@ -471,7 +496,10 @@ export class OAuthWorkspace {
       this.publish({ checked: false });
       return true;
     } catch (error) {
-      if (generation === this.generation) this.publish({ problem: oauthFailure(error), checked: false });
+      if (generation === this.generation) {
+        this.discardRejectedRotation(error, target);
+        this.publish({ problem: oauthFailure(error), checked: false });
+      }
       return false;
     } finally {
       if (generation === this.generation) this.publish({ busy: false });

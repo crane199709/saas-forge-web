@@ -68,6 +68,8 @@ watch(enabled, value => {
     </ElButton>
     <ElTable
       :data="state.operations"
+      class="oauth-operations"
+      :scrollbar-tabindex="0"
       row-key="operationId"
       :empty-text="$t('oauth.noOperations')"
       :aria-label="$t('oauth.recovery')"
@@ -121,3 +123,9 @@ watch(enabled, value => {
     </ElDialog>
   </section>
 </template>
+
+<style scoped>
+.oauth-operations {
+  --el-table-header-text-color: var(--el-text-color-regular);
+}
+</style>

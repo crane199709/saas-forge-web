@@ -95,6 +95,7 @@ const local: App.I18n.Schema = {
       REVOKE: 'Revoke'
     },
     errors: {
+      overlap: 'The Secret overlap window is still active. Wait until the server permits another rotation.',
       invalid: 'The service response could not be verified. Refresh to check.',
       unavailable: 'The result could not be confirmed. Check the original operation; do not issue again.',
       forbidden: 'Your identity or credential state does not permit this operation.',
