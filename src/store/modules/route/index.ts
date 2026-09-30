@@ -1,10 +1,11 @@
-import { computed, h, nextTick, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, watch } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 import { defineStore } from 'pinia';
 import { useBoolean } from '@sa/hooks';
 import type { CustomRoute, ElegantConstRoute, LastLevelRouteKey, RouteKey, RouteMap } from '@elegant-router/types';
 import { router } from '@/router';
 import { fetchGetConstantRoutes, fetchGetUserRoutes, fetchIsRouteExist } from '@/service/api';
+import { useSvgIcon } from '@/hooks/common/icon';
 import { consoleState } from '@/runtime/console';
 import { SetupStoreId } from '@/enum';
 import { $t } from '@/locales';
@@ -26,6 +27,7 @@ import {
 } from './shared';
 
 export const useRouteStore = defineStore(SetupStoreId.Route, () => {
+  const { SvgIconVNode } = useSvgIcon();
   const authStore = useAuthStore();
   const tabStore = useTabStore();
   const { bool: isInitConstantRoute, setBool: setIsInitConstantRoute } = useBoolean();
@@ -88,7 +90,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
       i18nKey: 'route.home',
       routeKey: 'home',
       routePath: '/home',
-      icon: () => h('span', { class: 'i-mdi-home-outline' })
+      icon: SvgIconVNode({ icon: 'mdi:home-outline', fontSize: 20 })
     }
   ]);
   watch(
@@ -103,7 +105,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
               i18nKey: tenant ? 'console.tenant' : 'console.home',
               routeKey: tenant ? 'workbench' : 'home',
               routePath: tenant ? '/workbench' : '/home',
-              icon: () => h('span', { class: 'i-mdi-home-outline' })
+              icon: SvgIconVNode({ icon: 'mdi:home-outline', fontSize: 20 })
             },
             ...(!tenant
               ? [
@@ -113,7 +115,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     i18nKey: 'tenants.title' as const,
                     routeKey: 'tenants' as const,
                     routePath: '/tenants' as const,
-                    icon: () => h('span', { class: 'i-mdi-domain' })
+                    icon: SvgIconVNode({ icon: 'mdi:domain', fontSize: 20 })
                   },
                   {
                     key: 'quota-definitions',
@@ -121,7 +123,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     i18nKey: 'entitlements.quota.title' as const,
                     routeKey: 'quota-definitions' as const,
                     routePath: '/quota-definitions' as const,
-                    icon: () => h('span', { class: 'i-mdi-counter' })
+                    icon: SvgIconVNode({ icon: 'mdi:counter', fontSize: 20 })
                   },
                   {
                     key: 'oauth-clients',
@@ -129,7 +131,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     i18nKey: 'oauth.title' as const,
                     routeKey: 'oauth-clients' as const,
                     routePath: '/oauth-clients' as const,
-                    icon: () => h('span', { class: 'i-mdi-key-outline' })
+                    icon: SvgIconVNode({ icon: 'mdi:key-outline', fontSize: 20 })
                   },
                   {
                     key: 'plans',
@@ -137,7 +139,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     i18nKey: 'entitlements.plan.title' as const,
                     routeKey: 'plans' as const,
                     routePath: '/plans' as const,
-                    icon: () => h('span', { class: 'i-mdi-package-variant' })
+                    icon: SvgIconVNode({ icon: 'mdi:package-variant', fontSize: 20 })
                   }
                 ]
               : [])

@@ -20,11 +20,13 @@ const hasChildren = item.children && item.children.length > 0;
     </template>
     <MenuItem v-for="child in item.children" :key="child.key" :item="child" :index="child.key"></MenuItem>
   </ElSubMenu>
-  <ElMenuItem v-else :class="{ 'tenant-brand-menu-item': consoleState.brand }">
+  <ElMenuItem v-else :aria-label="item.label" :class="{ 'tenant-brand-menu-item': consoleState.brand }">
     <ElIcon>
       <component :is="item.icon" />
     </ElIcon>
-    <span class="ib-ellipsis">{{ item.label }}</span>
+    <template #title>
+      <span class="ib-ellipsis">{{ item.label }}</span>
+    </template>
   </ElMenuItem>
 </template>
 

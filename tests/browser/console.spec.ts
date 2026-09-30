@@ -425,3 +425,54 @@ for (const routeName of ['tenants', 'oauth-clients', 'plans', 'quota-definitions
     });
   }
 }
+
+for (const locale of ['zh-CN', 'en']) {
+  test(`collapsed sidebar reveals menu names ${locale}`, async ({ context, page }, testInfo) => {
+    const state = await prepare(context, { locale, authenticated: true });
+    const chinese = locale === 'zh-CN';
+    await page.goto(`${origin}/home`);
+    const menu = page.getByRole('menubar');
+    const tenantItem = menu.getByRole('menuitem').nth(1);
+    const name = chinese ? '租户管理' : 'Tenants';
+    await expect(tenantItem).toHaveText(name);
+    const names = await menu.getByRole('menuitem').allTextContents();
+    await page.getByRole('button', { name: chinese ? '折叠菜单' : 'Collapse Menu', exact: true }).click();
+    await expect(menu).toHaveClass(/el-menu--collapse/);
+    /* eslint-disable no-await-in-loop -- 菜单悬停需串行，避免覆盖前一个名称提示。 */
+    for (const [index, label] of names.entries()) {
+      const item = menu.getByRole('menuitem').nth(index);
+      await expect(item).toHaveAccessibleName(label);
+      await item.hover();
+      await expect(page.getByRole('tooltip', { name: label, exact: true })).toBeVisible();
+    }
+    /* eslint-enable no-await-in-loop */
+    await tenantItem.hover();
+    await expect(page.getByRole('tooltip', { name, exact: true })).toBeVisible();
+    await expect(page.getByRole('tooltip')).toHaveCount(1);
+    await page.screenshot({ path: testInfo.outputPath('collapsed-menu.png') });
+    await tenantItem.click();
+    await expect(page).toHaveURL(`${origin}/tenants`);
+    await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+    await stable(page);
+    await audit(page);
+    expect(state.errors).toEqual([]);
+    expect(state.unexpected).toEqual([]);
+  });
+}
+
+test('collapsed sidebar keeps a visible icon for each menu entry', async ({ context, page }) => {
+  await prepare(context, { authenticated: true });
+  await page.goto(`${origin}/home`);
+  await page.getByRole('button', { name: '折叠菜单', exact: true }).click();
+  const entries = page.getByRole('menubar').getByRole('menuitem');
+  await expect(entries).toHaveCount(5);
+  await Promise.all(
+    (await entries.all()).map(async item => {
+      const icon = item.locator('.el-icon > *').first();
+      await expect(icon).toBeVisible();
+      const box = await icon.boundingBox();
+      expect(box!.width).toBeGreaterThan(0);
+      expect(box!.height).toBeGreaterThan(0);
+    })
+  );
+});
