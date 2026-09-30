@@ -127,7 +127,12 @@ export async function verifyStage2MainChain(h) {
   assert.ok(Date.now() < expiresAt);
   await probe(oldToken, 401, 'ACCESS_TOKEN_INVALID');
   await button(adminPage, '解除冻结').click();
+  const resumed = adminPage.waitForResponse(
+    response => new URL(response.url()).pathname === suspensionPath && response.request().method() === 'DELETE'
+  );
   await button(adminPage.getByRole('dialog'), '确认').click();
+  // 按钮可能在请求完成前出现；新登录必须等权威解除冻结响应提交完成。
+  assert.equal((await resumed).status(), 200);
   await button(adminPage, '冻结租户').waitFor();
   assert.ok(Date.now() < expiresAt);
   await probe(oldToken, 401, 'ACCESS_TOKEN_INVALID');

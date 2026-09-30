@@ -19,3 +19,5 @@ SF_STAGE2_CONFIG=/absolute/private-config.json node scripts/verify-stage2.mjs /a
 `scripts/stage2-aggregate.mjs` 也可单独接收 manifest 路径和新的输出文件，用于复核已经完成的同轮产物。它验证 runId、handoff、代码/Client/Chrome 来源、驱动散列、各必需场景、Audit 观察文件与 Runtime 输入散列；单测的合成报告只证明判定行为，不是浏览器验收。
 
 OAuth 到期结果必须标记为受保护时间状态注入；接收端仅证明非生产平台机制。完整 CI、实际浏览器结果、精确时间边界测试分别记录，不能相互替代。四项标准未全部通过时，不勾选开发计划或更新通过记录。
+
+第二操作者通过页面选择平台身份，并核对正式 Token 的 `identityId` 与主操作者不同；无论恢复验证成功或失败，都尝试经页面退出。登录结果或退出未确认会使验收失败，环境方仍须独立核对临时角色恢复回执。OAuth 报告保留固定阶段标识，待处理响应体最多等待 30 秒；超时保存失败终态，不将等待超时当作成功。

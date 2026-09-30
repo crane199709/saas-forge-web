@@ -65,6 +65,19 @@ function save() {
   for (const material of materials) assert.ok(!value.includes(material), 'EVIDENCE_CONTAINS_SECRET');
   writeFileSync(resolve(output, 'oauth.json'), `${value}\n`, { mode: 0o600 });
 }
+async function drainResponses() {
+  let timeout;
+  try {
+    await Promise.race([
+      Promise.all(pending),
+      new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(new Error('RESPONSE_BODY_TIMEOUT')), 30000);
+      })
+    ]);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 const pass = (name, facts = {}) => {
   report.checks.push({ name, status: 'passed', ...facts });
   save();
@@ -342,7 +355,7 @@ try {
   client = await create(page, 'rotation');
   await storageClean(ctx);
   await closeSecret(page);
-  await Promise.all(pending);
+  await drainResponses();
   assert.ok(adminToken);
   const replay = await probe(
     '/api/v1/platform/oauth-clients',
@@ -527,50 +540,87 @@ try {
 
   if (config.stage2) {
     let actorContext;
+    let actorPage;
+    let actorEmail;
+    let actorLoginAttempted = false;
     let otherActorToken;
-    if (config.otherActorAuthorized) {
-      assert.equal(statSync(config.otherActorFile).mode % 64, 0);
-      const actor = JSON.parse(readFileSync(config.otherActorFile));
-      remember(actor.password);
-      actorContext = await context();
-      actorContext.on('response', response => {
-        if (new URL(response.url()).pathname !== '/api/v2/auth/refresh' || response.status() !== 200) return;
-        const task = response.json().then(body => {
-          otherActorToken = remember(body.accessToken);
-        });
-        pending.add(task);
-        task.finally(() => pending.delete(task));
-      });
-      const actorPage = await actorContext.newPage();
-      await login(actorPage, actor.email, actor.password);
-      await platform(actorPage);
-      await Promise.all(pending);
-    }
-    await verifyStage2OAuthRecovery({
-      page,
-      ctx,
-      handoff,
-      button,
-      input,
-      remember,
-      displayed,
-      closeSecret,
-      credentials,
-      issue,
-      consume,
-      probe,
-      timeState,
-      pass,
-      create,
-      report,
-      otherActorToken,
-      adminToken: () => adminToken,
-      currentPhase: () => phase,
-      phase: value => {
-        phase = value;
+    async function cleanupActor() {
+      try {
+        if (actorLoginAttempted) {
+          assert.equal(await input(actorPage, '邮箱').isVisible(), false, 'OTHER_ACTOR_SESSION_CLEANUP_UNCONFIRMED');
+          await actorPage.getByText(actorEmail, { exact: true }).first().click();
+          await actorPage.getByRole('menuitem', { name: '退出登录', exact: true }).click();
+          await button(actorPage.getByRole('dialog'), '确认').click();
+          await input(actorPage, '邮箱').waitFor();
+        }
+        report.otherActorSessionCleanup = { status: 'passed' };
+      } catch (error) {
+        report.otherActorSessionCleanup = { status: 'failed', kind: error.name };
+        throw error;
+      } finally {
+        await actorContext?.close();
       }
-    });
-    await actorContext?.close();
+    }
+    try {
+      if (config.otherActorAuthorized) {
+        phase = 'other-actor-platform-login';
+        report.phase = phase;
+        save();
+        assert.equal(statSync(config.otherActorFile).mode % 64, 0);
+        const actor = JSON.parse(readFileSync(config.otherActorFile));
+        remember(actor.password);
+        actorContext = await context();
+        actorContext.on('response', response => {
+          if (new URL(response.url()).pathname !== '/api/v2/auth/refresh' || response.status() !== 200) return;
+          const task = response.json().then(body => {
+            otherActorToken = remember(body.accessToken);
+          });
+          pending.add(task);
+          task.finally(() => pending.delete(task));
+        });
+        actorEmail = actor.email;
+        actorPage = await actorContext.newPage();
+        actorLoginAttempted = true;
+        await login(actorPage, actor.email, actor.password);
+        await platform(actorPage);
+        report.phase = 'other-actor-response-bodies';
+        save();
+        await drainResponses();
+        const identity = token => JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()).identityId;
+        assert.match(identity(otherActorToken), /^[0-9a-f-]{36}$/);
+        assert.match(identity(adminToken), /^[0-9a-f-]{36}$/);
+        assert.notEqual(identity(otherActorToken), identity(adminToken));
+        report.otherActorPlatformContext = { distinctIdentity: true, selectedThroughConsole: true };
+      }
+      await verifyStage2OAuthRecovery({
+        page,
+        ctx,
+        handoff,
+        button,
+        input,
+        remember,
+        displayed,
+        closeSecret,
+        credentials,
+        issue,
+        consume,
+        probe,
+        timeState,
+        pass,
+        create,
+        report,
+        otherActorToken,
+        adminToken: () => adminToken,
+        currentPhase: () => phase,
+        phase: value => {
+          phase = value;
+          report.phase = phase;
+          save();
+        }
+      });
+    } finally {
+      await cleanupActor();
+    }
   }
 
   phase = 'secret-visible-refresh-leave-session-loss';
@@ -601,7 +651,7 @@ try {
   for (const value of materials) assert.ok(!serviceLogs.includes(value), 'SECRET_IN_SERVICE_LOGS');
   pass('same-run-service-logs-contain-no-known-sensitive-material');
 
-  await Promise.all(pending);
+  await drainResponses();
   const denied = report.requests.filter(r => r.source === 'console' && r.status >= 400);
   assert.equal(denied.length, 1);
   assert.equal(denied[0].code, 'CLIENT_SECRET_ROTATION_OVERLAP_ACTIVE');
@@ -658,7 +708,13 @@ try {
     }
   }
   await browser.close();
-  await Promise.all(pending);
+  try {
+    await drainResponses();
+  } catch {
+    report.status = 'failed';
+    report.failure ??= { phase, kind: 'ResponseBodyTimeout' };
+    process.exitCode = 1;
+  }
   report.finishedAt = new Date().toISOString();
   save();
 }

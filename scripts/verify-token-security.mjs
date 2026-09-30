@@ -201,6 +201,7 @@ async function context() {
         .json()
         .then(body => {
           record.code = body.code;
+          record.traceId = body.traceId;
         })
         .catch(() => {
           record.code = 'NON_JSON_ERROR';
@@ -538,6 +539,7 @@ try {
   await owner.close();
   phase = 'redis-failure';
   const recovery = await context();
+  report.redisContextId = contextIds.get(recovery);
   const rp = await recovery.newPage();
   const recoveryToken = observeToken(recovery);
   await login(rp, users[0].email, users[0].password);
@@ -548,7 +550,14 @@ try {
     report.redisStopped = await redis('stopped');
     await Promise.all([...pending]);
     await probe(recoveryToken(), 503, 'TOKEN_REVOCATION_STATUS_UNAVAILABLE');
+    const failedAuth = rp.waitForResponse(
+      response =>
+        /^\/api\/v2\/auth\/(session|refresh)$/.test(new URL(response.url()).pathname) && response.status() === 503,
+      { timeout: 120000 }
+    );
     await rp.reload();
+    const rejection = await (await failedAuth).json();
+    assert.ok(['SESSION_SECURITY_UNAVAILABLE', 'TOKEN_REVOCATION_STATUS_UNAVAILABLE'].includes(rejection.code));
     await rp.getByText('无法确认当前会话，已隐藏受保护内容。', { exact: true }).waitFor({ timeout: 120000 });
     assert.equal(await rp.getByText('邮箱或密码不正确。', { exact: true }).count(), 0);
     assert.equal(await rp.getByRole('heading', { name: '公司工作台', exact: true }).count(), 0);
@@ -619,9 +628,10 @@ try {
       record.status === 401 &&
       record.code === 'SESSION_INVALID') ||
     (record.phase === 'redis-failure' &&
+      record.contextId === report.redisContextId &&
       inWindow(record, { startedAt: report.redisStopped.startedAt, finishedAt: report.redisRestored.finishedAt }) &&
-      record.path === '/api/v2/auth/session' &&
-      record.method === 'GET' &&
+      ((record.path === '/api/v2/auth/session' && record.method === 'GET') ||
+        (record.path === '/api/v2/auth/refresh' && record.method === 'POST')) &&
       record.status === 503 &&
       ['SESSION_SECURITY_UNAVAILABLE', 'TOKEN_REVOCATION_STATUS_UNAVAILABLE'].includes(record.code));
   const unexpected = report.requests.filter(r => r.source !== 'independent-probe' && r.status >= 400 && !expected(r));
