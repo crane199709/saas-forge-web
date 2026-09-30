@@ -14,8 +14,8 @@ async function resume(id: string) {
 </script>
 
 <template>
-  <section :aria-label="$t('entitlements.recovery')" class="mt-24px space-y-16px">
-    <div class="flex items-center justify-between gap-16px">
+  <section :aria-label="$t('entitlements.recovery')" class="space-y-16px">
+    <div class="flex flex-wrap items-center justify-between gap-16px">
       <h2 class="text-18px font-semibold">{{ $t('entitlements.recovery') }}</h2>
       <ElButton :disabled="!enabled || state.busy" @click="workspace.checkOperations()">
         {{ $t('tenants.check') }}
@@ -35,32 +35,36 @@ async function resume(id: string) {
     <p v-else-if="!state.operations.length" role="status">{{ $t('entitlements.noOperations') }}</p>
     <ElTable
       v-if="state.operations.length"
+      class="business-table"
+      border
       :data="state.operations"
       row-key="id"
       :aria-label="$t('entitlements.recovery')"
     >
-      <ElTableColumn :label="$t('entitlements.operation')" min-width="130">
+      <ElTableColumn header-align="center" :label="$t('entitlements.operation')" align="center" min-width="130">
         <template #default="{ row }">
           <template v-if="row.operation">
             {{ $t(`entitlements.actions.${row.operation as 'CREATE' | 'ACTIVATE'}`) }}
           </template>
         </template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('entitlements.target')" min-width="180">
+      <ElTableColumn align="left" header-align="center" :label="$t('entitlements.target')" min-width="180">
         <template #default="{ row }">{{ row.code || resourceId(row) || 'max_users' }}</template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('tenants.createdAt')" min-width="210">
+      <ElTableColumn align="left" header-align="center" :label="$t('tenants.createdAt')" min-width="210">
         <template #default="{ row }">{{ row.createdAt ? instant(row.createdAt) : '' }}</template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('tenants.status')" min-width="120">
+      <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="120">
         <template #default="{ row }">
           <template v-if="row.state">{{ $t(`tenants.states.${row.state as OperationView['state']}`) }}</template>
         </template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('common.action')" align="right" fixed="right" width="160">
+      <ElTableColumn header-align="center" :label="$t('common.action')" align="center" fixed="right" width="220">
         <template #default="{ row }">
           <ElButton
             v-if="row.state === 'COMMITTED'"
+            plain
+            size="small"
             :disabled="!enabled || state.busy"
             @click="emit('view', resourceId(row)!)"
           >
@@ -68,6 +72,9 @@ async function resume(id: string) {
           </ElButton>
           <ElButton
             v-else-if="row.canReplay"
+            type="success"
+            plain
+            size="small"
             :disabled="!enabled || state.busy || !state.checked"
             @click="resume(row.id)"
           >

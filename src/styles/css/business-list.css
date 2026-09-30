@@ -1,0 +1,8 @@
+.el-table.business-table .cell {
+  padding-inline: 12px;
+}
+
+.business-table .el-button:focus-visible {
+  outline: 2px solid var(--el-color-primary);
+  outline-offset: 2px;
+}

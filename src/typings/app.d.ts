@@ -653,6 +653,7 @@ declare namespace App {
         updateCancel: string;
       };
       common: {
+        appliedFilters: string;
         action: string;
         add: string;
         addSuccess: string;

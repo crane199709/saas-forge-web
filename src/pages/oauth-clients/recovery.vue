@@ -43,7 +43,7 @@ watch(enabled, value => {
 </script>
 
 <template>
-  <section :aria-label="$t('oauth.recovery')" class="space-y-12px">
+  <section :aria-label="$t('oauth.recovery')" class="space-y-16px">
     <h2 id="oauth-recovery-heading" ref="heading" tabindex="-1" class="text-18px font-semibold">
       {{ $t('oauth.recovery') }}
     </h2>
@@ -67,34 +67,47 @@ watch(enabled, value => {
       {{ $t('common.refresh') }}
     </ElButton>
     <ElTable
+      border
       :data="state.operations"
-      class="oauth-operations"
+      class="business-table oauth-operations"
       :scrollbar-tabindex="0"
       row-key="operationId"
       :empty-text="$t('oauth.noOperations')"
       :aria-label="$t('oauth.recovery')"
     >
-      <ElTableColumn prop="displayName" :label="$t('oauth.name')" min-width="140" />
-      <ElTableColumn :label="$t('common.action')" min-width="100">
+      <ElTableColumn align="left" header-align="center" prop="displayName" :label="$t('oauth.name')" min-width="140" />
+      <ElTableColumn header-align="center" align="center" :label="$t('common.action')" min-width="100">
         <template #default="{ row }">{{ row.action ? $t(`oauth.actions.${row.action as 'CREATE'}`) : '' }}</template>
       </ElTableColumn>
-      <ElTableColumn prop="operationId" :label="$t('oauth.operationId')" min-width="300" />
-      <ElTableColumn prop="clientId" :label="$t('oauth.id')" min-width="300" />
-      <ElTableColumn :label="$t('oauth.completedAt')" min-width="210">
+      <ElTableColumn
+        align="left"
+        header-align="center"
+        prop="operationId"
+        :label="$t('oauth.operationId')"
+        min-width="300"
+      />
+      <ElTableColumn align="left" header-align="center" prop="clientId" :label="$t('oauth.id')" min-width="300" />
+      <ElTableColumn align="left" header-align="center" :label="$t('oauth.completedAt')" min-width="210">
         <template #default="{ row }">{{ row.completedAt ? instant(row.completedAt) : '' }}</template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('oauth.recoveryUntil')" min-width="210">
+      <ElTableColumn align="left" header-align="center" :label="$t('oauth.recoveryUntil')" min-width="210">
         <template #default="{ row }">{{ row.recoveryUntil ? instant(row.recoveryUntil) : '—' }}</template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('oauth.recoverable')" min-width="120">
+      <ElTableColumn header-align="center" :label="$t('oauth.recoverable')" align="center" min-width="120">
         <template #default="{ row }">
           {{ row.canRecover === undefined ? '' : $t(row.canRecover ? 'oauth.yes' : 'oauth.no') }}
         </template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('common.action')" min-width="180" fixed="right">
+      <ElTableColumn header-align="center" align="center" :label="$t('common.action')" min-width="180" fixed="right">
         <template #default="{ row }">
           <span v-if="state.recoveryPending.includes(row.operationId)" role="status">{{ $t('oauth.unknown') }}</span>
-          <ElButton :disabled="!enabled || !workspace.canRecover(row.operationId)" @click="confirm(row, $event)">
+          <ElButton
+            type="success"
+            plain
+            size="small"
+            :disabled="!enabled || !workspace.canRecover(row.operationId)"
+            @click="confirm(row, $event)"
+          >
             {{ $t('oauth.actions.RECOVER') }}
           </ElButton>
         </template>
@@ -116,7 +129,7 @@ watch(enabled, value => {
       </template>
       <template #footer>
         <ElButton @click="selected = undefined">{{ $t('common.cancel') }}</ElButton>
-        <ElButton type="primary" :disabled="!selected || !workspace.canRecover(selected.operationId)" @click="recover">
+        <ElButton type="success" :disabled="!selected || !workspace.canRecover(selected.operationId)" @click="recover">
           {{ $t('oauth.actions.RECOVER') }}
         </ElButton>
       </template>

@@ -274,3 +274,154 @@ test('runtime error guard observes an already created page', async ({ context, p
   await expect.poll(() => state.errors).toEqual(['UI_ERROR_GUARD_PROBE', 'Error']);
   expect(state.unexpected).toEqual([]);
 });
+
+for (const routeName of ['tenants', 'oauth-clients', 'plans', 'quota-definitions']) {
+  for (const locale of ['en', 'zh-CN']) {
+    test(`business lists ${routeName} ${locale}: folding preserves drafts and applied cursor query`, async ({
+      context,
+      page
+    }, testInfo) => {
+      const state = await prepare(context, { locale, authenticated: true });
+      const chinese = locale === 'zh-CN';
+      const listPath = `/api/v1/platform/${routeName}`;
+      const queries: URL[] = [];
+      const record = {
+        id: '019944ca-0000-7000-8000-000000000005',
+        displayName: 'Pending company',
+        code: 'pending',
+        operation: 'CREATE',
+        state: 'NOT_COMMITTED',
+        canReplay: true,
+        createdAt: tenant.createdAt,
+        replayUntil: '2099-01-02T01:30:00Z',
+        idempotencyKey: '019944ca-0000-7000-8000-000000000006'
+      };
+      const resources: Record<string, unknown> = {
+        tenants: tenant,
+        'oauth-clients': {
+          clientId: tenant.id,
+          displayName: 'Example Client',
+          allowedScopes: ['runtime:read'],
+          clientType: 'RUNTIME_SERVICE',
+          status: 'ACTIVE',
+          createdAt: tenant.createdAt,
+          updatedAt: tenant.updatedAt
+        }
+      };
+      const resource = resources[routeName] ?? {
+        id: tenant.id,
+        code: 'example',
+        displayName: 'Example Plan',
+        quotaLimits: [],
+        status: 'ACTIVE',
+        createdAt: tenant.createdAt,
+        updatedAt: tenant.updatedAt
+      };
+      await context.route('https://api.ui.test/api/v1/platform/**', async route => {
+        const url = new URL(route.request().url());
+        if (url.pathname === listPath) {
+          queries.push(url);
+          const last = url.searchParams.has('cursor');
+          await route.fulfill({ json: { items: [resource], hasMore: !last, nextCursor: last ? null : 'next-page' } });
+        } else if (
+          url.pathname.endsWith('/tenant-creations') ||
+          url.pathname.endsWith('/plan-operations') ||
+          url.pathname.endsWith('/quota-definition-operations')
+        ) {
+          await route.fulfill({ json: { items: [record], hasMore: false, nextCursor: null } });
+        } else if (url.pathname.endsWith('/oauth-client-operations')) {
+          await route.fulfill({
+            json: {
+              items: [
+                {
+                  operationId: record.id,
+                  clientId: tenant.id,
+                  displayName: 'Recoverable Client',
+                  action: 'CREATE',
+                  completedAt: tenant.createdAt,
+                  recoveryUntil: record.replayUntil,
+                  canRecover: true
+                }
+              ],
+              hasMore: false,
+              nextCursor: null
+            }
+          });
+        } else await route.fallback();
+      });
+      await page.setViewportSize({ width: chinese ? 1024 : 1440, height: 1000 });
+      await page.goto(`${origin}/${routeName}`);
+      await expect(
+        page
+          .locator('.el-table__body-wrapper')
+          .first()
+          .getByRole('button', { name: chinese ? '查看详情' : 'View details', exact: true })
+      ).toBeVisible();
+      await expect.poll(() => queries.length).toBe(1);
+      if (chinese) await page.getByRole('button', { name: '主题模式', exact: true }).click();
+      await stable(page);
+      const fold = page.getByRole('button', { name: /^(Filter |筛选)/ });
+      const search = page.getByRole('main').getByRole('button', { name: chinese ? '搜索' : 'Search', exact: true });
+      await expect(fold).toHaveAttribute('aria-expanded', 'false');
+      await expect(search).not.toBeVisible();
+      await fold.focus();
+      await page.keyboard.press('Enter');
+      await expect(fold).toHaveAttribute('aria-expanded', 'true');
+      const field = page.getByRole('form').getByRole('textbox').first();
+      await field.fill('example');
+      await fold.click();
+      await expect(search).not.toBeVisible();
+      await expect(fold).not.toContainText(chinese ? '已应用' : 'Applied filters');
+      expect(queries).toHaveLength(1);
+      await fold.click();
+      await expect(field).toHaveValue('example');
+      await search.click();
+      await expect.poll(() => queries.length).toBe(2);
+      await expect(fold).toContainText(chinese ? '已应用 1 项筛选' : 'Applied filters: 1');
+      const key = ['tenants', 'oauth-clients'].includes(routeName) ? 'name' : 'code';
+      expect(queries[1].searchParams.get(key)).toBe('example');
+      expect(queries[1].searchParams.has('cursor')).toBe(false);
+      await field.fill('unsubmitted');
+      await fold.click();
+      await page.getByRole('button', { name: chinese ? '下一页' : 'Next', exact: true }).click();
+      await expect.poll(() => queries.length).toBe(3);
+      expect(queries[2].searchParams.get(key)).toBe('example');
+      expect(queries[2].searchParams.get('cursor')).toBe('next-page');
+      await fold.click();
+      await expect(field).toHaveValue('unsubmitted');
+      await page.getByRole('button', { name: chinese ? '重置' : 'Reset', exact: true }).click();
+      await expect.poll(() => queries.length).toBe(4);
+      expect(queries[3].searchParams.has(key)).toBe(false);
+      expect(queries[3].searchParams.has('cursor')).toBe(false);
+      await expect(field).toHaveValue('');
+      await expect(fold).not.toContainText(chinese ? '已应用' : 'Applied filters');
+      await stable(page);
+      const headers = page.locator('.el-table__header-wrapper th');
+      expect(await headers.count()).toBeGreaterThan(0);
+      expect(
+        await headers.evaluateAll(nodes => nodes.every(node => getComputedStyle(node).textAlign === 'center'))
+      ).toBe(true);
+      await expect(page.locator('.el-table__body-wrapper').first().locator('td').first()).toHaveCSS(
+        'text-align',
+        'left'
+      );
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      expect(
+        await page.locator('.business-table td button').evaluateAll(buttons =>
+          buttons.every(button => {
+            const cell = button.closest('td')!.getBoundingClientRect();
+            const box = button.getBoundingClientRect();
+            return box.left >= cell.left && box.right <= cell.right;
+          })
+        )
+      ).toBe(true);
+      await audit(page);
+      await page.screenshot({ path: testInfo.outputPath('expanded.png'), fullPage: true });
+      await fold.click();
+      await expect(fold).toHaveAttribute('aria-expanded', 'false');
+      await page.screenshot({ path: testInfo.outputPath('collapsed.png'), fullPage: true });
+      expect(state.errors).toEqual([]);
+      expect(state.unexpected).toEqual([]);
+    });
+  }
+}

@@ -162,25 +162,36 @@ onUnmounted(() => {
       <h3 class="mb-8px text-16px font-semibold">{{ $t('subscriptions.operations') }}</h3>
       <p>{{ $t('subscriptions.recoveryHint') }}</p>
       <ElTable
+        class="business-table"
+        border
         :data="current ? state.operations : []"
         row-key="id"
         :empty-text="$t(state.operationsChecked ? 'subscriptions.noOperations' : 'subscriptions.unchecked')"
         :aria-label="$t('subscriptions.operations')"
       >
-        <ElTableColumn prop="id" :label="$t('subscriptions.operationId')" min-width="300" />
-        <ElTableColumn :label="$t('tenants.status')" min-width="120">
+        <ElTableColumn
+          align="left"
+          header-align="center"
+          prop="id"
+          :label="$t('subscriptions.operationId')"
+          min-width="300"
+        />
+        <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="120">
           <template #default="{ row }">{{ row.state ? stateText(row.state) : '' }}</template>
         </ElTableColumn>
-        <ElTableColumn :label="$t('tenants.createdAt')" min-width="210">
+        <ElTableColumn align="left" header-align="center" :label="$t('tenants.createdAt')" min-width="210">
           <template #default="{ row }">{{ row.createdAt ? instant(row.createdAt) : '' }}</template>
         </ElTableColumn>
-        <ElTableColumn :label="$t('subscriptions.replayUntil')" min-width="210">
+        <ElTableColumn align="left" header-align="center" :label="$t('subscriptions.replayUntil')" min-width="210">
           <template #default="{ row }">{{ row.replayUntil ? instant(row.replayUntil) : '' }}</template>
         </ElTableColumn>
-        <ElTableColumn :label="$t('common.action')" align="right" fixed="right" width="160">
+        <ElTableColumn header-align="center" :label="$t('common.action')" align="center" fixed="right" width="220">
           <template #default="{ row }">
             <ElButton
               v-if="row.canReplay"
+              type="success"
+              plain
+              size="small"
               :disabled="!enabled || state.busy || !state.operationsChecked"
               @click="resume(row.id)"
             >

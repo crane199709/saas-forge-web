@@ -98,6 +98,6 @@ onUnmounted(() => {
         </ElButton>
       </div>
     </ElForm>
-    <Recovery @view="view" />
+    <Recovery class="mt-24px" @view="view" />
   </ElDrawer>
 </template>

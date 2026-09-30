@@ -148,6 +148,6 @@ onUnmounted(() => {
     <p v-if="eligible && state.checked && !canActivate && !state.busy" class="mt-16px" role="status">
       {{ $t('entitlements.errors.pending') }}
     </p>
-    <Recovery :kind="kind" @view="view" />
+    <Recovery class="mt-24px" :kind="kind" @view="view" />
   </ElCard>
 </template>

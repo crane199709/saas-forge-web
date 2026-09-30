@@ -223,6 +223,6 @@ onUnmounted(() => {
         </ElButton>
       </div>
     </ElForm>
-    <Recovery :kind="kind" @view="viewRecord" />
+    <Recovery class="mt-24px" :kind="kind" @view="viewRecord" />
   </ElDrawer>
 </template>

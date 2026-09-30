@@ -414,6 +414,7 @@ const local: App.I18n.Schema = {
     updateCancel: 'Later'
   },
   common: {
+    appliedFilters: 'Applied filters: {count}',
     action: 'Action',
     add: 'Add',
     addSuccess: 'Add Success',

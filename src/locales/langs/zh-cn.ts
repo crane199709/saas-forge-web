@@ -389,6 +389,7 @@ const local: App.I18n.Schema = {
     updateCancel: '稍后再说'
   },
   common: {
+    appliedFilters: '已应用 {count} 项筛选',
     action: '操作',
     add: '新增',
     addSuccess: '添加成功',
