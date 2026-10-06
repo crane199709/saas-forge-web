@@ -28,6 +28,7 @@ export class OAuthFailure extends Error {
 export const oauthFailure = (error: unknown): OAuthProblem =>
   error instanceof OAuthFailure ? error.code : 'unavailable';
 export const runtimeScopes: RuntimeScope[] = [RuntimeScope.RuntimeRead, RuntimeScope.RuntimeQuotaWrite];
+export const managedScopes: RuntimeScope[] = [...runtimeScopes, RuntimeScope.RemoteDeliveryManifestRegister];
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const date = (value: unknown) => value instanceof Date && Number.isFinite(value.getTime());
 function valid(value: unknown): asserts value {
@@ -228,7 +229,7 @@ export class OAuthWorkspace {
   async detail(id: string, signal?: AbortSignal) {
     valid(uuid.test(id));
     const row = resource(await this.call(options => this.api.getOAuthClient({ clientId: id }, options), signal));
-    valid(row.clientId === id && ['RUNTIME_SERVICE', 'RESERVED_SERVICE'].includes(row.clientType));
+    valid(row.clientId === id && ['RUNTIME_SERVICE', 'RESERVED_SERVICE', 'CI_CLIENT'].includes(row.clientType));
     const status = await this.call(
       options => this.api.getOAuthClientCredentialStatus({ clientId: id }, options),
       signal
@@ -506,12 +507,13 @@ export class OAuthWorkspace {
     }
   }
   create(name: string, scopes: RuntimeScope[], signal?: AbortSignal) {
+    const ciRegistration = scopes.length === 1 && scopes[0] === RuntimeScope.RemoteDeliveryManifestRegister;
     if (
       !name.trim() ||
       name.length > 200 ||
       !scopes.length ||
       new Set(scopes).size !== scopes.length ||
-      scopes.some(value => !runtimeScopes.includes(value))
+      (!ciRegistration && scopes.some(value => !runtimeScopes.includes(value)))
     ) {
       this.publish({ problem: 'input' });
       return Promise.resolve(false);

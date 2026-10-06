@@ -15,4 +15,6 @@ ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
 minimumReleaseAgeExclude:
   - '@crane199709/saas-forge-api-client@0.1.0 || 0.1.1 || 0.2.0 || 0.3.0'
+  # 用户已批准发布并消费此精确版本，制品来自经专项验证的 d436c3c。
+  - '@crane199709/saas-forge-api-client@0.5.0'
 enableGlobalVirtualStore: false

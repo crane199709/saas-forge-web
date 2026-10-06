@@ -3,6 +3,7 @@ import { nextTick, onMounted, useTemplateRef } from 'vue';
 import { consoleState } from '@/runtime/console';
 import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
+import RemoteManifests from './remote-manifests.vue';
 const heading = useTemplateRef<HTMLElement>('heading');
 onMounted(async () => {
   await nextTick();
@@ -32,5 +33,6 @@ onMounted(async () => {
       <h2 class="mb-16px text-18px font-semibold">{{ $t('console.chooseWorkspace') }}</h2>
       <WorkContexts />
     </ElCard>
+    <RemoteManifests />
   </div>
 </template>

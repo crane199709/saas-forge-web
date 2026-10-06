@@ -641,3 +641,33 @@ test('a definitively rejected candidate does not strand a successful original re
     request.mock.restore();
   }
 });
+
+test('CI registration clients use the dedicated scope and reject mixed Runtime grants before writing', async t => {
+  let writes = 0;
+  t.mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    if (url.includes('operations')) return Response.json(page([]));
+    if (init.method === 'POST') {
+      writes += 1;
+      assert.deepEqual(JSON.parse(String(init.body)).allowedScopes, ['remote-delivery:manifest:register']);
+      return Response.json(
+        {
+          ...client,
+          displayName: 'CI',
+          clientType: 'CI_CLIENT',
+          allowedScopes: ['remote-delivery:manifest:register'],
+          clientSecret: 'test-only-secret'
+        },
+        { status: 201 }
+      );
+    }
+    return Response.json({ ...client, clientType: 'CI_CLIENT', allowedScopes: ['remote-delivery:manifest:register'] });
+  });
+  const { workspace } = setup();
+  t.after(() => workspace.dispose());
+  await workspace.checkOperations();
+  assert.equal(await workspace.create('CI', ['runtime:read', 'remote-delivery:manifest:register']), false);
+  assert.equal(writes, 0);
+  assert.equal(await workspace.create('CI', ['remote-delivery:manifest:register']), true);
+  assert.equal(writes, 1);
+  assert.equal(workspace.state.secret?.value, 'test-only-secret');
+});

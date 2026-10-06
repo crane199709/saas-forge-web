@@ -307,7 +307,46 @@ declare namespace App {
         timeout: string;
         language: string;
       };
+      projectRemote: {
+        projects: string;
+        tasks: string;
+        name: string;
+        description: string;
+        title: string;
+        todo: string;
+        inProgress: string;
+        done: string;
+        edit: string;
+        status: string;
+        create: string;
+        save: string;
+        delete: string;
+        select: string;
+        cancel: string;
+        reload: string;
+        next: string;
+        empty: string;
+        failed: string;
+        recover: string;
+        unknown: string;
+      };
+      manifest: {
+        title: string;
+        module: string;
+        version: string;
+        source: string;
+        state: string;
+        approve: string;
+        reject: string;
+        enable: string;
+        pending: string;
+        approved: string;
+        rejected: string;
+        enabled: string;
+      };
       remote: {
+        businessEmpty: string;
+        recoverSession: string;
         acceptance: string;
         title: string;
         form: string;
@@ -372,6 +411,7 @@ declare namespace App {
         types: {
           RUNTIME_SERVICE: string;
           RESERVED_SERVICE: string;
+          CI_CLIENT: string;
         };
         actions: {
           CREATE: string;

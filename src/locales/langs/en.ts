@@ -16,7 +16,46 @@ const local: App.I18n.Schema = {
     timeout: 'Connection timed out. Check the network and service status.',
     language: '中文'
   },
+  manifest: {
+    title: 'Business Remote review and enablement',
+    module: 'Module',
+    version: 'Version',
+    source: 'Source',
+    state: 'State',
+    approve: 'Approve',
+    reject: 'Reject',
+    enable: 'Enable',
+    pending: 'Pending review',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    enabled: 'Enabled'
+  },
+  projectRemote: {
+    projects: 'Projects',
+    tasks: 'Tasks',
+    name: 'Project name',
+    description: 'Description',
+    title: 'Task title',
+    todo: 'To do',
+    inProgress: 'In progress',
+    done: 'Done',
+    edit: 'Edit',
+    status: 'Status',
+    create: 'Create',
+    save: 'Save',
+    delete: 'Delete',
+    select: 'View tasks',
+    cancel: 'Cancel',
+    reload: 'Reload',
+    next: 'Load more',
+    empty: 'No records',
+    failed: 'The operation could not finish. Reload the record or recover your session before retrying.',
+    recover: 'Recover original operation',
+    unknown: 'The original result needs confirmation. Recover it before submitting another write.'
+  },
   remote: {
+    businessEmpty: 'No business modules are enabled.',
+    recoverSession: 'Recover session',
     acceptance: 'Remote consumption acceptance',
     title: 'Design System Remote consumer fixture',
     form: 'Remote consumption verification',
@@ -86,7 +125,8 @@ const local: App.I18n.Schema = {
     },
     types: {
       RUNTIME_SERVICE: 'Runtime service',
-      RESERVED_SERVICE: 'Reserved service'
+      RESERVED_SERVICE: 'Reserved service',
+      CI_CLIENT: 'CI registration client'
     },
     actions: {
       CREATE: 'Create',

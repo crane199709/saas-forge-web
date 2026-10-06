@@ -104,7 +104,7 @@ onUnmounted(() => controller?.abort());
       <ElFormItem :label="$t('oauth.type')">
         <ElSelect v-model="clientType" :aria-label="$t('oauth.type')" clearable class="w-full">
           <ElOption
-            v-for="value in ['RUNTIME_SERVICE', 'RESERVED_SERVICE'] as const"
+            v-for="value in ['RUNTIME_SERVICE', 'RESERVED_SERVICE', 'CI_CLIENT'] as const"
             :key="value"
             :value="value"
             :label="$t(`oauth.types.${value}`)"

@@ -10,18 +10,21 @@ function httpsOrigin(value) {
   if (url.protocol !== 'https:' || url.origin !== value || url.username || url.password)
     throw new Error('ORIGIN_INVALID');
 }
+const coreServices = ['gateway', 'iam-service', 'tenant-access-service', 'entitlement-service', 'audit-service'];
 function checkIsolation(handoff) {
   if (handoff.isolation?.kind === 'fresh-compose') {
     if (
       handoff.isolation.project !== `sf-acceptance-${handoff.runId}` ||
       handoff.isolation.volumes?.length !== 3 ||
-      handoff.backend.images?.length !== 5 ||
+      !Array.isArray(handoff.backend.images) ||
+      handoff.backend.images.length !== (handoff.requiredServices?.length ?? 5) ||
+      coreServices.some(service => !handoff.backend.images.some(image => image.service === service)) ||
       handoff.backend.jdkMajor !== 17
     )
       throw new Error('FRESH_EVIDENCE_MISSING');
   } else if (handoff.isolation?.kind !== 'existing-environment') throw new Error('ISOLATION_INVALID');
 }
-function loadHandoff(path) {
+export function loadHandoff(path) {
   const content = readFileSync(path);
   const handoff = JSON.parse(content);
   if (
@@ -44,6 +47,17 @@ function loadHandoff(path) {
   httpsOrigin(handoff.apiOrigin);
   checkIsolation(handoff);
   return { handoff, handoffSha256: createHash('sha256').update(content).digest('hex') };
+}
+
+export function chromeRouting(handoff) {
+  if (!handoff.edge) return {};
+  const { host, port } = handoff.edge;
+  if (host !== '127.0.0.1' || !Number.isInteger(port) || port < 1 || port > 65535) throw new Error('EDGE_INVALID');
+  const consoleHost = new URL(handoff.consoleOrigin).hostname;
+  if (!consoleHost.startsWith('console.')) throw new Error('ORIGIN_INVALID');
+  const root = consoleHost.slice(8);
+  const rules = ['console', 'api', 'remote', 'platform'].map(label => `MAP ${label}.${root} 127.0.0.1:${port}`);
+  return { args: [`--host-resolver-rules=${rules.join(', ')}`, '--no-proxy-server'] };
 }
 
 function credential(path) {
@@ -76,7 +90,7 @@ async function verify(handoffPath, outputDirectory) {
   const passed = name => report.checks.push({ name, status: 'passed' });
   try {
     const { chromium } = await import(process.env.SF_PLAYWRIGHT_MODULE || 'playwright');
-    browser = await chromium.launch({ channel: 'chrome', headless: true });
+    browser = await chromium.launch({ ...chromeRouting(handoff), channel: 'chrome', headless: true });
     report.chrome = browser.version();
     report.playwright = JSON.parse(
       readFileSync(new URL('./package.json', import.meta.resolve(process.env.SF_PLAYWRIGHT_MODULE || 'playwright')))
@@ -206,16 +220,18 @@ async function verify(handoffPath, outputDirectory) {
   }
 }
 
-try {
-  const [command, ...input] = process.argv.slice(2);
-  const [path, ...extra] = input[0] === '--' ? input.slice(1) : input;
-  if (command === '--check-handoff' && path && !extra.length) {
-    const { handoff } = loadHandoff(path);
-    console.log(JSON.stringify({ runId: handoff.runId, status: 'valid', scope: 'configuration-only' }));
-  } else if (command === '--run' && path && extra.length === 1) await verify(path, extra[0]);
-  else throw new Error('USAGE');
-} catch {
-  // Playwright 错误可能包含输入值或页面文本，不能把原始异常写入验收产物。
-  console.error('BROWSER_CHECK_FAILED: verify handoff, trusted HTTPS, running frontend and credential files');
-  process.exitCode = 1;
+if (process.argv[1] && new URL(`file://${resolve(process.argv[1])}`).href === import.meta.url) {
+  try {
+    const [command, ...input] = process.argv.slice(2);
+    const [path, ...extra] = input[0] === '--' ? input.slice(1) : input;
+    if (command === '--check-handoff' && path && !extra.length) {
+      const { handoff } = loadHandoff(path);
+      console.log(JSON.stringify({ runId: handoff.runId, status: 'valid', scope: 'configuration-only' }));
+    } else if (command === '--run' && path && extra.length === 1) await verify(path, extra[0]);
+    else throw new Error('USAGE');
+  } catch {
+    // Playwright 错误可能包含输入值或页面文本，不能把原始异常写入验收产物。
+    console.error('BROWSER_CHECK_FAILED: verify handoff, trusted HTTPS, running frontend and credential files');
+    process.exitCode = 1;
+  }
 }

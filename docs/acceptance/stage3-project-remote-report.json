@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "kind": "browser",
+  "runId": "4558f7d2-2296-4377-be69-b3de59c4d641",
+  "handoffSha256": "59e738c45f6615afdc2c4445480df24210018ef07376a9e9cf26c23ffb8feac3",
+  "startedAt": "2026-10-06T15:30:29.273Z",
+  "frontend": {
+    "commit": "aa67f6b771c73558d56a9af68c352341b21d7648",
+    "dirty": true,
+    "sourceSha256": "c8eff5e80ce5a7cdf6d04f7f362f1f800a4f4380fbc1680ecfff02f7a212b13d",
+    "lockSha256": "e05ec1b8f4754a6e62de8cb95e31ca85109a6dbd825829d19b8b5f54a8ccc98d"
+  },
+  "client": {
+    "name": "@crane199709/saas-forge-api-client",
+    "version": "0.5.0",
+    "sourceCommit": "d436c3c4bcb80519b50751155e081d086dc1e34b"
+  },
+  "checks": [
+    {
+      "name": "cross-tenant",
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "cross-tenant",
+      "method": "PUT",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "cross-tenant",
+      "method": "DELETE",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "cross-tenant",
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "cross-tenant",
+      "method": "PUT",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "cross-tenant",
+      "method": "DELETE",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "cross-tenant",
+      "method": "POST",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks",
+      "status": "passed",
+      "expectedHttp": 404,
+      "requestAddressTampering": true
+    },
+    {
+      "name": "session-check-retains-draft",
+      "status": "passed",
+      "durationMs": 35000
+    },
+    {
+      "name": "foreign-data-unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "project-task-crud",
+      "status": "passed",
+      "projectId": "01a111d6-86c5-750c-bae2-7fd928cb357d",
+      "taskId": "01a111d6-8814-73a8-a101-5415a8e55d9d"
+    },
+    {
+      "name": "remote-download-failure-recovery",
+      "status": "passed",
+      "fault": "browser-network-abort"
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks/01a111d6-8814-73a8-a101-5415a8e55d9d",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": 404
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks/01a111d6-8814-73a8-a101-5415a8e55d9d",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": 404
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks/01a111d6-8814-73a8-a101-5415a8e55d9d",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks/01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-8925-74ae-91e0-7e3383d4ef42/tasks",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks/01a111d6-8814-73a8-a101-5415a8e55d9d",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d/tasks",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/projects/01a111d6-86c5-750c-bae2-7fd928cb357d",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects",
+      "status": 200
+    }
+  ],
+  "status": "passed",
+  "chromeVersion": "154.0.8037.98",
+  "resources": {
+    "tenantA": {
+      "id": "01a111d6-86c5-750c-bae2-7fd928cb357d",
+      "taskId": "01a111d6-8814-73a8-a101-5415a8e55d9d",
+      "name": "Stage3 A 4010b141 updated"
+    },
+    "tenantB": {
+      "id": "01a111d6-8925-74ae-91e0-7e3383d4ef42",
+      "taskId": "01a111d6-8aa3-7f4e-ad05-ffff33a68a8d",
+      "name": "Stage3 B 4010b141"
+    }
+  },
+  "finishedAt": "2026-10-06T15:31:13.264Z"
+}

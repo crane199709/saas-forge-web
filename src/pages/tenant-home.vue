@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, nextTick, onMounted, useTemplateRef } f
 import { consoleState } from '@/runtime/console';
 import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
+import BusinessRemote from './business-remote.vue';
 
 const RemoteAcceptance =
   import.meta.env.DEV || import.meta.env.MODE === 'static-acceptance'
@@ -42,6 +43,8 @@ onMounted(async () => {
       :key="`${consoleState.snapshot.sessionId}:${consoleState.snapshot.revision}`"
       :enabled="consoleState.status === 'authenticated'"
     />
+    <ElDivider />
+    <BusinessRemote />
     <ElDivider />
     <h2 class="mb-16px text-18px font-semibold">{{ $t('console.chooseWorkspace') }}</h2>
     <WorkContexts />

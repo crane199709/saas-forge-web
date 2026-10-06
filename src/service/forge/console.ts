@@ -3,7 +3,9 @@ import {
   Console,
   OAuthClientsApi,
   PlatformEntitlementBootstrapApi,
-  PlatformTenantsApi
+  PlatformTenantsApi,
+  Project,
+  RemoteManifestsApi
 } from '@crane199709/saas-forge-api-client';
 import { SessionFailure } from '../../runtime/console-session';
 import type { ConsoleTransport } from '../../runtime/console-session';
@@ -14,6 +16,8 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   tenants: PlatformTenantsApi;
   entitlements: PlatformEntitlementBootstrapApi;
   oauth: OAuthClientsApi;
+  projects: Project.DefaultApi;
+  manifests: RemoteManifestsApi;
 } {
   const basePath = requireHttpsOrigin(apiOrigin);
   let token: string | undefined;
@@ -56,6 +60,13 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     headers: { ...businessOptions.headers, 'Content-Type': 'application/json' }
   });
   return {
+    projects: new Project.DefaultApi(
+      new Project.Configuration({
+        ...businessOptions,
+        headers: { ...businessOptions.headers, 'Content-Type': 'application/json' }
+      })
+    ),
+    manifests: new RemoteManifestsApi(jsonConfiguration),
     oauth: new OAuthClientsApi(jsonConfiguration),
     entitlements: new PlatformEntitlementBootstrapApi(businessConfiguration),
     tenants: new PlatformTenantsApi(jsonConfiguration),

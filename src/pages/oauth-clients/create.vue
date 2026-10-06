@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import type { RuntimeScope } from '@crane199709/saas-forge-api-client';
-import { runtimeScopes } from '@/service/forge/oauth-clients';
+import { managedScopes, runtimeScopes } from '@/service/forge/oauth-clients';
 import { $t } from '@/locales';
 import { useOAuth } from './shared';
 import Recovery from './recovery.vue';
@@ -101,7 +101,14 @@ onUnmounted(() => {
           :aria-describedby="invalidScopes ? 'oauth-scopes-error' : undefined"
           :disabled="!enabled || locked"
         >
-          <ElCheckbox v-for="scope in runtimeScopes" :key="scope" :value="scope">{{ scope }}</ElCheckbox>
+          <ElCheckbox
+            v-for="scope in managedScopes"
+            :key="scope"
+            :value="scope"
+            :disabled="scopes.length > 0 && runtimeScopes.includes(scope) !== runtimeScopes.includes(scopes[0])"
+          >
+            {{ scope }}
+          </ElCheckbox>
         </ElCheckboxGroup>
         <p v-if="invalidScopes" id="oauth-scopes-error" role="alert" class="text-error">
           {{ $t('oauth.scopesInvalid') }}

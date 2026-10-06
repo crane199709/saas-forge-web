@@ -14,7 +14,46 @@ const local: App.I18n.Schema = {
     timeout: '连接超时，请检查网络及服务状态。',
     language: 'English'
   },
+  manifest: {
+    title: '业务 Remote 审核与启用',
+    module: '模块',
+    version: '版本',
+    source: '来源',
+    state: '状态',
+    approve: '批准',
+    reject: '拒绝',
+    enable: '启用',
+    pending: '待审核',
+    approved: '已批准',
+    rejected: '已拒绝',
+    enabled: '已启用'
+  },
+  projectRemote: {
+    projects: '项目',
+    tasks: '任务',
+    name: '项目名称',
+    description: '描述',
+    title: '任务标题',
+    todo: '待办',
+    inProgress: '进行中',
+    done: '已完成',
+    edit: '编辑',
+    status: '状态',
+    create: '创建',
+    save: '保存',
+    delete: '删除',
+    select: '查看任务',
+    cancel: '取消',
+    reload: '重新读取',
+    next: '加载更多',
+    empty: '暂无记录',
+    failed: '操作未能完成，请重新读取记录或恢复会话后重试。',
+    recover: '恢复原操作',
+    unknown: '原操作结果待确认，请先恢复，避免重复提交。'
+  },
   remote: {
+    businessEmpty: '暂无已启用的业务模块。',
+    recoverSession: '恢复会话',
     acceptance: 'Remote 消费验收',
     title: 'Design System Remote 消费夹具',
     form: 'Remote 消费验证',
@@ -81,7 +120,8 @@ const local: App.I18n.Schema = {
     },
     types: {
       RUNTIME_SERVICE: '运行时服务',
-      RESERVED_SERVICE: '保留服务'
+      RESERVED_SERVICE: '保留服务',
+      CI_CLIENT: 'CI 注册客户端'
     },
     actions: {
       CREATE: '创建',

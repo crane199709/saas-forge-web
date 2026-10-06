@@ -1,4 +1,6 @@
 import { shallowRef } from 'vue';
+import type { RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
 import { LifecycleWorkspace } from '@/service/forge/lifecycle';
@@ -24,6 +26,8 @@ let initialization: InitializationWorkspace | undefined;
 let subscriptions: SubscriptionWorkspace | undefined;
 let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
+let projectBridge: ReturnType<typeof createProjectHost> | undefined;
+let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -35,6 +39,8 @@ export function consoleRuntime(): ConsoleSessionRuntime {
       key: operationKey,
       resolveBrand: resolveConsoleBrand
     });
+    projectBridge = createProjectHost(transport.projects, runtime, operationKey);
+    manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
       quota: new EntitlementWorkspace('quota', transport.entitlements, { session: runtime, key: operationKey })
@@ -78,6 +84,33 @@ export function consoleRuntime(): ConsoleSessionRuntime {
 export function oauthWorkspace(): OAuthWorkspace {
   consoleRuntime();
   return oauth!;
+}
+
+export function consoleProjectHost() {
+  consoleRuntime();
+  return projectBridge!.host;
+}
+
+export function discoverBusinessRemotes(signal: AbortSignal) {
+  consoleRuntime();
+  return manifests!.listEnabledRemoteManifests({ limit: 100 }, { signal, redirect: 'error' });
+}
+
+export function listRemoteManifests(cursor?: string) {
+  consoleRuntime();
+  return manifests!.listRemoteManifests(
+    { cursor, limit: 20 },
+    { signal: AbortSignal.timeout(8000), redirect: 'error' }
+  );
+}
+
+export function decideRemoteManifest(id: string, action: 'approve' | 'reject' | 'enable', key: string) {
+  consoleRuntime();
+  const request = { id, idempotencyKey: key };
+  const options = { signal: AbortSignal.timeout(8000), redirect: 'error' as const };
+  if (action === 'approve') return manifests!.approveRemoteManifest(request, options);
+  if (action === 'reject') return manifests!.rejectRemoteManifest(request, options);
+  return manifests!.enableRemoteManifest(request, options);
 }
 
 export function subscriptionWorkspace(): SubscriptionWorkspace {
@@ -141,6 +174,7 @@ if (import.meta.hot)
     document.removeEventListener('visibilitychange', verify);
     clearInterval(timer);
     oauth?.dispose();
+    projectBridge?.dispose();
     tenants?.dispose();
     lifecycle?.dispose();
     initialization?.dispose();
