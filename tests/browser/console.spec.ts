@@ -76,6 +76,7 @@ async function prepare(
           '/api/v1/platform/plan-operations',
           '/api/v1/platform/subscription-operations',
           '/api/v1/platform/quota-definitions',
+          '/api/v1/platform/remote-manifests',
           `/api/v1/platform/tenants/${tenant.id}/subscription-operations`
         ].includes(path)
       )
@@ -455,8 +456,8 @@ for (const locale of ['zh-CN', 'en']) {
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
     await stable(page);
     await audit(page);
-    expect(state.errors).toEqual([]);
     expect(state.unexpected).toEqual([]);
+    expect(state.errors).toEqual([]);
   });
 }
 
