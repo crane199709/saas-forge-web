@@ -172,6 +172,16 @@ for (const width of [1440, 1024]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`${origin}/home`);
       await expect(page.getByRole('heading', { name: 'Platform workspace', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Business Remote review and enablement', exact: true })
+      ).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Reload', exact: true })).toBeEnabled();
+      await expect(page.getByText('No records', { exact: true })).toBeVisible();
+      await Promise.all(
+        (await page.getByRole('menubar').getByRole('menuitem').all()).map(item =>
+          expect(item.locator('.el-icon > *').first()).toBeVisible()
+        )
+      );
       if (dark) await page.getByRole('button', { name: 'Theme Schema', exact: true }).click();
       await expect(page.locator('html')).toHaveClass(dark ? /dark/ : /^((?!dark).)*$/);
       await stable(page);
