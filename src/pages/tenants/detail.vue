@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, shallowRef, useTemplateRef } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, useTemplateRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { Tenant } from '@crane199709/saas-forge-api-client';
 import { failureCode } from '@/service/forge/tenants';
@@ -8,6 +8,7 @@ import { tenantWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
 import Subscription from './subscription.vue';
 import Lifecycle from './lifecycle.vue';
+import DetailsEdit from './details-edit.vue';
 import { useTenantDisplay } from './shared';
 defineOptions({ name: 'TenantDetail' });
 const route = useRoute();
@@ -17,6 +18,12 @@ const heading = useTemplateRef<HTMLElement>('heading');
 const tenant = shallowRef<Tenant>();
 const busy = ref(false);
 const problem = ref<TenantFailure['code']>();
+const displayStatus = computed(() => {
+  const current = tenant.value;
+  return current?.status === 'ACTIVE' && current.expiresAt && current.expiresAt.getTime() <= Date.now()
+    ? 'EXPIRED'
+    : (current?.status ?? 'PENDING');
+});
 let controller: AbortController | undefined;
 async function read() {
   controller?.abort();
@@ -59,11 +66,12 @@ onUnmounted(() => controller?.abort());
     <ElDescriptions v-if="tenant" :column="1" border>
       <ElDescriptionsItem :label="$t('tenants.name')">{{ tenant.displayName }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('tenants.id')">{{ tenant.id }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.status')">{{ $t(`tenants.states.${tenant.status}`) }}</ElDescriptionsItem>
+      <ElDescriptionsItem :label="$t('tenants.status')">{{ $t(`tenants.states.${displayStatus}`) }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('tenants.expiresAt')">{{ instant(tenant.expiresAt) }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(tenant.createdAt) }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(tenant.updatedAt) }}</ElDescriptionsItem>
     </ElDescriptions>
+    <DetailsEdit v-if="tenant" :key="tenant.id" :tenant="tenant" @changed="tenant = $event" />
     <Subscription :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
     <Lifecycle :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
   </ElCard>

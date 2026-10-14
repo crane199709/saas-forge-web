@@ -604,6 +604,13 @@ declare namespace App {
       };
       tenants: {
         title: string;
+        edit: {
+          title: string;
+          hint: string;
+          chooseExpiry: string;
+          save: string;
+          unknown: string;
+        };
         create: string;
         closeCreate: string;
         name: string;
@@ -637,6 +644,7 @@ declare namespace App {
         states: {
           PENDING: string;
           ACTIVE: string;
+          EXPIRED: string;
           SUSPENDED: string;
           CLOSED: string;
           COMMITTED: string;
@@ -651,6 +659,9 @@ declare namespace App {
           notFound: string;
           nameInvalid: string;
           stale: string;
+          expiryInvalid: string;
+          lifecycleConflict: string;
+          closed: string;
         };
       };
       console: {
