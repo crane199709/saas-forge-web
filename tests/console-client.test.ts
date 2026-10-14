@@ -33,6 +33,29 @@ test('formal login operation owns CSRF and revision but leaves browser credentia
   }
 });
 
+test('invitation first setup uses the formal anonymous operation without browser-managed headers', async () => {
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    assert.equal(url, 'https://api.example.test/api/v1/invitation-password-setups');
+    assert.equal(init.credentials, 'omit');
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('Idempotency-Key'), '019944ca-0000-7000-8000-000000000003');
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site', 'Authorization']) assert.equal(headers.get(name), null);
+    assert.deepEqual(JSON.parse(String(init.body)), { token: 'A'.repeat(43) });
+    return Response.json({ status: 'MAIL_SERVICE_ACCEPTED' });
+  });
+  try {
+    const result = await createConsoleTransport('https://api.example.test').invitations.requestInvitationPasswordSetup({
+      idempotencyKey: '019944ca-0000-7000-8000-000000000003',
+      xSFCSRF: '1',
+      invitationPasswordSetupRequest: { token: 'A'.repeat(43) }
+    });
+    assert.equal(result.status, 'MAIL_SERVICE_ACCEPTED');
+  } finally {
+    request.mock.restore();
+  }
+});
+
 test('refresh retains the operation key and exposes only a typed Problem code on rejection', async () => {
   const request = mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
     const headers = new Headers(init.headers);
