@@ -370,6 +370,31 @@ declare namespace App {
         states: { PENDING: string; ACCEPTED: string; REVOKED: string; EXPIRED: string };
         deliveryStates: { PENDING: string; SENT: string; FAILED: string };
       };
+      tenantRoles: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        roleKey: string;
+        permissions: string;
+        assignedMembers: string;
+        actions: string;
+        none: string;
+        automatic: string;
+        system: string;
+        create: string;
+        edit: string;
+        delete: string;
+        cancel: string;
+        save: string;
+        saved: string;
+        deleted: string;
+        confirmDelete: string;
+        conflict: string;
+        invalid: string;
+      };
       organization: {
         title: string;
         reload: string;

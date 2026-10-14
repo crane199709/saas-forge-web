@@ -13,7 +13,9 @@ import { SessionFailure } from '../../runtime/console-session';
 import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
 import { createPermissionApi } from './permissions';
+import { createTenantRoleApi } from './tenant-roles';
 import type { PermissionCatalogApi } from './permissions';
+import type { TenantRoleApi } from './tenant-roles';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
 export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
@@ -24,6 +26,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   organization: OrganizationApi;
   permissions: PermissionCatalogApi;
   invitations: InvitationsApi;
+  roles: TenantRoleApi;
   manifests: RemoteManifestsApi;
 } {
   const basePath = requireHttpsOrigin(apiOrigin);
@@ -69,6 +72,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   return {
     permissions: createPermissionApi(basePath, () => token ?? ''),
     invitations: new InvitationsApi(jsonConfiguration),
+    roles: createTenantRoleApi(basePath, () => token ?? ''),
     organization: new OrganizationApi(jsonConfiguration),
     projects: new Project.DefaultApi(
       new Project.Configuration({
