@@ -34,7 +34,10 @@ test('platform administrator revocation uses exact identity and idempotency key'
   });
   const api = createPlatformAdminApi('https://api.saas.forge.test', () => 'current-token');
   await api.revoke('0198c9d5-0f25-7b21-8d67-31c8652d4c91', '0198c9d5-0f25-7b21-8d67-31c8652d4c90');
-  assert.equal(calls[0].url, 'https://api.saas.forge.test/api/v1/platform/administrators/0198c9d5-0f25-7b21-8d67-31c8652d4c91');
+  assert.equal(
+    calls[0].url,
+    'https://api.saas.forge.test/api/v1/platform/administrators/0198c9d5-0f25-7b21-8d67-31c8652d4c91'
+  );
   assert.equal(calls[0].init.method, 'DELETE');
   const headers = new Headers(calls[0].init.headers);
   assert.equal(headers.get('Idempotency-Key'), '0198c9d5-0f25-7b21-8d67-31c8652d4c90');
