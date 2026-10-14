@@ -390,6 +390,13 @@ const local: App.I18n.Schema = {
     noExpiry: 'No expiry',
     id: 'Tenant ID',
     detail: 'Tenant details',
+    edit: {
+      title: 'Manage tenant details',
+      hint: 'This name is for platform management. The tenant brand display name is managed separately. An expiry must be in the future.',
+      chooseExpiry: 'Choose a future date and time',
+      save: 'Save changes',
+      unknown: 'The result is unknown. Retry the same values to check the original operation.'
+    },
     view: 'View details',
     back: 'Back to tenants',
     filters: 'Filter tenants',
@@ -416,6 +423,7 @@ const local: App.I18n.Schema = {
     states: {
       PENDING: 'Pending initialization',
       ACTIVE: 'Active',
+      EXPIRED: 'Expired',
       SUSPENDED: 'Suspended',
       CLOSED: 'Closed',
       COMMITTED: 'Completed',
@@ -428,8 +436,11 @@ const local: App.I18n.Schema = {
       invalid: 'The service returned incomplete or inconsistent records. Related actions are locked.',
       forbidden: 'This session cannot perform the operation. Recheck your session and permissions.',
       notFound: 'The record was not found. This does not permit a new creation.',
-      nameInvalid: 'Enter a name of 1–200 characters, not only whitespace.',
-      stale: 'The session or request changed. Read again.'
+      nameInvalid: 'Enter a name of 1–200 characters that is not only whitespace.',
+      stale: 'The session or request changed. Read the latest tenant details before trying again.',
+      expiryInvalid: 'Choose a future expiry or select no expiry.',
+      lifecycleConflict: 'A tenant lifecycle change is in progress. Retry after it completes.',
+      closed: 'A closed tenant cannot be changed.'
     }
   },
   console: {
@@ -446,6 +457,19 @@ const local: App.I18n.Schema = {
       'The API configuration is unavailable. Contact your administrator and reopen the original link after it is corrected.',
     setupSubmitting: 'Establishing your password…',
     backToLogin: 'Return to sign in',
+    forgotPassword: 'Forgot password?',
+    recoveryTitle: 'Recover your password',
+    recoveryIntro:
+      'Enter your account email. If it can be recovered, we will send a one-time link. The response is the same for every address.',
+    recoverySend: 'Send recovery link',
+    recoveryRequested:
+      'If this address belongs to a recoverable account, a recovery link will arrive by email. Check your inbox.',
+    recoveryNewPassword: 'Set a new password. All previous sessions will end. Sign in again afterward.',
+    recoveryPending: 'Previous sessions are still being revoked. Retry with the same link and password.',
+    recoveryComplete: 'Password recovered and previous sessions ended. Sign in with your new password.',
+    recoveryInvalid: 'The link is invalid, expired or already used. Request a new recovery link.',
+    recoveryUnknown: 'The result cannot be confirmed yet. Retry with the same link and password.',
+    recoveryUnavailable: 'Recovery is temporarily unavailable. Try again later.',
 
     changePassword: 'Set a new password',
     newPassword: 'New password',

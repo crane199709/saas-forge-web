@@ -374,6 +374,13 @@ const local: App.I18n.Schema = {
     noExpiry: '无到期时间',
     id: '租户 ID',
     detail: '租户详情',
+    edit: {
+      title: '维护租户主档',
+      hint: '管理名称仅供平台管理，品牌显示名由租户独立维护。有效期须晚于当前时间。',
+      chooseExpiry: '选择未来日期和时间',
+      save: '保存修改',
+      unknown: '结果尚不确定。使用相同内容重试，以核查原操作。'
+    },
     view: '查看详情',
     back: '返回租户列表',
     filters: '筛选租户',
@@ -397,6 +404,7 @@ const local: App.I18n.Schema = {
     states: {
       PENDING: '待初始化',
       ACTIVE: '正常',
+      EXPIRED: '已到期',
       SUSPENDED: '已暂停',
       CLOSED: '已关闭',
       COMMITTED: '已完成',
@@ -410,7 +418,10 @@ const local: App.I18n.Schema = {
       forbidden: '当前会话无权执行此操作，请重新核查会话和权限。',
       notFound: '未找到记录；这不表示可以重新创建。',
       nameInvalid: '请输入 1–200 个字符的名称，不能全部为空白。',
-      stale: '会话或请求已变化，请重新读取。'
+      stale: '会话或请求已变化，请重新读取。',
+      expiryInvalid: '请选择未来有效期，或勾选无到期时间。',
+      lifecycleConflict: '租户生命周期变更正在进行，请完成后重试。',
+      closed: '已关闭的租户不能修改。'
     }
   },
   console: {
@@ -422,6 +433,17 @@ const local: App.I18n.Schema = {
     setupUnavailable: 'API 配置不可用，请联系管理员修正后重新打开原始链接。',
     setupSubmitting: '正在设置密码…',
     backToLogin: '返回登录',
+    forgotPassword: '忘记密码？',
+    recoveryTitle: '找回密码',
+    recoveryIntro: '输入账号邮箱。若账号可恢复，我们会发送一次性链接；无论账号是否存在，页面都会显示相同结果。',
+    recoverySend: '发送恢复链接',
+    recoveryRequested: '如果该邮箱对应可恢复的账号，恢复链接将发送至该邮箱。请检查收件箱。',
+    recoveryNewPassword: '设置新密码后，所有旧会话将退出。完成后请重新登录。',
+    recoveryPending: '正在撤销旧会话，尚未完成。请用同一链接和密码重试。',
+    recoveryComplete: '密码已恢复，所有旧会话已退出。请使用新密码登录。',
+    recoveryInvalid: '链接无效、已过期或已使用。请重新申请恢复链接。',
+    recoveryUnknown: '结果暂时无法确认。请用同一链接和密码重试。',
+    recoveryUnavailable: '恢复服务暂时不可用，请稍后重试。',
 
     changePassword: '设置新密码',
     newPassword: '新密码',

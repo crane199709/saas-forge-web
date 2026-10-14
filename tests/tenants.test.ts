@@ -49,6 +49,51 @@ test('tenant create and recovery carry the Gateway CSRF marker through the share
   }
 });
 
+test('platform tenant update uses the formal client with a stable idempotency key and cleared expiry', async () => {
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    const headers = new Headers(init.headers);
+    assert.equal(url, `https://api.example.test/api/v1/platform/tenants/${tenantId}`);
+    assert.equal(init.method, 'PUT');
+    assert.equal(headers.get('Idempotency-Key'), key);
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    assert.equal(headers.get('Authorization'), 'Bearer test-memory-token');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site']) assert.equal(headers.get(name), null);
+    assert.deepEqual(JSON.parse(String(init.body)), { displayName: 'New name', expiresAt: null });
+    return Response.json({ ...tenant, displayName: 'New name', expiresAt: null });
+  });
+  const { workspace } = setup();
+  try {
+    const result = await workspace.update(tenantId, 'New name', null);
+    assert.equal(result?.displayName, 'New name');
+    assert.equal(request.mock.callCount(), 1);
+  } finally {
+    workspace.dispose();
+    request.mock.restore();
+  }
+});
+
+test('tenant detail update retries an unknown response with the original request and key', async () => {
+  let calls = 0;
+  const request = mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
+    calls += 1;
+    assert.equal(new Headers(init.headers).get('Idempotency-Key'), key);
+    assert.deepEqual(JSON.parse(String(init.body)), { displayName: 'New name', expiresAt: null });
+    if (calls === 1) throw new TypeError('Lost response');
+    return Response.json({ ...tenant, displayName: 'New name', expiresAt: null });
+  });
+  const { workspace } = setup();
+  try {
+    await assert.rejects(workspace.update(tenantId, 'New name', null), { code: 'unavailable' });
+    await assert.rejects(workspace.update(tenantId, 'Different name', null), { code: 'stale' });
+    assert.equal(calls, 1);
+    assert.equal((await workspace.update(tenantId, 'New name', null)).displayName, 'New name');
+    assert.equal(calls, 2);
+  } finally {
+    workspace.dispose();
+    request.mock.restore();
+  }
+});
+
 function setup() {
   let view = {
     status: 'authenticated',

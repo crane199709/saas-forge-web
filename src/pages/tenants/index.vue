@@ -128,7 +128,13 @@ onUnmounted(() => controller?.abort());
           min-width="180"
         />
         <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="120">
-          <template #default="{ row }">{{ stateText(row.status) }}</template>
+          <template #default="{ row }">
+            {{
+              row.status === 'ACTIVE' && row.expiresAt && row.expiresAt.getTime() <= Date.now()
+                ? $t('tenants.states.EXPIRED')
+                : stateText(row.status)
+            }}
+          </template>
         </ElTableColumn>
         <ElTableColumn align="left" header-align="center" :label="$t('tenants.createdAt')" min-width="210">
           <template #default="{ row }">{{ instant(row.createdAt) }}</template>
