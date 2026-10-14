@@ -6,7 +6,13 @@ import type { Member, OrganizationUnit } from '@crane199709/saas-forge-api-clien
 import type { TenantRole } from '@/service/forge/tenant-roles';
 import { MembershipRoleFailure } from '@/service/forge/membership-roles';
 import type { MemberRoleAssignment } from '@/service/forge/membership-roles';
-import { consoleMembers, consoleMembershipRoles, consoleOrganization, consoleState, consoleTenantRoles } from '@/runtime/console';
+import {
+  consoleMembers,
+  consoleMembershipRoles,
+  consoleOrganization,
+  consoleState,
+  consoleTenantRoles
+} from '@/runtime/console';
 import { $t } from '@/locales';
 import { operationKey } from '@/runtime/browser-coordination';
 
