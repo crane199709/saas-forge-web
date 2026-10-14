@@ -19,6 +19,7 @@ import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
 import type { PermissionCatalogApi } from '@/service/forge/permissions';
 import type { TenantRoleApi } from '@/service/forge/tenant-roles';
+import type { MembershipRoleApi } from '@/service/forge/membership-roles';
 import type { PlatformAdminApi } from '@/service/forge/platform-administrators';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
@@ -44,6 +45,7 @@ let members: MembersApi | undefined;
 let effectivePermissions: PermissionsApi | undefined;
 let acceptance: Console.InvitationAcceptanceApi | undefined;
 let roles: TenantRoleApi | undefined;
+let membershipRoles: MembershipRoleApi | undefined;
 let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
 let brandAssets: BrandAssetsApi | undefined;
@@ -66,6 +68,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     effectivePermissions = transport.effectivePermissions;
     acceptance = transport.acceptance;
     roles = transport.roles;
+    membershipRoles = transport.membershipRoles;
     platformAdministrators = transport.administrators;
     organization = transport.organization;
     brandAssets = transport.brandAssets;
@@ -148,6 +151,11 @@ export function consoleInvitationAcceptance(): Console.InvitationAcceptanceApi {
 export function consoleTenantRoles() {
   consoleRuntime();
   return roles!;
+}
+
+export function consoleMembershipRoles(): MembershipRoleApi {
+  consoleRuntime();
+  return membershipRoles!;
 }
 
 export function consolePlatformAdministrators(): PlatformAdminApi {

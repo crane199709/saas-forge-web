@@ -406,6 +406,15 @@ declare namespace App {
         status: string;
         enabled: string;
         disabled: string;
+        roles: string;
+        manageRoles: string;
+        loadingRoles: string;
+        unavailableRoles: string;
+        noRoles: string;
+        chooseRole: string;
+        assignRole: string;
+        revokeRole: string;
+        roleError: Record<'forbidden' | 'last-administrator' | 'missing' | 'unavailable', string>;
       };
       waiting: {
         title: string;

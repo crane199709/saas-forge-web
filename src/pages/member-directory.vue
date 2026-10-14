@@ -1,31 +1,106 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { ResponseError } from '@crane199709/saas-forge-api-client';
 import type { Member } from '@crane199709/saas-forge-api-client';
-import { consoleMembers, consoleState } from '@/runtime/console';
+import type { TenantRole } from '@/service/forge/tenant-roles';
+import { MembershipRoleFailure } from '@/service/forge/membership-roles';
+import type { MemberRoleAssignment } from '@/service/forge/membership-roles';
+import { consoleMembers, consoleMembershipRoles, consoleState, consoleTenantRoles } from '@/runtime/console';
 import { $t } from '@/locales';
 
 const items = ref<Member[]>([]);
+const roles = ref<TenantRole[]>([]);
 const status = ref<'loading' | 'ready' | 'forbidden' | 'unavailable'>('loading');
+const selectedMember = ref<Member | null>(null);
+const assignments = ref<MemberRoleAssignment[]>([]);
+const detailStatus = ref<'loading' | 'ready' | 'unavailable'>('loading');
+const actionError = ref<MembershipRoleFailure['code'] | null>(null);
+const chosenRole = ref('');
+const saving = ref(false);
+const detailOpen = ref(false);
+const assignableRoles = computed(() =>
+  roles.value.filter(role => !assignments.value.some(assignment => assignment.roleId === role.id))
+);
 let generation = 0;
+let detailGeneration = 0;
 let controller = new AbortController();
+let detailController = new AbortController();
 async function load() {
   generation += 1;
+  detailGeneration += 1;
   controller.abort();
+  detailController.abort();
   controller = new AbortController();
   items.value = [];
+  roles.value = [];
+  detailOpen.value = false;
   if (consoleState.value.status !== 'authenticated' || consoleState.value.snapshot?.activeContext?.type !== 'TENANT')
     return;
   status.value = 'loading';
   const started = generation;
   try {
-    const result = await consoleMembers().listMembers({ signal: controller.signal, redirect: 'error' });
+    const [result, currentRoles] = await Promise.all([
+      consoleMembers().listMembers({
+        signal: controller.signal,
+        redirect: 'error'
+      }),
+      consoleTenantRoles().list(controller.signal)
+    ]);
     if (started !== generation) return;
     items.value = result.items;
+    roles.value = currentRoles;
     status.value = 'ready';
   } catch (error) {
     if (started !== generation) return;
     status.value = error instanceof ResponseError && error.response.status === 403 ? 'forbidden' : 'unavailable';
+  }
+}
+
+async function inspect(member: Member) {
+  detailGeneration += 1;
+  detailController.abort();
+  detailController = new AbortController();
+  selectedMember.value = member;
+  assignments.value = [];
+  chosenRole.value = '';
+  actionError.value = null;
+  detailStatus.value = 'loading';
+  detailOpen.value = true;
+  const started = generation;
+  const detailStarted = detailGeneration;
+  try {
+    const result = await consoleMembershipRoles().list(member.membershipId, detailController.signal);
+    if (started !== generation || detailStarted !== detailGeneration) return;
+    assignments.value = result;
+    detailStatus.value = 'ready';
+  } catch {
+    if (started === generation && detailStarted === detailGeneration) detailStatus.value = 'unavailable';
+  }
+}
+
+async function changeRole(roleId: string, action: 'assign' | 'revoke') {
+  const member = selectedMember.value;
+  if (!member || saving.value) return;
+  saving.value = true;
+  actionError.value = null;
+  const started = generation;
+  try {
+    const current = await consoleMembershipRoles()[action](member.membershipId, roleId);
+    if (started !== generation || selectedMember.value?.membershipId !== member.membershipId) return;
+    assignments.value = current;
+    chosenRole.value = '';
+    try {
+      const currentRoles = await consoleTenantRoles().list();
+      if (started === generation && selectedMember.value?.membershipId === member.membershipId)
+        roles.value = currentRoles;
+    } catch {
+      // 角色分配已成功，列表刷新失败不应把该操作展示为失败。
+    }
+  } catch (error) {
+    if (started !== generation) return;
+    actionError.value = error instanceof MembershipRoleFailure ? error.code : 'unavailable';
+  } finally {
+    saving.value = false;
   }
 }
 watch(
@@ -37,9 +112,16 @@ watch(
   load,
   { immediate: true }
 );
+watch(detailOpen, open => {
+  if (!open) {
+    detailGeneration += 1;
+    detailController.abort();
+  }
+});
 onBeforeUnmount(() => {
   generation += 1;
   controller.abort();
+  detailController.abort();
 });
 </script>
 
@@ -50,9 +132,13 @@ onBeforeUnmount(() => {
       <ElButton :loading="status === 'loading'" @click="load">{{ $t('members.refresh') }}</ElButton>
     </div>
     <p v-if="status === 'loading'" role="status">{{ $t('members.loading') }}</p>
-    <p v-else-if="status === 'forbidden'" role="status">{{ $t('members.forbidden') }}</p>
+    <p v-else-if="status === 'forbidden'" role="status">
+      {{ $t('members.forbidden') }}
+    </p>
     <ElAlert v-else-if="status === 'unavailable'" :title="$t('members.unavailable')" type="error" :closable="false" />
-    <p v-else-if="items.length === 0" role="status">{{ $t('members.empty') }}</p>
+    <p v-else-if="items.length === 0" role="status">
+      {{ $t('members.empty') }}
+    </p>
     <ElTable v-else :data="items" :aria-label="$t('members.title')">
       <ElTableColumn :label="$t('members.identity')" min-width="220">
         <template #default="{ row }">{{ row.invitedEmail || row.identityId }}</template>
@@ -62,6 +148,64 @@ onBeforeUnmount(() => {
           {{ $t(row.status === 'ENABLED' ? 'members.enabled' : 'members.disabled') }}
         </template>
       </ElTableColumn>
+      <ElTableColumn :label="$t('members.roles')" min-width="140">
+        <template #default="{ row }">
+          <ElButton link type="primary" @click="inspect(row)">{{ $t('members.manageRoles') }}</ElButton>
+        </template>
+      </ElTableColumn>
     </ElTable>
+    <ElDialog v-model="detailOpen" :title="$t('members.manageRoles')" width="min(640px, 90vw)">
+      <p class="mb-12px">
+        {{ selectedMember?.invitedEmail || selectedMember?.identityId }}
+      </p>
+      <p v-if="detailStatus === 'loading'" role="status">
+        {{ $t('members.loadingRoles') }}
+      </p>
+      <ElAlert
+        v-else-if="detailStatus === 'unavailable'"
+        type="error"
+        role="alert"
+        :title="$t('members.unavailableRoles')"
+        :closable="false"
+      />
+      <template v-else>
+        <p v-if="assignments.length === 0" role="status">
+          {{ $t('members.noRoles') }}
+        </p>
+        <ul v-else class="mb-16px flex flex-col gap-8px">
+          <li
+            v-for="assignment in assignments"
+            :key="assignment.roleId"
+            class="flex items-center justify-between gap-12px"
+          >
+            <span>{{ assignment.roleKey }}</span>
+            <ElButton link type="danger" :disabled="saving" @click="changeRole(assignment.roleId, 'revoke')">
+              {{ $t('members.revokeRole') }}
+            </ElButton>
+          </li>
+        </ul>
+        <div class="flex flex-wrap items-center gap-8px">
+          <ElSelect v-model="chosenRole" :aria-label="$t('members.chooseRole')" class="min-w-200px">
+            <ElOption v-for="role in assignableRoles" :key="role.id" :label="role.roleKey" :value="role.id" />
+          </ElSelect>
+          <ElButton
+            type="primary"
+            :disabled="!chosenRole || saving"
+            :loading="saving"
+            @click="changeRole(chosenRole, 'assign')"
+          >
+            {{ $t('members.assignRole') }}
+          </ElButton>
+        </div>
+      </template>
+      <ElAlert
+        v-if="actionError"
+        class="mt-12px"
+        type="error"
+        role="alert"
+        :closable="false"
+        :title="$t(`members.roleError.${actionError}`)"
+      />
+    </ElDialog>
   </section>
 </template>

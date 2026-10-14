@@ -125,7 +125,21 @@ const local: App.I18n.Schema = {
     identity: 'Identity',
     status: '状态',
     enabled: '已启用',
-    disabled: '已禁用'
+    disabled: '已禁用',
+    roles: '角色',
+    manageRoles: '管理角色',
+    loadingRoles: '正在读取角色分配…',
+    unavailableRoles: '暂时无法读取角色分配，请关闭后重试。',
+    noRoles: '该成员尚无角色。',
+    chooseRole: '选择要分配的角色',
+    assignRole: '分配角色',
+    revokeRole: '撤销',
+    roleError: {
+      forbidden: '当前管理员权限已变更，请刷新页面。',
+      'last-administrator': '不能移除最后一个已启用的 Tenant Administrator。',
+      missing: '成员或角色已不存在，请刷新页面。',
+      unavailable: '角色变更结果暂时无法确认，请刷新后重试。'
+    }
   },
   waiting: {
     title: '等待授权',
