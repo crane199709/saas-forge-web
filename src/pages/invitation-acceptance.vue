@@ -4,7 +4,13 @@ import { Console } from '@crane199709/saas-forge-api-client';
 import LoginShell from '@/views/_builtin/login/index.vue';
 import { $t } from '@/locales';
 import { operationKey } from '@/runtime/browser-coordination';
-import { consoleInvitationAcceptance, consoleRuntime, consoleState, startConsole } from '@/runtime/console';
+import {
+  consoleInvitationAcceptance,
+  consoleInvitations,
+  consoleRuntime,
+  consoleState,
+  startConsole
+} from '@/runtime/console';
 import { onInvitationLink, takeInvitationToken } from '@/runtime/invitation-link';
 import WorkContexts from './work-contexts.vue';
 
@@ -14,12 +20,18 @@ const password = ref('');
 const busy = ref(false);
 const success = ref(false);
 const errorCode = ref('');
+const setupStatus = ref<'MAIL_SERVICE_ACCEPTED' | 'PASSWORD_READY' | 'RECOVERY_REQUIRED' | ''>('');
+const setupErrorCode = ref('');
 let key = operationKey();
+let setupKey = operationKey();
 function openLink() {
   token.value = takeInvitationToken();
   key = operationKey();
+  setupKey = operationKey();
   success.value = false;
   errorCode.value = '';
+  setupStatus.value = '';
+  setupErrorCode.value = '';
 }
 const stopLinks = onInvitationLink(openLink);
 const identity = computed(() => consoleState.value.snapshot?.identity);
@@ -67,6 +79,49 @@ async function signIn() {
     busy.value = false;
   }
 }
+async function requestSetup() {
+  if (busy.value || !token.value || consoleState.value.status !== 'anonymous') return;
+  if (setupStatus.value) setupKey = operationKey();
+  busy.value = true;
+  setupErrorCode.value = '';
+  try {
+    const result = await consoleInvitations().requestInvitationPasswordSetup(
+      {
+        idempotencyKey: setupKey,
+        xSFCSRF: '1',
+        invitationPasswordSetupRequest: { token: token.value }
+      },
+      { signal: AbortSignal.timeout(12000), redirect: 'error' }
+    );
+    setupStatus.value = result.status;
+  } catch (error) {
+    if (error instanceof Console.ResponseError) {
+      const problem: unknown = await error.response.json().catch(() => undefined);
+      setupErrorCode.value =
+        problem && typeof problem === 'object' && 'code' in problem && typeof problem.code === 'string'
+          ? problem.code
+          : 'UNAVAILABLE';
+    } else {
+      setupErrorCode.value = 'UNAVAILABLE';
+    }
+  } finally {
+    busy.value = false;
+  }
+}
+const setupMessage = computed(() => {
+  if (setupErrorCode.value) {
+    const code = setupErrorCode.value;
+    if (code === 'INVITATION_INVALID') return $t('invitationAcceptance.errors.INVITATION_INVALID');
+    if (code === 'INVITATION_REVOKED') return $t('invitationAcceptance.errors.INVITATION_REVOKED');
+    if (code === 'INVITATION_EXPIRED') return $t('invitationAcceptance.errors.INVITATION_EXPIRED');
+    if (code === 'INVITATION_ALREADY_ACCEPTED') return $t('invitationAcceptance.errors.INVITATION_ALREADY_ACCEPTED');
+    return $t('invitationAcceptance.setupUnavailable');
+  }
+  if (setupStatus.value === 'MAIL_SERVICE_ACCEPTED') return $t('invitationAcceptance.setupSent');
+  if (setupStatus.value === 'PASSWORD_READY') return $t('invitationAcceptance.passwordReady');
+  if (setupStatus.value === 'RECOVERY_REQUIRED') return $t('invitationAcceptance.recoveryRequired');
+  return '';
+});
 async function accept() {
   const revision = consoleState.value.snapshot?.revision;
   if (busy.value || !canAccept.value || !revision) return;
@@ -118,6 +173,19 @@ onUnmounted(() => {
     <div class="space-y-16px" :aria-busy="busy">
       <p role="status" aria-live="polite">{{ message }}</p>
       <form v-if="token && consoleState.status === 'anonymous'" class="space-y-12px" @submit.prevent="signIn">
+        <ElButton type="primary" :loading="busy" :disabled="busy" @click="requestSetup">
+          {{
+            $t(
+              setupStatus === 'MAIL_SERVICE_ACCEPTED'
+                ? 'invitationAcceptance.resendSetup'
+                : 'invitationAcceptance.requestSetup'
+            )
+          }}
+        </ElButton>
+        <p v-if="setupMessage" role="status" aria-live="polite">{{ setupMessage }}</p>
+        <RouterLink v-if="setupStatus === 'RECOVERY_REQUIRED'" to="/password-recovery">
+          {{ $t('invitationAcceptance.openRecovery') }}
+        </RouterLink>
         <ElFormItem :label="$t('console.email')">
           <ElInput v-model="email" name="email" type="email" autocomplete="username" required />
         </ElFormItem>

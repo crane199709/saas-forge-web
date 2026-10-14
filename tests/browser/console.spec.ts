@@ -286,6 +286,28 @@ test('password recovery email and one-use link render and accept keyboard input'
   expect(state.errors).toEqual([]);
 });
 
+test('new invitee requests first password setup from the invitation page', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en' });
+  const keys: string[] = [];
+  await page.route('https://api.ui.test/api/v1/invitation-password-setups', async route => {
+    const request = route.request();
+    expect(request.method()).toBe('POST');
+    expect(request.postDataJSON()).toEqual({ token: 'A'.repeat(43) });
+    keys.push(request.headers()['idempotency-key']);
+    await route.fulfill({ json: { status: 'MAIL_SERVICE_ACCEPTED' } });
+  });
+  await page.goto(`${origin}/invitation#token=${'A'.repeat(43)}`);
+  await expect(page).toHaveURL(`${origin}/invitation`);
+  await page.getByRole('button', { name: 'Set up a password' }).click();
+  await expect(page.getByRole('status').last()).toContainText('The mail service accepted');
+  await page.getByRole('button', { name: 'Resend setup email' }).click();
+  await expect.poll(() => keys.length).toBe(2);
+  expect(keys[0]).not.toBe(keys[1]);
+  await audit(page);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
 for (const width of [1440, 1024]) {
   for (const dark of [false, true]) {
     test(`workspace ${width} ${dark ? 'dark' : 'light'}`, async ({ context, page }) => {

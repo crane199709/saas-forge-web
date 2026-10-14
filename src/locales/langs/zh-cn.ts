@@ -93,7 +93,15 @@ const local: App.I18n.Schema = {
   },
   invitationAcceptance: {
     title: '接受邀请',
-    intro: '请先使用受邀账号登录，再明确接受这份邀请。',
+    intro: '首次使用请先申请设置密码；已有密码请以受邀账号登录，再明确接受邀请。',
+    requestSetup: '首次设置密码',
+    resendSetup: '重发设置密码邮件',
+    setupSent:
+      '设置密码邮件已由邮件服务接收。完成设置后，请重新打开邀请邮件中的链接，以新密码登录并接受邀请；此时尚未占用成员名额。',
+    passwordReady: '此账号已有密码，请直接登录。邀请不会重置已有密码。',
+    recoveryRequired: '此账号存在历史凭据，不能用首次设置密码链接覆盖。请走独立密码恢复流程，完成后重新打开邀请链接。',
+    openRecovery: '前往密码恢复',
+    setupUnavailable: '暂时无法确认密码设置邮件状态，请保留此邀请页面并重试。',
     currentIdentity: '当前登录账号',
     accept: '接受邀请',
     refresh: '刷新访问状态',
