@@ -428,6 +428,28 @@ declare namespace App {
           forbidden: string;
           unavailable: string;
         };
+        operation: string;
+        actions: string;
+        disable: string;
+        confirmDisable: string;
+        revoking: string;
+        releasePending: string;
+        recoveryRequired: string;
+        noPendingOperation: string;
+        recover: string;
+        disablePending: string;
+        disableCompleted: string;
+        disableConflict: string;
+        disableFailed: string;
+        roles: string;
+        manageRoles: string;
+        loadingRoles: string;
+        unavailableRoles: string;
+        noRoles: string;
+        chooseRole: string;
+        assignRole: string;
+        revokeRole: string;
+        roleError: Record<'forbidden' | 'last-administrator' | 'missing' | 'unavailable', string>;
       };
       waiting: {
         title: string;
