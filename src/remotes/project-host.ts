@@ -21,7 +21,10 @@ export type ProjectTextKey =
   | 'empty'
   | 'failed'
   | 'recover'
-  | 'unknown';
+  | 'unknown'
+  | 'permissionAllowed'
+  | 'permissionDenied'
+  | 'permissionUnavailable';
 
 /** Shell 只交付业务能力；幂等键、版本条件、会话与底层 Client 保留在 Shell 内。 */
 export interface ProjectHost {

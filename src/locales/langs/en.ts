@@ -51,7 +51,22 @@ const local: App.I18n.Schema = {
     empty: 'No records',
     failed: 'The operation could not finish. Reload the record or recover your session before retrying.',
     recover: 'Recover original operation',
-    unknown: 'The original result needs confirmation. Recover it before submitting another write.'
+    unknown: 'The original result needs confirmation. Recover it before submitting another write.',
+    permissionAllowed: 'Your current permission allows the Project list.',
+    permissionDenied: 'This membership lacks permission for the operation.',
+    permissionUnavailable: 'The permission service is temporarily unavailable. Try again.'
+  },
+  permissionCatalog: {
+    title: 'Permission catalog',
+    reload: 'Refresh catalog',
+    loading: 'Loading permissions…',
+    forbidden: 'Only a Tenant Administrator can view the Permission catalog.',
+    unavailable: 'The Permission catalog is temporarily unavailable. Try again.',
+    empty: 'No permissions have been imported.',
+    code: 'Permission code',
+    status: 'Status',
+    enabled: 'Enabled',
+    disabled: 'Disabled'
   },
   remote: {
     businessEmpty: 'No business modules are enabled.',

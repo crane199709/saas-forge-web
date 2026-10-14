@@ -9,6 +9,7 @@ import { OAuthWorkspace } from '@/service/forge/oauth-clients';
 import { EntitlementWorkspace } from '@/service/forge/entitlements';
 import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
+import type { PermissionCatalogApi } from '@/service/forge/permissions';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -27,6 +28,7 @@ let subscriptions: SubscriptionWorkspace | undefined;
 let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
+let permissions: PermissionCatalogApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -40,6 +42,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
       resolveBrand: resolveConsoleBrand
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
+    permissions = transport.permissions;
     manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
@@ -89,6 +92,11 @@ export function oauthWorkspace(): OAuthWorkspace {
 export function consoleProjectHost() {
   consoleRuntime();
   return projectBridge!.host;
+}
+
+export function consolePermissionCatalog() {
+  consoleRuntime();
+  return permissions!;
 }
 
 export function discoverBusinessRemotes(signal: AbortSignal) {

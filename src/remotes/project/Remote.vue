@@ -24,15 +24,31 @@ const taskCursor = ref<string | null>(null);
 const busy = ref(false);
 const failed = ref(false);
 const unknown = ref(false);
+const permissionState = ref<'allowed' | 'denied' | 'unavailable'>();
+
+function failureCode(error: unknown): string | undefined {
+  return error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+    ? error.code
+    : undefined;
+}
 
 async function action(operation: () => Promise<void>) {
   if (busy.value) return;
   busy.value = true;
   failed.value = false;
+  permissionState.value = undefined;
   try {
     await operation();
-  } catch {
-    failed.value = true;
+  } catch (error) {
+    const code = failureCode(error);
+    if (code === 'PERMISSION_DENIED' || code === 'PERMISSION_AUTHORITY_UNAVAILABLE') {
+      permissionState.value = code === 'PERMISSION_DENIED' ? 'denied' : 'unavailable';
+      projects.value = [];
+      tasks.value = [];
+      selected.value = undefined;
+      projectCursor.value = null;
+      taskCursor.value = null;
+    } else failed.value = true;
   } finally {
     busy.value = false;
     unknown.value = props.host.pending();
@@ -42,6 +58,7 @@ async function projectPage(append = false) {
   const page = await props.host.listProjects(append ? (projectCursor.value ?? undefined) : undefined);
   projects.value = append ? [...projects.value, ...page.items] : page.items;
   projectCursor.value = page.nextCursor;
+  permissionState.value = 'allowed';
 }
 async function taskPage(append = false) {
   if (!selected.value) return;
@@ -117,6 +134,21 @@ onMounted(() => action(() => projectPage()));
   <section data-testid="project-remote" class="space-y-16px" :aria-busy="busy">
     <h2 class="text-18px font-semibold">{{ text('projects') }} · {{ brandName }}</h2>
     <ElAlert v-if="failed" :title="text('failed')" type="error" :closable="false" role="alert" />
+    <ElAlert
+      v-if="permissionState === 'denied'"
+      :title="text('permissionDenied')"
+      type="warning"
+      :closable="false"
+      role="alert"
+    />
+    <ElAlert
+      v-if="permissionState === 'unavailable'"
+      :title="text('permissionUnavailable')"
+      type="error"
+      :closable="false"
+      role="alert"
+    />
+    <p v-if="permissionState === 'allowed'" role="status">{{ text('permissionAllowed') }}</p>
     <ElAlert v-if="unknown" :title="text('unknown')" type="warning" :closable="false" role="status" />
     <ElButton v-if="unknown" :disabled="busy" @click="action(recover)">{{ text('recover') }}</ElButton>
     <ElCard>
