@@ -344,19 +344,6 @@ declare namespace App {
         status: string;
         enabled: string;
         disabled: string;
-        operation: string;
-        actions: string;
-        disable: string;
-        confirmDisable: string;
-        revoking: string;
-        releasePending: string;
-        recoveryRequired: string;
-        noPendingOperation: string;
-        recover: string;
-        disablePending: string;
-        disableCompleted: string;
-        disableConflict: string;
-        disableFailed: string;
       };
       invitations: {
         title: string;
@@ -419,6 +406,19 @@ declare namespace App {
         status: string;
         enabled: string;
         disabled: string;
+        operation: string;
+        actions: string;
+        disable: string;
+        confirmDisable: string;
+        revoking: string;
+        releasePending: string;
+        recoveryRequired: string;
+        noPendingOperation: string;
+        recover: string;
+        disablePending: string;
+        disableCompleted: string;
+        disableConflict: string;
+        disableFailed: string;
       };
       waiting: {
         title: string;
