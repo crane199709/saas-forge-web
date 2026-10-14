@@ -2,6 +2,7 @@ import {
   Configuration,
   Console,
   OAuthClientsApi,
+  OrganizationApi,
   PlatformEntitlementBootstrapApi,
   PlatformTenantsApi,
   Project,
@@ -19,6 +20,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   entitlements: PlatformEntitlementBootstrapApi;
   oauth: OAuthClientsApi;
   projects: Project.DefaultApi;
+  organization: OrganizationApi;
   permissions: PermissionCatalogApi;
   manifests: RemoteManifestsApi;
 } {
@@ -64,6 +66,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   });
   return {
     permissions: createPermissionApi(basePath, () => token ?? ''),
+    organization: new OrganizationApi(jsonConfiguration),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,
