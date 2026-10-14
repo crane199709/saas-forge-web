@@ -2,8 +2,10 @@ import {
   Configuration,
   Console,
   InvitationsApi,
+  MembersApi,
   OAuthClientsApi,
   OrganizationApi,
+  PermissionsApi,
   PlatformEntitlementBootstrapApi,
   PlatformTenantsApi,
   Project,
@@ -26,6 +28,9 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   organization: OrganizationApi;
   permissions: PermissionCatalogApi;
   invitations: InvitationsApi;
+  members: MembersApi;
+  effectivePermissions: PermissionsApi;
+  acceptance: Console.InvitationAcceptanceApi;
   roles: TenantRoleApi;
   manifests: RemoteManifestsApi;
 } {
@@ -37,6 +42,9 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
       credentials: 'include',
       accessToken: () => token ?? ''
     })
+  );
+  const acceptance = new Console.InvitationAcceptanceApi(
+    new Console.Configuration({ basePath, credentials: 'include' })
   );
   const options = () => ({
     redirect: 'error' as const,
@@ -72,6 +80,9 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   return {
     permissions: createPermissionApi(basePath, () => token ?? ''),
     invitations: new InvitationsApi(jsonConfiguration),
+    members: new MembersApi(jsonConfiguration),
+    effectivePermissions: new PermissionsApi(jsonConfiguration),
+    acceptance,
     roles: createTenantRoleApi(basePath, () => token ?? ''),
     organization: new OrganizationApi(jsonConfiguration),
     projects: new Project.DefaultApi(

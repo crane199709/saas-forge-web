@@ -5,18 +5,6 @@ import type { ConsoleBrand } from './console-brand';
 type Snapshot = Console.ConsoleSessionSnapshot;
 type Authentication = Console.ConsoleAuthenticationResult;
 export type WorkContextTarget = Console.ConsoleContextSelectionRequest;
-function soleAvailableContext(result: Authentication): WorkContextTarget | undefined {
-  const contexts = result.availableContexts;
-  if (
-    result.state !== 'CONTEXT_SELECTION_REQUIRED' ||
-    !contexts ||
-    contexts.companies.length + Number(contexts.platform) !== 1
-  )
-    return undefined;
-  return contexts.platform
-    ? { type: 'PLATFORM' }
-    : { type: 'TENANT', membershipId: contexts.companies[0].membershipId };
-}
 export type CoordinationMessage = 'changed' | 'logout' | 'switching' | 'edited';
 export interface ConsoleTransport {
   bootstrap(): Promise<Console.ConsoleBootstrapResult>;
@@ -167,19 +155,6 @@ export class ConsoleSessionRuntime {
       const result = await this.api.refresh(this.refreshAttempt.revision, this.refreshAttempt.key);
       this.refreshAttempt = undefined;
       if (generation !== this.generation) return;
-      const target = soleAvailableContext(result);
-      if (target) {
-        // 等待页重新获得唯一候选仍须经过正式选择，不能从候选列表自行取得权限。
-        this.selectionAttempt = {
-          target,
-          revision: result.revision,
-          key: this.key()
-        };
-        this.selectionNeedsSync = true;
-        this.coordination.publish('switching');
-        await this.refreshSelection(generation);
-        return;
-      }
       await this.accept(result, generation);
       if (
         generation === this.generation &&

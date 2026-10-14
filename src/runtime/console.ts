@@ -1,5 +1,12 @@
 import { shallowRef } from 'vue';
-import type { InvitationsApi, OrganizationApi, RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import type {
+  Console,
+  InvitationsApi,
+  MembersApi,
+  OrganizationApi,
+  PermissionsApi,
+  RemoteManifestsApi
+} from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
@@ -31,6 +38,9 @@ let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
 let permissions: PermissionCatalogApi | undefined;
 let invitations: InvitationsApi | undefined;
+let members: MembersApi | undefined;
+let effectivePermissions: PermissionsApi | undefined;
+let acceptance: Console.InvitationAcceptanceApi | undefined;
 let roles: TenantRoleApi | undefined;
 let organization: OrganizationApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
@@ -48,6 +58,9 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
     invitations = transport.invitations;
+    members = transport.members;
+    effectivePermissions = transport.effectivePermissions;
+    acceptance = transport.acceptance;
     roles = transport.roles;
     organization = transport.organization;
     manifests = transport.manifests;
@@ -109,6 +122,21 @@ export function consolePermissionCatalog() {
 export function consoleInvitations(): InvitationsApi {
   consoleRuntime();
   return invitations!;
+}
+
+export function consoleMembers(): MembersApi {
+  consoleRuntime();
+  return members!;
+}
+
+export function consoleEffectivePermissions(): PermissionsApi {
+  consoleRuntime();
+  return effectivePermissions!;
+}
+
+export function consoleInvitationAcceptance(): Console.InvitationAcceptanceApi {
+  consoleRuntime();
+  return acceptance!;
 }
 
 export function consoleTenantRoles() {
