@@ -345,6 +345,31 @@ declare namespace App {
         enabled: string;
         disabled: string;
       };
+      invitations: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        email: string;
+        emailHint: string;
+        create: string;
+        created: string;
+        duplicate: string;
+        failed: string;
+        status: string;
+        delivery: string;
+        expiresAt: string;
+        actions: string;
+        resend: string;
+        resent: string;
+        revoke: string;
+        revoked: string;
+        confirmRevoke: string;
+        states: { PENDING: string; ACCEPTED: string; REVOKED: string; EXPIRED: string };
+        deliveryStates: { PENDING: string; SENT: string; FAILED: string };
+      };
       tenantRoles: {
         title: string;
         reload: string;

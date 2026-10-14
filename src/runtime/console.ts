@@ -1,5 +1,5 @@
 import { shallowRef } from 'vue';
-import type { OrganizationApi, RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import type { InvitationsApi, OrganizationApi, RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
@@ -30,6 +30,7 @@ let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
 let permissions: PermissionCatalogApi | undefined;
+let invitations: InvitationsApi | undefined;
 let roles: TenantRoleApi | undefined;
 let organization: OrganizationApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
@@ -46,6 +47,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
+    invitations = transport.invitations;
     roles = transport.roles;
     organization = transport.organization;
     manifests = transport.manifests;
@@ -102,6 +104,11 @@ export function consoleProjectHost() {
 export function consolePermissionCatalog() {
   consoleRuntime();
   return permissions!;
+}
+
+export function consoleInvitations(): InvitationsApi {
+  consoleRuntime();
+  return invitations!;
 }
 
 export function consoleTenantRoles() {
