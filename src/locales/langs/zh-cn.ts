@@ -49,7 +49,22 @@ const local: App.I18n.Schema = {
     empty: '暂无记录',
     failed: '操作未能完成，请重新读取记录或恢复会话后重试。',
     recover: '恢复原操作',
-    unknown: '原操作结果待确认，请先恢复，避免重复提交。'
+    unknown: '原操作结果待确认，请先恢复，避免重复提交。',
+    permissionAllowed: '当前权限允许查看项目列表。',
+    permissionDenied: '当前成员没有执行此操作的权限。',
+    permissionUnavailable: '权限服务暂时不可用，请稍后重试。'
+  },
+  permissionCatalog: {
+    title: '权限目录',
+    reload: '刷新目录',
+    loading: '正在读取权限目录…',
+    forbidden: '仅 Tenant Administrator 可以查看权限目录。',
+    unavailable: '权限目录暂时不可用，请稍后重试。',
+    empty: '当前没有已导入的权限。',
+    code: '权限代码',
+    status: '状态',
+    enabled: '有效',
+    disabled: '已停用'
   },
   remote: {
     businessEmpty: '暂无已启用的业务模块。',

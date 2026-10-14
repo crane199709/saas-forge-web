@@ -118,3 +118,11 @@ test('in-progress idempotency stays recoverable, while a definitive version conf
   await assert.rejects(f.host.retryPending(), { code });
   assert.equal(f.host.pending(), false);
 });
+
+test('authority denial is visible and does not reserve a write recovery attempt', async t => {
+  t.mock.method(globalThis, 'fetch', async () => Response.json({ code: 'PERMISSION_DENIED' }, { status: 403 }));
+  const f = setup();
+  t.after(f.dispose);
+  await assert.rejects(f.host.createProject({ name: 'No access' }), { code: 'PERMISSION_DENIED' });
+  assert.equal(f.host.pending(), false);
+});

@@ -329,6 +329,21 @@ declare namespace App {
         failed: string;
         recover: string;
         unknown: string;
+        permissionAllowed: string;
+        permissionDenied: string;
+        permissionUnavailable: string;
+      };
+      permissionCatalog: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        code: string;
+        status: string;
+        enabled: string;
+        disabled: string;
       };
       manifest: {
         title: string;
