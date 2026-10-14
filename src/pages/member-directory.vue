@@ -10,6 +10,7 @@ import { $t } from '@/locales';
 
 const items = ref<Member[]>([]);
 const roles = ref<TenantRole[]>([]);
+const canManageRoles = ref(false);
 const status = ref<'loading' | 'ready' | 'forbidden' | 'unavailable'>('loading');
 const selectedMember = ref<Member | null>(null);
 const assignments = ref<MemberRoleAssignment[]>([]);
@@ -33,13 +34,14 @@ async function load() {
   controller = new AbortController();
   items.value = [];
   roles.value = [];
+  canManageRoles.value = false;
   detailOpen.value = false;
   if (consoleState.value.status !== 'authenticated' || consoleState.value.snapshot?.activeContext?.type !== 'TENANT')
     return;
   status.value = 'loading';
   const started = generation;
   try {
-    const [result, currentRoles] = await Promise.all([
+    const [memberResult, roleResult] = await Promise.allSettled([
       consoleMembers().listMembers({
         signal: controller.signal,
         redirect: 'error'
@@ -47,8 +49,12 @@ async function load() {
       consoleTenantRoles().list(controller.signal)
     ]);
     if (started !== generation) return;
-    items.value = result.items;
-    roles.value = currentRoles;
+    if (memberResult.status === 'rejected') throw memberResult.reason;
+    items.value = memberResult.value.items;
+    if (roleResult.status === 'fulfilled') {
+      roles.value = roleResult.value;
+      canManageRoles.value = true;
+    }
     status.value = 'ready';
   } catch (error) {
     if (started !== generation) return;
@@ -148,7 +154,7 @@ onBeforeUnmount(() => {
           {{ $t(row.status === 'ENABLED' ? 'members.enabled' : 'members.disabled') }}
         </template>
       </ElTableColumn>
-      <ElTableColumn :label="$t('members.roles')" min-width="140">
+      <ElTableColumn v-if="canManageRoles" :label="$t('members.roles')" min-width="140">
         <template #default="{ row }">
           <ElButton link type="primary" @click="inspect(row)">{{ $t('members.manageRoles') }}</ElButton>
         </template>
