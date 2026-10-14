@@ -345,6 +345,31 @@ declare namespace App {
         enabled: string;
         disabled: string;
       };
+      tenantRoles: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        roleKey: string;
+        permissions: string;
+        assignedMembers: string;
+        actions: string;
+        none: string;
+        automatic: string;
+        system: string;
+        create: string;
+        edit: string;
+        delete: string;
+        cancel: string;
+        save: string;
+        saved: string;
+        deleted: string;
+        confirmDelete: string;
+        conflict: string;
+        invalid: string;
+      };
       manifest: {
         title: string;
         module: string;

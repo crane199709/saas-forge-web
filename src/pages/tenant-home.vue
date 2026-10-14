@@ -5,6 +5,7 @@ import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
 import BusinessRemote from './business-remote.vue';
 import PermissionCatalog from './permission-catalog.vue';
+import TenantRoles from './tenant-roles.vue';
 
 const RemoteAcceptance =
   import.meta.env.DEV || import.meta.env.MODE === 'static-acceptance'
@@ -46,6 +47,8 @@ onMounted(async () => {
     />
     <ElDivider />
     <PermissionCatalog />
+    <ElDivider />
+    <TenantRoles />
     <ElDivider />
     <BusinessRemote />
     <ElDivider />
