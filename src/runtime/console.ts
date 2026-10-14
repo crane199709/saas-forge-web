@@ -1,5 +1,10 @@
 import { shallowRef } from 'vue';
-import type { BrandAssetsApi, OrganizationApi, RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import type {
+  BrandAssetsApi,
+  InvitationsApi,
+  OrganizationApi,
+  RemoteManifestsApi
+} from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
@@ -10,6 +15,7 @@ import { EntitlementWorkspace } from '@/service/forge/entitlements';
 import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
 import type { PermissionCatalogApi } from '@/service/forge/permissions';
+import type { TenantRoleApi } from '@/service/forge/tenant-roles';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -29,6 +35,8 @@ let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
 let permissions: PermissionCatalogApi | undefined;
+let invitations: InvitationsApi | undefined;
+let roles: TenantRoleApi | undefined;
 let organization: OrganizationApi | undefined;
 let brandAssets: BrandAssetsApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
@@ -45,6 +53,8 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
+    invitations = transport.invitations;
+    roles = transport.roles;
     organization = transport.organization;
     brandAssets = transport.brandAssets;
     manifests = transport.manifests;
@@ -101,6 +111,16 @@ export function consoleProjectHost() {
 export function consolePermissionCatalog() {
   consoleRuntime();
   return permissions!;
+}
+
+export function consoleInvitations(): InvitationsApi {
+  consoleRuntime();
+  return invitations!;
+}
+
+export function consoleTenantRoles() {
+  consoleRuntime();
+  return roles!;
 }
 
 export function consoleOrganization() {
