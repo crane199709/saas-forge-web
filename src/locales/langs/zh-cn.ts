@@ -49,7 +49,22 @@ const local: App.I18n.Schema = {
     empty: '暂无记录',
     failed: '操作未能完成，请重新读取记录或恢复会话后重试。',
     recover: '恢复原操作',
-    unknown: '原操作结果待确认，请先恢复，避免重复提交。'
+    unknown: '原操作结果待确认，请先恢复，避免重复提交。',
+    permissionAllowed: '当前权限允许查看项目列表。',
+    permissionDenied: '当前成员没有执行此操作的权限。',
+    permissionUnavailable: '权限服务暂时不可用，请稍后重试。'
+  },
+  permissionCatalog: {
+    title: '权限目录',
+    reload: '刷新目录',
+    loading: '正在读取权限目录…',
+    forbidden: '仅 Tenant Administrator 可以查看权限目录。',
+    unavailable: '权限目录暂时不可用，请稍后重试。',
+    empty: '当前没有已导入的权限。',
+    code: '权限代码',
+    status: '状态',
+    enabled: '有效',
+    disabled: '已停用'
   },
   remote: {
     businessEmpty: '暂无已启用的业务模块。',
@@ -334,6 +349,13 @@ const local: App.I18n.Schema = {
     noExpiry: '无到期时间',
     id: '租户 ID',
     detail: '租户详情',
+    edit: {
+      title: '维护租户主档',
+      hint: '管理名称仅供平台管理，品牌显示名由租户独立维护。有效期须晚于当前时间。',
+      chooseExpiry: '选择未来日期和时间',
+      save: '保存修改',
+      unknown: '结果尚不确定。使用相同内容重试，以核查原操作。'
+    },
     view: '查看详情',
     back: '返回租户列表',
     filters: '筛选租户',
@@ -357,6 +379,7 @@ const local: App.I18n.Schema = {
     states: {
       PENDING: '待初始化',
       ACTIVE: '正常',
+      EXPIRED: '已到期',
       SUSPENDED: '已暂停',
       CLOSED: '已关闭',
       COMMITTED: '已完成',
@@ -370,7 +393,10 @@ const local: App.I18n.Schema = {
       forbidden: '当前会话无权执行此操作，请重新核查会话和权限。',
       notFound: '未找到记录；这不表示可以重新创建。',
       nameInvalid: '请输入 1–200 个字符的名称，不能全部为空白。',
-      stale: '会话或请求已变化，请重新读取。'
+      stale: '会话或请求已变化，请重新读取。',
+      expiryInvalid: '请选择未来有效期，或勾选无到期时间。',
+      lifecycleConflict: '租户生命周期变更正在进行，请完成后重试。',
+      closed: '已关闭的租户不能修改。'
     }
   },
   console: {

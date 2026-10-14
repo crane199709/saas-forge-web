@@ -51,7 +51,22 @@ const local: App.I18n.Schema = {
     empty: 'No records',
     failed: 'The operation could not finish. Reload the record or recover your session before retrying.',
     recover: 'Recover original operation',
-    unknown: 'The original result needs confirmation. Recover it before submitting another write.'
+    unknown: 'The original result needs confirmation. Recover it before submitting another write.',
+    permissionAllowed: 'Your current permission allows the Project list.',
+    permissionDenied: 'This membership lacks permission for the operation.',
+    permissionUnavailable: 'The permission service is temporarily unavailable. Try again.'
+  },
+  permissionCatalog: {
+    title: 'Permission catalog',
+    reload: 'Refresh catalog',
+    loading: 'Loading permissions…',
+    forbidden: 'Only a Tenant Administrator can view the Permission catalog.',
+    unavailable: 'The Permission catalog is temporarily unavailable. Try again.',
+    empty: 'No permissions have been imported.',
+    code: 'Permission code',
+    status: 'Status',
+    enabled: 'Enabled',
+    disabled: 'Disabled'
   },
   remote: {
     businessEmpty: 'No business modules are enabled.',
@@ -350,6 +365,13 @@ const local: App.I18n.Schema = {
     noExpiry: 'No expiry',
     id: 'Tenant ID',
     detail: 'Tenant details',
+    edit: {
+      title: 'Manage tenant details',
+      hint: 'This name is for platform management. The tenant brand display name is managed separately. An expiry must be in the future.',
+      chooseExpiry: 'Choose a future date and time',
+      save: 'Save changes',
+      unknown: 'The result is unknown. Retry the same values to check the original operation.'
+    },
     view: 'View details',
     back: 'Back to tenants',
     filters: 'Filter tenants',
@@ -376,6 +398,7 @@ const local: App.I18n.Schema = {
     states: {
       PENDING: 'Pending initialization',
       ACTIVE: 'Active',
+      EXPIRED: 'Expired',
       SUSPENDED: 'Suspended',
       CLOSED: 'Closed',
       COMMITTED: 'Completed',
@@ -388,8 +411,11 @@ const local: App.I18n.Schema = {
       invalid: 'The service returned incomplete or inconsistent records. Related actions are locked.',
       forbidden: 'This session cannot perform the operation. Recheck your session and permissions.',
       notFound: 'The record was not found. This does not permit a new creation.',
-      nameInvalid: 'Enter a name of 1–200 characters, not only whitespace.',
-      stale: 'The session or request changed. Read again.'
+      nameInvalid: 'Enter a name of 1–200 characters that is not only whitespace.',
+      stale: 'The session or request changed. Read the latest tenant details before trying again.',
+      expiryInvalid: 'Choose a future expiry or select no expiry.',
+      lifecycleConflict: 'A tenant lifecycle change is in progress. Retry after it completes.',
+      closed: 'A closed tenant cannot be changed.'
     }
   },
   console: {

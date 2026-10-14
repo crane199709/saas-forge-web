@@ -12,9 +12,32 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{1
 export const tenantStatuses = ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'] as const;
 const validDate = (value: unknown): value is Date => value instanceof Date && Number.isFinite(value.getTime());
 export class TenantFailure extends Error {
-  constructor(readonly code: 'unavailable' | 'invalid' | 'forbidden' | 'notFound' | 'nameInvalid' | 'stale') {
+  constructor(
+    readonly code:
+      | 'unavailable'
+      | 'invalid'
+      | 'forbidden'
+      | 'notFound'
+      | 'nameInvalid'
+      | 'stale'
+      | 'expiryInvalid'
+      | 'lifecycleConflict'
+      | 'closed'
+  ) {
     super(code);
   }
+}
+async function responseFailure(error: ResponseError): Promise<TenantFailure> {
+  if ([401, 403].includes(error.response.status)) return new TenantFailure('forbidden');
+  if (error.response.status === 404) return new TenantFailure('notFound');
+  const problem: unknown = await error.response.json().catch(() => undefined);
+  const code = problem && typeof problem === 'object' && 'code' in problem ? problem.code : undefined;
+  if (code === 'TENANT_EXPIRY_INVALID') return new TenantFailure('expiryInvalid');
+  if (code === 'TENANT_LIFECYCLE_CHANGE_IN_PROGRESS') return new TenantFailure('lifecycleConflict');
+  if (code === 'TENANT_STATE_TRANSITION_NOT_ALLOWED') return new TenantFailure('closed');
+  if (code === 'IDEMPOTENCY_KEY_REUSED') return new TenantFailure('stale');
+  if (error.response.status === 400) return new TenantFailure('invalid');
+  return new TenantFailure('unavailable');
 }
 function requireValid(value: unknown): asserts value {
   if (!value) throw new TenantFailure('invalid');
@@ -78,6 +101,7 @@ type Session = { readonly state: SessionView; subscribe(listener: (state: Sessio
 export class TenantWorkspace {
   private materials = new Map<string, TenantCreationRecovery>();
   private attempt?: { key: string; displayName: string };
+  private detailUpdateAttempt?: { key: string; tenantId: string; displayName: string; expiresAt: string | null };
   private view: TenantWorkspaceState = { busy: false, checked: false, canCreate: false, unknown: false, creations: [] };
   private listeners = new Set<(state: TenantWorkspaceState) => void>();
   private controller = new AbortController();
@@ -130,6 +154,7 @@ export class TenantWorkspace {
     this.controller = new AbortController();
     this.materials.clear();
     if (!retainAttempt) this.attempt = undefined;
+    if (!retainAttempt) this.detailUpdateAttempt = undefined;
     this.publish({ busy: false, checked: false, unknown: Boolean(this.attempt), creations: [], problem: undefined });
   }
   dispose() {
@@ -148,10 +173,7 @@ export class TenantWorkspace {
     } catch (error) {
       if (generation !== this.generation || signal?.aborted) throw new TenantFailure('stale');
       if (error instanceof TenantFailure) throw error;
-      if (error instanceof ResponseError) {
-        if ([401, 403].includes(error.response.status)) throw new TenantFailure('forbidden');
-        if (error.response.status === 404) throw new TenantFailure('notFound');
-      }
+      if (error instanceof ResponseError) throw await responseFailure(error);
       throw new TenantFailure('unavailable');
     }
   }
@@ -169,6 +191,41 @@ export class TenantWorkspace {
     );
     requireValid(tenant.id === id);
     return tenant;
+  }
+  async update(id: string, displayName: string, expiresAt: Date | null): Promise<Tenant> {
+    requireValid(uuid.test(id) && displayName.trim() && displayName.length <= 200);
+    requireValid(expiresAt === null || validDate(expiresAt));
+    const expiry = expiresAt?.toISOString() ?? null;
+    if (
+      this.detailUpdateAttempt &&
+      (this.detailUpdateAttempt.tenantId !== id ||
+        this.detailUpdateAttempt.displayName !== displayName ||
+        this.detailUpdateAttempt.expiresAt !== expiry)
+    )
+      throw new TenantFailure('stale');
+    if (!this.detailUpdateAttempt)
+      this.detailUpdateAttempt = { key: this.key(), tenantId: id, displayName, expiresAt: expiry };
+    const attempt = this.detailUpdateAttempt;
+    try {
+      const result = validateTenant(
+        await this.call(options =>
+          this.api.updatePlatformTenant(
+            {
+              tenantId: id,
+              idempotencyKey: attempt.key,
+              updateTenantRequest: { displayName, expiresAt }
+            },
+            options
+          )
+        )
+      );
+      requireValid(result.id === id);
+      this.detailUpdateAttempt = undefined;
+      return result;
+    } catch (error) {
+      if (error instanceof TenantFailure && error.code !== 'unavailable') this.detailUpdateAttempt = undefined;
+      throw error;
+    }
   }
   /** 整次分页完成前不发布可恢复句柄；缺失、重复游标和中途失败均保持关闭。 */
   async checkCreations(): Promise<void> {

@@ -329,6 +329,21 @@ declare namespace App {
         failed: string;
         recover: string;
         unknown: string;
+        permissionAllowed: string;
+        permissionDenied: string;
+        permissionUnavailable: string;
+      };
+      permissionCatalog: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        code: string;
+        status: string;
+        enabled: string;
+        disabled: string;
       };
       manifest: {
         title: string;
@@ -589,6 +604,13 @@ declare namespace App {
       };
       tenants: {
         title: string;
+        edit: {
+          title: string;
+          hint: string;
+          chooseExpiry: string;
+          save: string;
+          unknown: string;
+        };
         create: string;
         closeCreate: string;
         name: string;
@@ -622,6 +644,7 @@ declare namespace App {
         states: {
           PENDING: string;
           ACTIVE: string;
+          EXPIRED: string;
           SUSPENDED: string;
           CLOSED: string;
           COMMITTED: string;
@@ -636,6 +659,9 @@ declare namespace App {
           notFound: string;
           nameInvalid: string;
           stale: string;
+          expiryInvalid: string;
+          lifecycleConflict: string;
+          closed: string;
         };
       };
       console: {

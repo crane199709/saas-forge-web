@@ -284,6 +284,56 @@ test('tenant detail renders real sections with accessible headings', async ({ co
   expect(state.unexpected).toEqual([]);
 });
 
+test('tenant detail name edit works by keyboard and keeps the independent expiry', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  let updated = false;
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}`, async route => {
+    if (route.request().method() !== 'PUT') return route.fallback();
+    const request = route.request();
+    expect(request.headers()['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
+    expect(request.postDataJSON()).toEqual({ displayName: 'Renamed Company', expiresAt: null });
+    updated = true;
+    return route.fulfill({ json: { ...tenant, displayName: 'Renamed Company' } });
+  });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const edit = page.getByRole('form', { name: 'Manage tenant details' });
+  await expect(edit.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  await edit.getByRole('textbox', { name: 'Tenant name' }).fill('Renamed Company');
+  await audit(page);
+  await edit.getByRole('button', { name: 'Save changes' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Renamed Company', { exact: true }).first()).toBeVisible();
+  expect(updated).toBe(true);
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('tenant expiry edit sets a future deadline and can clear it', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  const requests: (string | null)[] = [];
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}`, async route => {
+    if (route.request().method() !== 'PUT') return route.fallback();
+    const body = route.request().postDataJSON();
+    requests.push(body.expiresAt);
+    return route.fulfill({ json: { ...tenant, expiresAt: body.expiresAt } });
+  });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const edit = page.getByRole('form', { name: 'Manage tenant details' });
+  await edit.getByText('No expiry', { exact: true }).click();
+  const deadline = edit.getByRole('combobox', { name: 'Expires at' });
+  await deadline.fill('2099-01-01 12:00:00');
+  await deadline.press('Tab');
+  await edit.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByText('2099', { exact: false }).first()).toBeVisible();
+  expect(requests[0]).toBe('2099-01-01T12:00:00.000Z');
+  await edit.getByText('No expiry', { exact: true }).click();
+  await edit.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.locator('.el-descriptions').getByText('No expiry')).toBeVisible();
+  expect(requests).toEqual(['2099-01-01T12:00:00.000Z', null]);
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
 test('desktop zoom reflow keeps login controls within 320 CSS pixels', async ({ context, page }) => {
   const state = await prepare(context, { locale: 'en' });
   await page.setViewportSize({ width: 320, height: 900 });

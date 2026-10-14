@@ -117,7 +117,8 @@ export function createProjectHost(
         error instanceof Project.ResponseError &&
         error.response.status >= 400 &&
         error.response.status < 500 &&
-        ![401, 403, 408, 429].includes(error.response.status) &&
+        (![401, 403, 408, 429].includes(error.response.status) ||
+          (error.response.status === 403 && problem.code === 'PERMISSION_DENIED')) &&
         problem.code !== 'IDEMPOTENCY_REQUEST_IN_PROGRESS' &&
         pending === attempt
       )

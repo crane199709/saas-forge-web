@@ -10,6 +10,8 @@ import {
 import { SessionFailure } from '../../runtime/console-session';
 import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
+import { createPermissionApi } from './permissions';
+import type { PermissionCatalogApi } from './permissions';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
 export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
@@ -17,6 +19,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   entitlements: PlatformEntitlementBootstrapApi;
   oauth: OAuthClientsApi;
   projects: Project.DefaultApi;
+  permissions: PermissionCatalogApi;
   manifests: RemoteManifestsApi;
 } {
   const basePath = requireHttpsOrigin(apiOrigin);
@@ -60,6 +63,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     headers: { ...businessOptions.headers, 'Content-Type': 'application/json' }
   });
   return {
+    permissions: createPermissionApi(basePath, () => token ?? ''),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,
