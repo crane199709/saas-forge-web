@@ -226,6 +226,84 @@ test('tenant role form is keyboard reachable and shows a newly created role', as
   expect(state.unexpected).toEqual([]);
 });
 
+test('disabled member can gain and lose multiple organization units without changing roles', async ({
+  context,
+  page
+}, testInfo) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
+  const membershipId = '019944ca-0000-7000-8000-000000000020';
+  const first = '019944ca-0000-7000-8000-000000000021';
+  const second = '019944ca-0000-7000-8000-000000000022';
+  const assignments = new Set<string>();
+  const actions: string[] = [];
+  await page.route('**/api/v1/permissions/effective', route =>
+    route.fulfill({ json: { codes: ['system:organization:manage'] } })
+  );
+  await page.route('**/api/v1/invitations', route => route.fulfill({ json: { items: [] } }));
+  await page.route('**/api/v1/organization/units', route =>
+    route.fulfill({
+      json: {
+        organizationId: tenant.id,
+        items: [
+          { id: first, name: 'Engineering', memberCount: 0 },
+          { id: second, name: 'Operations', memberCount: 0 }
+        ]
+      }
+    })
+  );
+  await page.route('**/api/v1/members**', async route => {
+    const { pathname } = new URL(route.request().url());
+    const method = route.request().method();
+    if (pathname === '/api/v1/members' && method === 'GET') {
+      return route.fulfill({
+        json: {
+          items: [{ membershipId, identityId: '019944ca-0000-7000-8000-000000000023', status: 'DISABLED' }]
+        }
+      });
+    }
+    if (pathname === `/api/v1/members/${membershipId}/organization-units` && method === 'GET')
+      return route.fulfill({ json: { unitIds: [...assignments] } });
+    if (pathname === `/api/v1/members/${membershipId}/organization-units` && method === 'POST') {
+      const { unitId } = route.request().postDataJSON();
+      assignments.add(unitId);
+      actions.push(`add:${unitId}`);
+      return route.fulfill({ status: 201, body: '' });
+    }
+    if (pathname.startsWith(`/api/v1/members/${membershipId}/organization-units/`) && method === 'DELETE') {
+      const unitId = pathname.split('/').at(-1)!;
+      assignments.delete(unitId);
+      actions.push(`remove:${unitId}`);
+      return route.fulfill({ status: 204, body: '' });
+    }
+    return route.abort();
+  });
+  await page.goto(`${origin}/workbench`);
+  await expect(page.getByRole('heading', { name: 'Members' })).toBeVisible();
+  await page.getByRole('button', { name: 'Manage associations' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Organization units' });
+  await expect(dialog.getByText('No organization units are assigned.')).toBeVisible();
+  await audit(page, true);
+  const select = dialog.getByRole('combobox', { name: 'Add association' });
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('option', { name: 'Engineering' }).click();
+  await dialog.getByRole('button', { name: 'Add association' }).click();
+  await expect(dialog.getByRole('button', { name: 'Engineering · Remove association' })).toBeVisible();
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('option', { name: 'Operations' }).click();
+  await dialog.getByRole('button', { name: 'Add association' }).click();
+  await expect(dialog.getByRole('button', { name: 'Operations · Remove association' })).toBeVisible();
+  await audit(page, true);
+  await page.screenshot({ path: testInfo.outputPath('member-organizations.png'), fullPage: false });
+  await dialog.getByRole('button', { name: 'Engineering · Remove association' }).click();
+  await expect(dialog.getByRole('button', { name: 'Engineering · Remove association' })).toHaveCount(0);
+  expect(actions).toEqual([`add:${first}`, `add:${second}`, `remove:${first}`]);
+  expect([...assignments]).toEqual([second]);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
 async function audit(page: Page, dialog = false) {
   await page.addScriptTag({ content: axe });
   const violations = await page.evaluate(async modal => {
