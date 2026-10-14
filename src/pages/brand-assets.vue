@@ -22,6 +22,7 @@ interface PendingPreview {
 }
 
 const api = consoleBrandAssets();
+const emit = defineEmits<{ uploaded: [kind: Kind, reference: string] }>();
 const preview = ref<Partial<Record<Kind, Preview>>>({});
 const busy = ref<Kind>();
 const problem = ref<Failure>();
@@ -74,6 +75,7 @@ async function showPreview({ kind, asset, options, started, tenantId }: PendingP
   const previous = preview.value[kind];
   preview.value = { ...preview.value, [kind]: { url, reference: asset.url, width: asset.width, height: asset.height } };
   if (previous) URL.revokeObjectURL(previous.url);
+  emit('uploaded', kind, asset.url);
 }
 
 async function upload(kind: Kind, event: Event) {

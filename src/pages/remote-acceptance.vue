@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onDeactivated, onUnmounted, ref, useTemplateRef } from 'vue';
 import { useAppStore } from '@/store/modules/app';
-import { consoleState } from '@/runtime/console';
 import { mountStaticRemote } from '@/runtime/remote-loader';
 import type { RemoteMount, RemoteVersion } from '@/runtime/remote-loader';
 import { $t } from '@/locales';
@@ -13,9 +12,6 @@ const props = defineProps<{ enabled: boolean }>();
 const app = useAppStore();
 const host: RemoteDisplayHost = {
   text: (key, values) => $t(`remote.${key}`, values ?? {}),
-  get brandName() {
-    return consoleState.value.brand?.displayName ?? 'SaaS Forge';
-  },
   number: value => formatNumber({ value, locale: app.locale }),
   money: (value, currency) => formatMoney({ value, currency, locale: app.locale }),
   date: value => formatDate({ value, locale: app.locale }),

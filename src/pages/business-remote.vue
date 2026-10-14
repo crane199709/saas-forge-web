@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, markRaw, onBeforeUnmount, onErrorCaptured, ref, shallowRef, version, watch } from 'vue';
+import { markRaw, onBeforeUnmount, onErrorCaptured, ref, shallowRef, version, watch } from 'vue';
 import * as vue from 'vue';
 import type { Component } from 'vue';
 import * as elementPlus from 'element-plus';
@@ -15,11 +15,6 @@ let generation = 0;
 let controller = new AbortController();
 let dispose: (() => void) | undefined;
 let observedOwner: string | undefined;
-const company = computed(() =>
-  consoleState.value.snapshot?.availableContexts?.companies.find(
-    item => item.membershipId === consoleState.value.snapshot?.activeContext?.membershipId
-  )
-);
 const text = (key: ProjectTextKey) => $t(`projectRemote.${key}`);
 function unload() {
   generation += 1;
@@ -107,7 +102,6 @@ onBeforeUnmount(unload);
       v-show="consoleState.status === 'authenticated'"
       :host="host"
       :text="text"
-      :brand-name="company?.tenantDisplayName ?? ''"
     />
   </section>
 </template>

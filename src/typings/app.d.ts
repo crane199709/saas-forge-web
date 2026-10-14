@@ -530,6 +530,25 @@ declare namespace App {
         preview: string;
         errors: { invalid: string; forbidden: string; unavailable: string };
       };
+      brandProfile: {
+        title: string;
+        description: string;
+        displayName: string;
+        primaryColor: string;
+        accentColor: string;
+        logo: string;
+        favicon: string;
+        missing: string;
+        loading: string;
+        reload: string;
+        preview: string;
+        save: string;
+        forbidden: string;
+        stale: string;
+        asset: string;
+        invalid: string;
+        unavailable: string;
+      };
       manifest: {
         title: string;
         module: string;
@@ -553,7 +572,6 @@ declare namespace App {
         name: string;
         submit: string;
         success: string;
-        brand: string;
         number: string;
         money: string;
         date: string;

@@ -23,6 +23,8 @@ import type { PermissionCatalogApi } from './permissions';
 import type { TenantRoleApi } from './tenant-roles';
 import type { MembershipRoleApi } from './membership-roles';
 import type { PlatformAdminApi } from './platform-administrators';
+import { createBrandProfileApi } from './brand-profile';
+import type { BrandProfileApi } from './brand-profile';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
 export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
@@ -32,6 +34,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   projects: Project.DefaultApi;
   organization: OrganizationApi;
   brandAssets: BrandAssetsApi;
+  brandProfiles: BrandProfileApi;
   permissions: PermissionCatalogApi;
   invitations: InvitationsApi;
   members: MembersApi;
@@ -96,6 +99,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     administrators: createPlatformAdminApi(basePath, () => token ?? ''),
     organization: new OrganizationApi(jsonConfiguration),
     brandAssets: new BrandAssetsApi(businessConfiguration),
+    brandProfiles: createBrandProfileApi(basePath, () => token ?? ''),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,
