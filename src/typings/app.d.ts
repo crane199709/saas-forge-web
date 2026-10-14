@@ -370,6 +370,49 @@ declare namespace App {
         states: { PENDING: string; ACCEPTED: string; REVOKED: string; EXPIRED: string };
         deliveryStates: { PENDING: string; SENT: string; FAILED: string };
       };
+      invitationAcceptance: {
+        title: string;
+        intro: string;
+        currentIdentity: string;
+        accept: string;
+        refresh: string;
+        success: string;
+        invalid: string;
+        unavailable: string;
+        errors: Record<
+          | 'INVITATION_INVALID'
+          | 'INVITATION_IDENTITY_MISMATCH'
+          | 'INVITATION_REVOKED'
+          | 'INVITATION_EXPIRED'
+          | 'INVITATION_ALREADY_ACCEPTED'
+          | 'INVITATION_NOT_PENDING'
+          | 'MEMBERSHIP_ALREADY_EXISTS'
+          | 'QUOTA_EXCEEDED'
+          | 'SUBSCRIPTION_REQUIRED'
+          | 'INVITATION_ACTIVATION_COMPENSATING'
+          | 'INVITATION_ACCEPTANCE_RETRY_REQUIRED'
+          | 'INVITATION_ACCEPTANCE_IN_PROGRESS',
+          string
+        >;
+      };
+      members: {
+        title: string;
+        refresh: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        identity: string;
+        status: string;
+        enabled: string;
+        disabled: string;
+      };
+      waiting: {
+        title: string;
+        message: string;
+        refresh: string;
+        unavailable: string;
+      };
       tenantRoles: {
         title: string;
         reload: string;
@@ -721,11 +764,26 @@ declare namespace App {
         title: string;
         check: string;
         hint: string;
+        closed: string;
         unknown: string;
         progress: string;
         operation: string;
-        actions: { suspend: string; resume: string; recover: string; continue: string };
-        confirm: { suspend: string; resume: string; recover: string; continue: string };
+        actions: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
+        confirm: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
         states: { NONE: string; PENDING: string; COMPLETED: string; RETRY_REQUIRED: string; RECOVERY_REQUIRED: string };
       };
       tenants: {

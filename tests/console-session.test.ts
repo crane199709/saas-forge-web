@@ -385,7 +385,7 @@ test('brand preparation cannot resurrect a workspace after a newer cross-tab tra
   assert.equal(f.token(), undefined);
 });
 
-test('a sole newly available membership still requires authoritative selection before entering', async () => {
+test('a newly available membership waits for explicit Context selection', async () => {
   const f = fixture();
   const response = await f.api.login('', '', '');
   let selected = false;
@@ -424,6 +424,10 @@ test('a sole newly available membership still requires authoritative selection b
     return '3';
   };
   await f.runtime.recover();
+  assert.equal(selected, false);
+  assert.equal(f.runtime.state.status, 'restricted');
+  f.api.bootstrap = async () => ({ revision: '2', sessionPresent: true, transition: 'NONE' });
+  await f.runtime.select(tenantTarget, async () => true);
   assert.equal(selected, true);
   assert.equal(f.runtime.state.snapshot?.activeContext?.membershipId, tenantTarget.membershipId);
 });

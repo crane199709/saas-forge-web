@@ -93,6 +93,48 @@ const local: App.I18n.Schema = {
     states: { PENDING: 'Pending', ACCEPTED: 'Accepted', REVOKED: 'Revoked', EXPIRED: 'Expired' },
     deliveryStates: { PENDING: 'Pending', SENT: 'Sent', FAILED: 'Failed' }
   },
+  invitationAcceptance: {
+    title: 'Accept invitation',
+    intro: 'Sign in with the invited account, then explicitly accept this invitation.',
+    currentIdentity: 'Signed in as',
+    accept: 'Accept invitation',
+    refresh: 'Refresh access',
+    success: 'You joined the company. Your workspace stays as selected; an administrator can now grant your role.',
+    invalid: 'The invitation link is invalid. Open the latest link from your email.',
+    unavailable: 'The result cannot be confirmed. Keep this page open and retry.',
+    errors: {
+      INVITATION_INVALID: 'The link is invalid or has been replaced. Open the latest invitation email.',
+      INVITATION_IDENTITY_MISMATCH: 'This invitation belongs to another account. Sign out and use the invited email.',
+      INVITATION_REVOKED: 'This invitation was revoked. Ask the administrator for a new invitation.',
+      INVITATION_EXPIRED: 'This invitation has expired. Ask the administrator for a new invitation.',
+      INVITATION_ALREADY_ACCEPTED: 'This invitation has already been accepted.',
+      INVITATION_NOT_PENDING: 'This invitation is no longer available. Refresh or ask for a new one.',
+      MEMBERSHIP_ALREADY_EXISTS: 'You already belong to this company.',
+      QUOTA_EXCEEDED: 'This company has no remaining member seats. Ask an administrator to increase its limit.',
+      SUBSCRIPTION_REQUIRED: 'This company needs an active subscription before you can join.',
+      INVITATION_ACTIVATION_COMPENSATING: 'The seat is being released after an interrupted attempt. Retry shortly.',
+      INVITATION_ACCEPTANCE_RETRY_REQUIRED: 'The interrupted attempt was safely reversed. Retry to join.',
+      INVITATION_ACCEPTANCE_IN_PROGRESS: 'Another acceptance attempt is finishing. Retry shortly.'
+    }
+  },
+  members: {
+    title: 'Members',
+    refresh: 'Refresh members',
+    loading: 'Loading members…',
+    forbidden: 'Only a Tenant Administrator can view the member directory.',
+    unavailable: 'Members are temporarily unavailable. Try again.',
+    empty: 'No members yet.',
+    identity: 'Identity',
+    status: 'Status',
+    enabled: 'Enabled',
+    disabled: 'Disabled'
+  },
+  waiting: {
+    title: 'Waiting for access',
+    message: 'Your membership is active, but no Permission has been granted. Ask an administrator to assign a role.',
+    refresh: 'Refresh permissions',
+    unavailable: 'Current permissions cannot be confirmed. Refresh to try again.'
+  },
   tenantRoles: {
     title: 'Tenant roles',
     reload: 'Refresh roles',
@@ -460,7 +502,9 @@ const local: App.I18n.Schema = {
   lifecycle: {
     title: 'Tenant lifecycle',
     check: 'Check lifecycle',
-    hint: 'Actions follow current server permission. Suspension revokes tenant sessions; resumption requires members to sign in again and pass eligibility checks.',
+    hint: 'Actions follow current server permission. Suspension can be lifted; closure permanently ends tenant access. Both revoke tenant sessions first.',
+    closed:
+      'This tenant is permanently closed. Access cannot be restored. Membership, business, audit, and separate subscription records remain.',
     unknown:
       'The operation result is unknown. New actions are blocked. Check authoritative progress before continuing.',
     progress: 'Progress',
@@ -469,12 +513,17 @@ const local: App.I18n.Schema = {
       suspend: 'Suspend tenant',
       resume: 'Resume tenant',
       recover: 'Recover suspension',
+      close: 'Permanently close tenant',
+      recoverClosure: 'Continue closure',
       continue: 'Continue original operation'
     },
     confirm: {
       suspend: 'Suspend this tenant? Protected access and existing tenant sessions will be revoked.',
       resume: 'Resume this tenant? Old sessions will remain invalid; members must sign in again.',
       recover: 'Recover the original suspension workflow without starting a new suspension or resumption?',
+      close:
+        'Permanently close this tenant? Tenant sessions are revoked first, then access cannot be restored. Membership, business, audit, and subscription records remain.',
+      recoverClosure: 'Continue the original closure? Access remains blocked and completion is permanent.',
       continue: 'Continue the original lifecycle operation recorded by the server?'
     },
     states: {
@@ -482,7 +531,7 @@ const local: App.I18n.Schema = {
       PENDING: 'Processing',
       COMPLETED: 'Completed',
       RETRY_REQUIRED: 'Retry required',
-      RECOVERY_REQUIRED: 'Suspension recovery required'
+      RECOVERY_REQUIRED: 'Original operation requires recovery'
     }
   },
   tenants: {
