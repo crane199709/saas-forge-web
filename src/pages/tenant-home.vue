@@ -6,6 +6,7 @@ import WorkContexts from './work-contexts.vue';
 import BusinessRemote from './business-remote.vue';
 import PermissionCatalog from './permission-catalog.vue';
 import InvitationManager from './invitation-manager.vue';
+import OrganizationUnits from './organization-units.vue';
 
 const RemoteAcceptance =
   import.meta.env.DEV || import.meta.env.MODE === 'static-acceptance'
@@ -49,6 +50,8 @@ onMounted(async () => {
     <PermissionCatalog />
     <ElDivider />
     <InvitationManager />
+    <ElDivider />
+    <OrganizationUnits />
     <ElDivider />
     <BusinessRemote />
     <ElDivider />

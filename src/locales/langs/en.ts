@@ -93,6 +93,31 @@ const local: App.I18n.Schema = {
     states: { PENDING: 'Pending', ACCEPTED: 'Accepted', REVOKED: 'Revoked', EXPIRED: 'Expired' },
     deliveryStates: { PENDING: 'Pending', SENT: 'Sent', FAILED: 'Failed' }
   },
+  organization: {
+    title: 'Organization units',
+    reload: 'Refresh organization',
+    loading: 'Loading organization…',
+    empty: 'No units yet. You can create multiple roots.',
+    addRoot: 'Add root',
+    addChild: 'Add child',
+    rename: 'Rename',
+    move: 'Move',
+    delete: 'Delete',
+    deleteConfirm: 'Only empty leaves can be deleted. Delete this unit?',
+    name: 'Name',
+    parent: 'Destination parent',
+    root: 'Make root',
+    cancel: 'Cancel',
+    save: 'Save',
+    actions: { create: 'Create organization unit', rename: 'Rename organization unit', move: 'Move organization unit' },
+    errors: {
+      invalid: 'Enter a valid name.',
+      missing: 'This unit no longer exists. Refresh and try again.',
+      conflict: 'A cycle or existing association prevents this change.',
+      forbidden: 'This membership cannot manage the organization.',
+      unavailable: 'The organization service is temporarily unavailable. Try again.'
+    }
+  },
   remote: {
     businessEmpty: 'No business modules are enabled.',
     recoverSession: 'Recover session',

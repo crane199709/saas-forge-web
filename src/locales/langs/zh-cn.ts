@@ -91,6 +91,31 @@ const local: App.I18n.Schema = {
     states: { PENDING: '待处理', ACCEPTED: '已接受', REVOKED: '已撤销', EXPIRED: '已过期' },
     deliveryStates: { PENDING: '待投递', SENT: '已投递', FAILED: '投递失败' }
   },
+  organization: {
+    title: '组织单元',
+    reload: '刷新组织',
+    loading: '正在读取组织…',
+    empty: '暂无组织单元，可创建多个根节点。',
+    addRoot: '新增根节点',
+    addChild: '新增子节点',
+    rename: '重命名',
+    move: '移动',
+    delete: '删除',
+    deleteConfirm: '仅空叶节点可删除。确定删除此组织单元吗？',
+    name: '名称',
+    parent: '目标父节点',
+    root: '作为根节点',
+    cancel: '取消',
+    save: '保存',
+    actions: { create: '创建组织单元', rename: '重命名组织单元', move: '移动组织单元' },
+    errors: {
+      invalid: '请输入有效名称。',
+      missing: '组织单元已不存在，请刷新后重试。',
+      conflict: '存在循环关系或非空关联，无法完成此操作。',
+      forbidden: '当前成员没有组织维护权限。',
+      unavailable: '组织服务暂时不可用，请稍后重试。'
+    }
+  },
   remote: {
     businessEmpty: '暂无已启用的业务模块。',
     recoverSession: '恢复会话',

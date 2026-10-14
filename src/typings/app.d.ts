@@ -370,6 +370,31 @@ declare namespace App {
         states: { PENDING: string; ACCEPTED: string; REVOKED: string; EXPIRED: string };
         deliveryStates: { PENDING: string; SENT: string; FAILED: string };
       };
+      organization: {
+        title: string;
+        reload: string;
+        loading: string;
+        empty: string;
+        addRoot: string;
+        addChild: string;
+        rename: string;
+        move: string;
+        delete: string;
+        deleteConfirm: string;
+        name: string;
+        parent: string;
+        root: string;
+        cancel: string;
+        save: string;
+        actions: { create: string; rename: string; move: string };
+        errors: {
+          invalid: string;
+          missing: string;
+          conflict: string;
+          forbidden: string;
+          unavailable: string;
+        };
+      };
       manifest: {
         title: string;
         module: string;
