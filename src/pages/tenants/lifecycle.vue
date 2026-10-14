@@ -14,7 +14,7 @@ const { enabled } = useTenantDisplay();
 const unsubscribe = workspace.subscribe(value => {
   state.value = value;
 });
-const actions: LifecycleAction[] = ['suspend', 'resume', 'recover', 'continue'];
+const actions: LifecycleAction[] = ['suspend', 'resume', 'recover', 'close', 'recoverClosure', 'continue'];
 let disposed = false;
 let confirming = false;
 let cancelConfirmation: (() => void) | undefined;
@@ -112,11 +112,19 @@ onUnmounted(() => {
         {{ state.snapshot.operationId }}
       </ElDescriptionsItem>
     </ElDescriptions>
+    <ElAlert
+      v-if="state.snapshot?.action === 'CLOSE' && state.snapshot.state === 'COMPLETED'"
+      :title="$t('lifecycle.closed')"
+      type="error"
+      :closable="false"
+      show-icon
+      class="closure-alert mb-16px"
+    />
     <div class="flex flex-wrap justify-end gap-12px">
       <ElButton
         v-for="action in actions"
         :key="action"
-        :type="action === 'suspend' ? 'danger' : 'primary'"
+        :type="action === 'suspend' || action === 'close' ? 'danger' : 'primary'"
         :disabled="!enabled || !workspace.can(action)"
         @click="run(action, $event)"
       >
@@ -125,3 +133,9 @@ onUnmounted(() => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.closure-alert :deep(.el-alert__title) {
+  color: var(--el-text-color-primary);
+}
+</style>

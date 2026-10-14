@@ -670,11 +670,26 @@ declare namespace App {
         title: string;
         check: string;
         hint: string;
+        closed: string;
         unknown: string;
         progress: string;
         operation: string;
-        actions: { suspend: string; resume: string; recover: string; continue: string };
-        confirm: { suspend: string; resume: string; recover: string; continue: string };
+        actions: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
+        confirm: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
         states: { NONE: string; PENDING: string; COMPLETED: string; RETRY_REQUIRED: string; RECOVERY_REQUIRED: string };
       };
       tenants: {

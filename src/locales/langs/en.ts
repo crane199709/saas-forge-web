@@ -403,7 +403,9 @@ const local: App.I18n.Schema = {
   lifecycle: {
     title: 'Tenant lifecycle',
     check: 'Check lifecycle',
-    hint: 'Actions follow current server permission. Suspension revokes tenant sessions; resumption requires members to sign in again and pass eligibility checks.',
+    hint: 'Actions follow current server permission. Suspension can be lifted; closure permanently ends tenant access. Both revoke tenant sessions first.',
+    closed:
+      'This tenant is permanently closed. Access cannot be restored. Membership, business, audit, and separate subscription records remain.',
     unknown:
       'The operation result is unknown. New actions are blocked. Check authoritative progress before continuing.',
     progress: 'Progress',
@@ -412,12 +414,17 @@ const local: App.I18n.Schema = {
       suspend: 'Suspend tenant',
       resume: 'Resume tenant',
       recover: 'Recover suspension',
+      close: 'Permanently close tenant',
+      recoverClosure: 'Continue closure',
       continue: 'Continue original operation'
     },
     confirm: {
       suspend: 'Suspend this tenant? Protected access and existing tenant sessions will be revoked.',
       resume: 'Resume this tenant? Old sessions will remain invalid; members must sign in again.',
       recover: 'Recover the original suspension workflow without starting a new suspension or resumption?',
+      close:
+        'Permanently close this tenant? Tenant sessions are revoked first, then access cannot be restored. Membership, business, audit, and subscription records remain.',
+      recoverClosure: 'Continue the original closure? Access remains blocked and completion is permanent.',
       continue: 'Continue the original lifecycle operation recorded by the server?'
     },
     states: {
@@ -425,7 +432,7 @@ const local: App.I18n.Schema = {
       PENDING: 'Processing',
       COMPLETED: 'Completed',
       RETRY_REQUIRED: 'Retry required',
-      RECOVERY_REQUIRED: 'Suspension recovery required'
+      RECOVERY_REQUIRED: 'Original operation requires recovery'
     }
   },
   tenants: {
