@@ -373,6 +373,13 @@ declare namespace App {
       invitationAcceptance: {
         title: string;
         intro: string;
+        requestSetup: string;
+        resendSetup: string;
+        setupSent: string;
+        passwordReady: string;
+        recoveryRequired: string;
+        openRecovery: string;
+        setupUnavailable: string;
         currentIdentity: string;
         accept: string;
         refresh: string;
@@ -419,6 +426,15 @@ declare namespace App {
         disableCompleted: string;
         disableConflict: string;
         disableFailed: string;
+        roles: string;
+        manageRoles: string;
+        loadingRoles: string;
+        unavailableRoles: string;
+        noRoles: string;
+        chooseRole: string;
+        assignRole: string;
+        revokeRole: string;
+        roleError: Record<'forbidden' | 'last-administrator' | 'missing' | 'unavailable', string>;
       };
       waiting: {
         title: string;
@@ -462,6 +478,20 @@ declare namespace App {
         passwordStatus: string;
         passwordReady: string;
         passwordPending: string;
+        actions: string;
+        revoke: string;
+        cancel: string;
+        revokeConfirm: string;
+        revokePending: string;
+        revokeResults: {
+          revoked: string;
+          'last-admin': string;
+          missing: string;
+          forbidden: string;
+          conflict: string;
+          invalid: string;
+          unavailable: string;
+        };
         pending: string;
         retry: string;
         results: {

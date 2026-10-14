@@ -93,7 +93,15 @@ const local: App.I18n.Schema = {
   },
   invitationAcceptance: {
     title: '接受邀请',
-    intro: '请先使用受邀账号登录，再明确接受这份邀请。',
+    intro: '首次使用请先申请设置密码；已有密码请以受邀账号登录，再明确接受邀请。',
+    requestSetup: '首次设置密码',
+    resendSetup: '重发设置密码邮件',
+    setupSent:
+      '设置密码邮件已由邮件服务接收。完成设置后，请重新打开邀请邮件中的链接，以新密码登录并接受邀请；此时尚未占用成员名额。',
+    passwordReady: '此账号已有密码，请直接登录。邀请不会重置已有密码。',
+    recoveryRequired: '此账号存在历史凭据，不能用首次设置密码链接覆盖。请走独立密码恢复流程，完成后重新打开邀请链接。',
+    openRecovery: '前往密码恢复',
+    setupUnavailable: '暂时无法确认密码设置邮件状态，请保留此邀请页面并重试。',
     currentIdentity: '当前登录账号',
     accept: '接受邀请',
     refresh: '刷新访问状态',
@@ -138,7 +146,21 @@ const local: App.I18n.Schema = {
     disablePending: '禁用仍在处理中，请刷新查看进度。',
     disableCompleted: '成员已禁用，名额已释放。',
     disableConflict: '成员状态或管理员保护规则已变化，请刷新后重试。',
-    disableFailed: '暂时无法完成禁用，请刷新进度后重试。'
+    disableFailed: '暂时无法完成禁用，请刷新进度后重试。',
+    roles: '角色',
+    manageRoles: '管理角色',
+    loadingRoles: '正在读取角色分配…',
+    unavailableRoles: '暂时无法读取角色分配，请关闭后重试。',
+    noRoles: '该成员尚无角色。',
+    chooseRole: '选择要分配的角色',
+    assignRole: '分配角色',
+    revokeRole: '撤销',
+    roleError: {
+      forbidden: '当前管理员权限已变更，请刷新页面。',
+      'last-administrator': '不能移除最后一个已启用的 Tenant Administrator。',
+      missing: '成员或角色已不存在，请刷新页面。',
+      unavailable: '角色变更结果暂时无法确认，请刷新后重试。'
+    }
   },
   waiting: {
     title: '等待授权',
@@ -182,6 +204,20 @@ const local: App.I18n.Schema = {
     passwordStatus: '密码凭据',
     passwordReady: '已建立',
     passwordPending: '待设置或恢复',
+    actions: '操作',
+    revoke: '撤销管理员',
+    cancel: '取消',
+    revokeConfirm: '确定撤销 {email} 的平台管理员权限吗？其平台会话将结束，合法公司会话保留。',
+    revokePending: '{email} 的撤权结果尚未确认，请重试原请求。',
+    revokeResults: {
+      revoked: '平台管理员权限已撤销。',
+      'last-admin': '必须至少保留一名已设置常规密码的平台管理员。',
+      missing: '该身份当前没有平台管理员权限。',
+      forbidden: '需要平台管理员权限。',
+      conflict: '请求与先前操作冲突，请刷新后重试。',
+      invalid: '撤权请求无效。',
+      unavailable: '撤权结果暂不可用，请重试原请求。'
+    },
     pending: '{email} 的结果尚未确认，请重试原请求。',
     retry: '重试原请求',
     results: {

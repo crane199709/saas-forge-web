@@ -17,9 +17,11 @@ import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
 import { createPermissionApi } from './permissions';
 import { createTenantRoleApi } from './tenant-roles';
+import { createMembershipRoleApi } from './membership-roles';
 import { createPlatformAdminApi } from './platform-administrators';
 import type { PermissionCatalogApi } from './permissions';
 import type { TenantRoleApi } from './tenant-roles';
+import type { MembershipRoleApi } from './membership-roles';
 import type { PlatformAdminApi } from './platform-administrators';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
@@ -36,6 +38,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   effectivePermissions: PermissionsApi;
   acceptance: Console.InvitationAcceptanceApi;
   roles: TenantRoleApi;
+  membershipRoles: MembershipRoleApi;
   administrators: PlatformAdminApi;
   manifests: RemoteManifestsApi;
 } {
@@ -89,6 +92,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     effectivePermissions: new PermissionsApi(jsonConfiguration),
     acceptance,
     roles: createTenantRoleApi(basePath, () => token ?? ''),
+    membershipRoles: createMembershipRoleApi(basePath, () => token ?? ''),
     administrators: createPlatformAdminApi(basePath, () => token ?? ''),
     organization: new OrganizationApi(jsonConfiguration),
     brandAssets: new BrandAssetsApi(businessConfiguration),

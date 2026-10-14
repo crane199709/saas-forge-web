@@ -95,7 +95,16 @@ const local: App.I18n.Schema = {
   },
   invitationAcceptance: {
     title: 'Accept invitation',
-    intro: 'Sign in with the invited account, then explicitly accept this invitation.',
+    intro: 'Request first password setup if needed. Otherwise sign in with the invited account and explicitly accept.',
+    requestSetup: 'Set up a password',
+    resendSetup: 'Resend setup email',
+    setupSent:
+      'The mail service accepted your setup email. After setting your password, reopen the invitation email, sign in, and accept. No member seat has been used yet.',
+    passwordReady: 'This account already has a password. Sign in directly; the invitation will not reset it.',
+    recoveryRequired:
+      'This account has a previous credential. First setup cannot replace it. Recover your password separately, then reopen the invitation link.',
+    openRecovery: 'Recover password',
+    setupUnavailable: 'The setup email status cannot be confirmed. Keep this invitation page open and retry.',
     currentIdentity: 'Signed in as',
     accept: 'Accept invitation',
     refresh: 'Refresh access',
@@ -140,7 +149,21 @@ const local: App.I18n.Schema = {
     disablePending: 'Disabling is still in progress. Refresh to check the result.',
     disableCompleted: 'Member disabled and seat released.',
     disableConflict: 'Member state or administrator protection changed. Refresh and try again.',
-    disableFailed: 'Disabling could not complete. Refresh the progress and try again.'
+    disableFailed: 'Disabling could not complete. Refresh the progress and try again.',
+    roles: 'Roles',
+    manageRoles: 'Manage roles',
+    loadingRoles: 'Loading role assignments…',
+    unavailableRoles: 'Role assignments are unavailable. Close and try again.',
+    noRoles: 'This member has no roles yet.',
+    chooseRole: 'Choose a role to assign',
+    assignRole: 'Assign role',
+    revokeRole: 'Revoke',
+    roleError: {
+      forbidden: 'Your administrator access changed. Refresh this page.',
+      'last-administrator': 'The last enabled Tenant Administrator cannot be removed.',
+      missing: 'The member or role no longer exists. Refresh this page.',
+      unavailable: 'The role change result is unavailable. Refresh before retrying.'
+    }
   },
   waiting: {
     title: 'Waiting for access',
@@ -185,6 +208,21 @@ const local: App.I18n.Schema = {
     passwordStatus: 'Password credential',
     passwordReady: 'Ready',
     passwordPending: 'Setup or recovery required',
+    actions: 'Actions',
+    revoke: 'Revoke administrator',
+    cancel: 'Cancel',
+    revokeConfirm:
+      'Revoke platform administrator access for {email}? Platform sessions will end; valid company sessions remain.',
+    revokePending: 'The revocation result for {email} is not confirmed. Retry the same request.',
+    revokeResults: {
+      revoked: 'Platform administrator access was revoked.',
+      'last-admin': 'Keep at least one administrator with a regular password.',
+      missing: 'This identity has no current platform administrator role.',
+      forbidden: 'Platform administrator authorization is required.',
+      conflict: 'The request conflicts with an earlier operation. Refresh and try again.',
+      invalid: 'The revocation request is invalid.',
+      unavailable: 'The result is unavailable. Retry the original request.'
+    },
     pending: 'The result for {email} is not confirmed. Retry the same request.',
     retry: 'Retry original request',
     results: {
