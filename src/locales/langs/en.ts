@@ -136,7 +136,22 @@ const local: App.I18n.Schema = {
     identity: 'Identity',
     status: 'Status',
     enabled: 'Enabled',
-    disabled: 'Disabled'
+    disabled: 'Disabled',
+    organizationUnits: 'Organization units',
+    manageUnits: 'Manage associations',
+    unitsLoading: 'Loading organization associations…',
+    reloadUnits: 'Reload associations',
+    unitsUnavailable: 'Organization associations are unavailable. Try again.',
+    unitsHint: 'A member can belong to multiple units. These links do not change roles or business data access.',
+    noUnits: 'No organization units are assigned.',
+    addUnit: 'Add association',
+    removeUnit: 'Remove association',
+    unitErrors: {
+      missing: 'The member or unit no longer exists. Refresh and try again.',
+      conflict: 'This association changed elsewhere. Reload it.',
+      forbidden: 'You cannot manage organization associations.',
+      unavailable: 'The association could not be changed. Try again.'
+    }
   },
   waiting: {
     title: 'Waiting for access',
