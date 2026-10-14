@@ -26,7 +26,7 @@ const snapshot = {
 // 生产构建 + 正式路由 + 模拟 HTTP，仅证明前端回归，不能替代 Chrome/Gateway/Fresh 验收。
 async function prepare(
   context: BrowserContext,
-  options: { locale?: string; authenticated?: boolean; failed?: boolean } = {}
+  options: { locale?: string; authenticated?: boolean; failed?: boolean; tenant?: boolean } = {}
 ) {
   const errors: string[] = [];
   const unexpected: string[] = [];
@@ -41,6 +41,7 @@ async function prepare(
   };
   context.pages().forEach(observePage);
   context.on('page', observePage);
+  // eslint-disable-next-line complexity -- 共享 HTTP 夹具需要区分正式 Console 的多个 operation。
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (url.origin === origin) {
@@ -50,15 +51,48 @@ async function prepare(
     }
     if (url.origin === 'https://api.ui.test') {
       const path = url.pathname;
+      const session = options.tenant
+        ? {
+            ...snapshot,
+            activeContext: { type: 'TENANT', membershipId: '019944ca-0000-7000-8000-000000000006' },
+            availableContexts: {
+              platform: false,
+              companies: [
+                {
+                  tenantId: tenant.id,
+                  tenantDisplayName: tenant.displayName,
+                  membershipId: '019944ca-0000-7000-8000-000000000006'
+                }
+              ]
+            }
+          }
+        : snapshot;
       let body: unknown;
       if (path.endsWith('/bootstrap'))
         body = { revision: '1', sessionPresent: Boolean(options.authenticated || options.failed), transition: 'NONE' };
       else if (options.failed && path.endsWith('/session')) {
         await route.fulfill({ status: 503, json: { code: 'SESSION_SECURITY_UNAVAILABLE' } });
         return;
-      } else if (path.endsWith('/session')) body = snapshot;
+      } else if (path.endsWith('/session')) body = session;
       else if (path.endsWith('/refresh') || path.endsWith('/login'))
-        body = { ...snapshot, accessToken: 'ui-fixture-token', tokenType: 'Bearer', expiresIn: 900 };
+        body = { ...session, accessToken: 'ui-fixture-token', tokenType: 'Bearer', expiresIn: 900 };
+      else if (options.tenant && path === '/api/v1/permissions')
+        body = { items: [{ code: 'example:project:list', enabled: true }] };
+      else if (options.tenant && path === '/api/v1/organization/units') body = { items: [] };
+      else if (options.tenant && path === '/api/v1/tenant-roles')
+        body = {
+          items: [
+            {
+              id: '019944ca-0000-7000-8000-000000000007',
+              roleKey: 'TENANT_ADMINISTRATOR',
+              systemManaged: true,
+              permissions: [],
+              assignedMembers: 1
+            }
+          ]
+        };
+      else if (options.tenant && path === '/api/v1/remote-manifests/enabled')
+        body = { items: [], hasMore: false, nextCursor: null };
       else if (path === '/api/v1/platform/tenants') body = { items: [tenant], hasMore: false, nextCursor: null };
       else if (path === '/api/v1/platform/tenant-creations') body = { items: [], hasMore: false, nextCursor: null };
       else if (path === `/api/v1/platform/tenants/${tenant.id}`) body = tenant;
@@ -131,6 +165,64 @@ async function prepare(
   });
   return { errors, unexpected };
 }
+
+test('tenant role form is keyboard reachable and shows a newly created role', async ({ context, page }, testInfo) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
+  let created = false;
+  await page.route('**/api/v1/tenant-roles', async route => {
+    if (route.request().method() === 'GET') {
+      const items = [
+        {
+          id: '019944ca-0000-7000-8000-000000000007',
+          roleKey: 'TENANT_ADMINISTRATOR',
+          systemManaged: true,
+          permissions: [] as string[],
+          assignedMembers: 1
+        }
+      ];
+      if (created)
+        items.push({
+          id: '019944ca-0000-7000-8000-000000000008',
+          roleKey: 'REPORT_READER',
+          systemManaged: false,
+          permissions: ['example:project:list'],
+          assignedMembers: 0
+        });
+      return route.fulfill({ json: { items } });
+    }
+    if (route.request().method() !== 'POST') return route.fallback();
+    expect(route.request().postDataJSON()).toEqual({ roleKey: 'REPORT_READER', permissions: ['example:project:list'] });
+    created = true;
+    return route.fulfill({
+      status: 201,
+      json: {
+        id: '019944ca-0000-7000-8000-000000000008',
+        roleKey: 'REPORT_READER',
+        systemManaged: false,
+        permissions: ['example:project:list'],
+        assignedMembers: 0
+      }
+    });
+  });
+  await page.goto(`${origin}/workbench`);
+  await expect(page.getByRole('heading', { name: 'Tenant roles' })).toBeVisible();
+  await stable(page);
+  await audit(page);
+  const create = page.getByRole('button', { name: 'Create role' });
+  await create.focus();
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Create role' });
+  await expect(dialog).toBeVisible();
+  await audit(page, true);
+  await dialog.getByRole('textbox', { name: 'Role key' }).fill('REPORT_READER');
+  await dialog.getByText('example:project:list', { exact: true }).click();
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole('cell', { name: 'REPORT_READER' })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('tenant-roles.png'), fullPage: false });
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
 
 async function audit(page: Page, dialog = false) {
   await page.addScriptTag({ content: axe });

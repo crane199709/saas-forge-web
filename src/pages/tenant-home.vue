@@ -5,6 +5,7 @@ import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
 import BusinessRemote from './business-remote.vue';
 import PermissionCatalog from './permission-catalog.vue';
+import TenantRoles from './tenant-roles.vue';
 import OrganizationUnits from './organization-units.vue';
 
 const RemoteAcceptance =
@@ -47,6 +48,8 @@ onMounted(async () => {
     />
     <ElDivider />
     <PermissionCatalog />
+    <ElDivider />
+    <TenantRoles />
     <ElDivider />
     <OrganizationUnits />
     <ElDivider />
