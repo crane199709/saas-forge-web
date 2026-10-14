@@ -413,6 +413,21 @@ declare namespace App {
         status: string;
         enabled: string;
         disabled: string;
+        organizationUnits: string;
+        manageUnits: string;
+        unitsLoading: string;
+        reloadUnits: string;
+        unitsUnavailable: string;
+        unitsHint: string;
+        noUnits: string;
+        addUnit: string;
+        removeUnit: string;
+        unitErrors: {
+          missing: string;
+          conflict: string;
+          forbidden: string;
+          unavailable: string;
+        };
         operation: string;
         actions: string;
         disable: string;

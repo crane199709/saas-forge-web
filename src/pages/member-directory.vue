@@ -2,11 +2,11 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ResponseError } from '@crane199709/saas-forge-api-client';
-import type { Member } from '@crane199709/saas-forge-api-client';
+import type { Member, OrganizationUnit } from '@crane199709/saas-forge-api-client';
 import type { TenantRole } from '@/service/forge/tenant-roles';
 import { MembershipRoleFailure } from '@/service/forge/membership-roles';
 import type { MemberRoleAssignment } from '@/service/forge/membership-roles';
-import { consoleMembers, consoleMembershipRoles, consoleState, consoleTenantRoles } from '@/runtime/console';
+import { consoleMembers, consoleMembershipRoles, consoleOrganization, consoleState, consoleTenantRoles } from '@/runtime/console';
 import { $t } from '@/locales';
 import { operationKey } from '@/runtime/browser-coordination';
 
@@ -15,6 +15,14 @@ const roles = ref<TenantRole[]>([]);
 const canManageRoles = ref(false);
 const status = ref<'loading' | 'ready' | 'forbidden' | 'unavailable'>('loading');
 const busy = ref<string | null>(null);
+const editorOpen = ref(false);
+const editing = ref<Member>();
+const units = ref<OrganizationUnit[]>([]);
+const unitIds = ref<string[]>([]);
+const chosenUnit = ref('');
+const unitStatus = ref<'loading' | 'ready' | 'forbidden' | 'unavailable'>('loading');
+const unitProblem = ref<'missing' | 'conflict' | 'forbidden' | 'unavailable'>();
+const unitSaving = ref(false);
 const selectedMember = ref<Member | null>(null);
 const assignments = ref<MemberRoleAssignment[]>([]);
 const detailStatus = ref<'loading' | 'ready' | 'unavailable'>('loading');
@@ -29,11 +37,16 @@ let generation = 0;
 let detailGeneration = 0;
 let controller = new AbortController();
 let detailController = new AbortController();
+let editorController = new AbortController();
+let mutation = new AbortController();
 async function load() {
   generation += 1;
   detailGeneration += 1;
   controller.abort();
   detailController.abort();
+  editorController.abort();
+  mutation.abort();
+  editorOpen.value = false;
   controller = new AbortController();
   items.value = [];
   roles.value = [];
@@ -107,6 +120,82 @@ async function recover(item: Member) {
     await load();
   }
 }
+async function openEditor(member: Member) {
+  editorController.abort();
+  editorController = new AbortController();
+  const pending = editorController;
+  editing.value = member;
+  unitIds.value = [];
+  units.value = [];
+  chosenUnit.value = '';
+  unitProblem.value = undefined;
+  unitStatus.value = 'loading';
+  editorOpen.value = true;
+  try {
+    const [list, associations] = await Promise.all([
+      consoleOrganization().listOrganizationUnits({ signal: pending.signal, redirect: 'error' }),
+      consoleMembers().listMembershipOrganizationUnits(
+        { membershipId: member.membershipId },
+        { signal: pending.signal, redirect: 'error' }
+      )
+    ]);
+    if (pending.signal.aborted || editing.value?.membershipId !== member.membershipId) return;
+    units.value = list.items;
+    unitIds.value = Array.from(associations.unitIds);
+    unitStatus.value = 'ready';
+  } catch (error) {
+    if (pending.signal.aborted) return;
+    unitStatus.value = error instanceof ResponseError && error.response.status === 403 ? 'forbidden' : 'unavailable';
+  }
+}
+function failure(error: unknown): NonNullable<typeof unitProblem.value> {
+  if (!(error instanceof ResponseError)) return 'unavailable';
+  switch (error.response.status) {
+    case 403:
+      return 'forbidden';
+    case 404:
+      return 'missing';
+    case 409:
+      return 'conflict';
+    default:
+      return 'unavailable';
+  }
+}
+async function changeUnit(unitId: string, action: 'add' | 'remove') {
+  const member = editing.value;
+  if (!member || unitSaving.value) return;
+  unitSaving.value = true;
+  unitProblem.value = undefined;
+  const pending = new AbortController();
+  mutation = pending;
+  const options = { signal: AbortSignal.any([AbortSignal.timeout(8000), pending.signal]), redirect: 'error' as const };
+  try {
+    if (action === 'add') {
+      await consoleMembers().addMembershipOrganizationUnit(
+        { membershipId: member.membershipId, addMembershipOrganizationUnitRequest: { unitId } },
+        options
+      );
+    } else {
+      await consoleMembers().removeMembershipOrganizationUnit({ membershipId: member.membershipId, unitId }, options);
+    }
+    if (pending.signal.aborted || editing.value?.membershipId !== member.membershipId) return;
+    const result = await consoleMembers().listMembershipOrganizationUnits(
+      { membershipId: member.membershipId },
+      options
+    );
+    if (pending.signal.aborted || editing.value?.membershipId !== member.membershipId) return;
+    unitIds.value = Array.from(result.unitIds);
+    chosenUnit.value = '';
+  } catch (error) {
+    if (!pending.signal.aborted) unitProblem.value = failure(error);
+  } finally {
+    unitSaving.value = false;
+  }
+}
+const availableUnits = computed(() => units.value.filter(unit => !unitIds.value.includes(unit.id)));
+function unitName(unitId: string) {
+  return units.value.find(unit => unit.id === unitId)?.name ?? unitId;
+}
 async function inspect(member: Member) {
   detailGeneration += 1;
   detailController.abort();
@@ -169,10 +258,18 @@ watch(detailOpen, open => {
     detailController.abort();
   }
 });
+watch(editorOpen, open => {
+  if (!open) {
+    editorController.abort();
+    mutation.abort();
+  }
+});
 onBeforeUnmount(() => {
   generation += 1;
   controller.abort();
   detailController.abort();
+  editorController.abort();
+  mutation.abort();
 });
 </script>
 
@@ -232,12 +329,62 @@ onBeforeUnmount(() => {
           </ElButton>
         </template>
       </ElTableColumn>
+      <ElTableColumn :label="$t('members.organizationUnits')" min-width="150">
+        <template #default="{ row }">
+          <ElButton text @click="openEditor(row)">{{ $t('members.manageUnits') }}</ElButton>
+        </template>
+      </ElTableColumn>
       <ElTableColumn v-if="canManageRoles" :label="$t('members.roles')" min-width="140">
         <template #default="{ row }">
           <ElButton link type="primary" @click="inspect(row)">{{ $t('members.manageRoles') }}</ElButton>
         </template>
       </ElTableColumn>
     </ElTable>
+    <ElDialog v-model="editorOpen" :title="$t('members.organizationUnits')" width="520px">
+      <p v-if="unitStatus === 'loading'" role="status">{{ $t('members.unitsLoading') }}</p>
+      <ElAlert
+        v-else-if="unitStatus !== 'ready'"
+        role="alert"
+        type="error"
+        :closable="false"
+        :title="$t(unitStatus === 'forbidden' ? 'members.forbidden' : 'members.unitsUnavailable')"
+      />
+      <template v-else>
+        <p class="mb-12px">{{ $t('members.unitsHint') }}</p>
+        <ElButton class="mb-12px" :disabled="unitSaving" @click="editing && openEditor(editing)">
+          {{ $t('members.reloadUnits') }}
+        </ElButton>
+        <p v-if="unitIds.length === 0" role="status">{{ $t('members.noUnits') }}</p>
+        <ul v-else class="mb-16px flex flex-wrap gap-8px">
+          <li v-for="unitId in unitIds" :key="unitId">
+            <ElButton :disabled="unitSaving" @click="changeUnit(unitId, 'remove')">
+              {{ unitName(unitId) }} · {{ $t('members.removeUnit') }}
+            </ElButton>
+          </li>
+        </ul>
+        <div class="flex items-center gap-8px">
+          <ElSelect v-model="chosenUnit" :aria-label="$t('members.addUnit')" class="min-w-0 flex-1">
+            <ElOption v-for="unit in availableUnits" :key="unit.id" :value="unit.id" :label="unit.name" />
+          </ElSelect>
+          <ElButton
+            type="primary"
+            :disabled="!chosenUnit || unitSaving"
+            :loading="unitSaving"
+            @click="changeUnit(chosenUnit, 'add')"
+          >
+            {{ $t('members.addUnit') }}
+          </ElButton>
+        </div>
+        <ElAlert
+          v-if="unitProblem"
+          class="mt-12px"
+          role="alert"
+          type="error"
+          :closable="false"
+          :title="$t(`members.unitErrors.${unitProblem}`)"
+        />
+      </template>
+    </ElDialog>
     <ElDialog v-model="detailOpen" :title="$t('members.manageRoles')" width="min(640px, 90vw)">
       <p class="mb-12px">
         {{ selectedMember?.invitedEmail || selectedMember?.identityId }}
