@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { ResponseError } from '@crane199709/saas-forge-api-client';
 import type { Member } from '@crane199709/saas-forge-api-client';
 import type { TenantRole } from '@/service/forge/tenant-roles';
@@ -7,11 +8,13 @@ import { MembershipRoleFailure } from '@/service/forge/membership-roles';
 import type { MemberRoleAssignment } from '@/service/forge/membership-roles';
 import { consoleMembers, consoleMembershipRoles, consoleState, consoleTenantRoles } from '@/runtime/console';
 import { $t } from '@/locales';
+import { operationKey } from '@/runtime/browser-coordination';
 
 const items = ref<Member[]>([]);
 const roles = ref<TenantRole[]>([]);
 const canManageRoles = ref(false);
 const status = ref<'loading' | 'ready' | 'forbidden' | 'unavailable'>('loading');
+const busy = ref<string | null>(null);
 const selectedMember = ref<Member | null>(null);
 const assignments = ref<MemberRoleAssignment[]>([]);
 const detailStatus = ref<'loading' | 'ready' | 'unavailable'>('loading');
@@ -62,6 +65,48 @@ async function load() {
   }
 }
 
+async function disable(item: Member) {
+  if (busy.value || item.status !== 'ENABLED' || item.disableStatus !== 'NONE') return;
+  try {
+    await ElMessageBox.confirm($t('members.confirmDisable'), $t('members.disable'));
+  } catch {
+    return;
+  }
+  busy.value = item.membershipId;
+  try {
+    const progress = await consoleMembers().disableMembership(
+      { membershipId: item.membershipId, idempotencyKey: operationKey() },
+      { signal: AbortSignal.timeout(12000), redirect: 'error' }
+    );
+    ElMessage.info($t(progress.pending ? 'members.disablePending' : 'members.disableCompleted'));
+  } catch (error) {
+    ElMessage.error(
+      error instanceof ResponseError && error.response.status === 409
+        ? $t('members.disableConflict')
+        : $t('members.disableFailed')
+    );
+  } finally {
+    busy.value = null;
+    await load();
+  }
+}
+
+async function recover(item: Member) {
+  if (busy.value || item.disableStatus !== 'RECOVERY_REQUIRED') return;
+  busy.value = item.membershipId;
+  try {
+    await consoleMembers().recoverMembershipDisable(
+      { membershipId: item.membershipId },
+      { signal: AbortSignal.timeout(12000), redirect: 'error' }
+    );
+    ElMessage.info($t('members.disablePending'));
+  } catch {
+    ElMessage.error($t('members.disableFailed'));
+  } finally {
+    busy.value = null;
+    await load();
+  }
+}
 async function inspect(member: Member) {
   detailGeneration += 1;
   detailController.abort();
@@ -152,6 +197,39 @@ onBeforeUnmount(() => {
       <ElTableColumn :label="$t('members.status')" min-width="120">
         <template #default="{ row }">
           {{ $t(row.status === 'ENABLED' ? 'members.enabled' : 'members.disabled') }}
+        </template>
+      </ElTableColumn>
+      <ElTableColumn :label="$t('members.operation')" min-width="200">
+        <template #default="{ row }">
+          <span v-if="row.disableStatus === 'REVOKING'" role="status">{{ $t('members.revoking') }}</span>
+          <span v-else-if="row.disableStatus === 'RELEASE_PENDING'" role="status">
+            {{ $t('members.releasePending') }}
+          </span>
+          <span v-else-if="row.disableStatus === 'RECOVERY_REQUIRED'" role="status">
+            {{ $t('members.recoveryRequired') }}
+          </span>
+          <span v-else>{{ $t('members.noPendingOperation') }}</span>
+        </template>
+      </ElTableColumn>
+      <ElTableColumn :label="$t('members.actions')" min-width="190">
+        <template #default="{ row }">
+          <ElButton
+            v-if="row.status === 'ENABLED' && row.disableStatus === 'NONE'"
+            type="danger"
+            :loading="busy === row.membershipId"
+            :aria-label="`${$t('members.disable')} ${row.invitedEmail || row.identityId}`"
+            @click="disable(row)"
+          >
+            {{ $t('members.disable') }}
+          </ElButton>
+          <ElButton
+            v-else-if="row.disableStatus === 'RECOVERY_REQUIRED'"
+            :loading="busy === row.membershipId"
+            :aria-label="`${$t('members.recover')} ${row.invitedEmail || row.identityId}`"
+            @click="recover(row)"
+          >
+            {{ $t('members.recover') }}
+          </ElButton>
         </template>
       </ElTableColumn>
       <ElTableColumn v-if="canManageRoles" :label="$t('members.roles')" min-width="140">
