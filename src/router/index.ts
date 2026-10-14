@@ -77,6 +77,18 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/platform-administrators',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'platform-administrators',
+          component: () => import('@/pages/platform-administrators.vue'),
+          meta: { title: 'Platform administrators', i18nKey: 'platformAdministrators.title' }
+        }
+      ]
+    },
+    {
       path: '/oauth-clients',
       component: () => import('@/layouts/base-layout/index.vue'),
       children: [
@@ -173,6 +185,7 @@ export async function setupRouter(app: App) {
       active === 'PLATFORM'
         ? [
             'oauth-clients',
+            'platform-administrators',
             'oauth-client-detail',
             'home',
             'tenants',
@@ -199,6 +212,7 @@ export async function setupRouter(app: App) {
       active === 'PLATFORM'
         ? [
             'oauth-clients',
+            'platform-administrators',
             'oauth-client-detail',
             'home',
             'tenants',

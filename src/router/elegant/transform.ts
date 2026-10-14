@@ -164,6 +164,7 @@ const routeMap: RouteMap = {
   "root": "/",
   "not-found": "/:pathMatch(.*)*",
   "workbench": "/workbench",
+  "platform-administrators": "/platform-administrators",
   "oauth-clients": "/oauth-clients",
   "oauth-client-detail": "/oauth-clients/:id",
   "tenants": "/tenants",
