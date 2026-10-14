@@ -373,6 +373,13 @@ declare namespace App {
       invitationAcceptance: {
         title: string;
         intro: string;
+        requestSetup: string;
+        resendSetup: string;
+        setupSent: string;
+        passwordReady: string;
+        recoveryRequired: string;
+        openRecovery: string;
+        setupUnavailable: string;
         currentIdentity: string;
         accept: string;
         refresh: string;

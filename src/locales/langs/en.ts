@@ -95,7 +95,16 @@ const local: App.I18n.Schema = {
   },
   invitationAcceptance: {
     title: 'Accept invitation',
-    intro: 'Sign in with the invited account, then explicitly accept this invitation.',
+    intro: 'Request first password setup if needed. Otherwise sign in with the invited account and explicitly accept.',
+    requestSetup: 'Set up a password',
+    resendSetup: 'Resend setup email',
+    setupSent:
+      'The mail service accepted your setup email. After setting your password, reopen the invitation email, sign in, and accept. No member seat has been used yet.',
+    passwordReady: 'This account already has a password. Sign in directly; the invitation will not reset it.',
+    recoveryRequired:
+      'This account has a previous credential. First setup cannot replace it. Recover your password separately, then reopen the invitation link.',
+    openRecovery: 'Recover password',
+    setupUnavailable: 'The setup email status cannot be confirmed. Keep this invitation page open and retry.',
     currentIdentity: 'Signed in as',
     accept: 'Accept invitation',
     refresh: 'Refresh access',
