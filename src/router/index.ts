@@ -8,6 +8,7 @@ import {
   createWebHistory
 } from 'vue-router';
 import { capturePasswordSetupLink } from '@/runtime/password-setup-link';
+import { captureInvitationLink } from '@/runtime/invitation-link';
 import { capturePasswordRecoveryLink } from '@/runtime/password-recovery-link';
 import { consoleState, startConsole } from '@/runtime/console';
 import { createProgressGuard } from './guard/progress';
@@ -22,11 +23,18 @@ const historyCreatorMap: Record<Env.RouterHistoryMode, (base?: string) => Router
 };
 
 capturePasswordSetupLink();
+captureInvitationLink();
 capturePasswordRecoveryLink();
 
 export const router = createRouter({
   history: historyCreatorMap[VITE_ROUTER_HISTORY_MODE](VITE_BASE_URL),
   routes: [
+    {
+      path: '/invitation',
+      name: 'invitation',
+      component: () => import('@/pages/invitation-acceptance.vue'),
+      meta: { title: 'SaaS Forge', constant: true }
+    },
     {
       path: '/password-setup',
       name: 'password-setup',
@@ -73,6 +81,18 @@ export const router = createRouter({
           name: 'tenant-detail',
           component: () => import('@/pages/tenants/detail.vue'),
           meta: { title: 'Tenant details', i18nKey: 'tenants.detail' }
+        }
+      ]
+    },
+    {
+      path: '/platform-administrators',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'platform-administrators',
+          component: () => import('@/pages/platform-administrators.vue'),
+          meta: { title: 'Platform administrators', i18nKey: 'platformAdministrators.title' }
         }
       ]
     },
@@ -147,6 +167,18 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/tenant-settings',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'tenant-settings',
+          component: () => import('@/pages/tenant-settings.vue'),
+          meta: { title: 'Tenant settings', i18nKey: 'brandAssets.settings' }
+        }
+      ]
+    },
+    {
       path: '/connection',
       name: 'gateway-connection',
       component: () => import('@/pages/gateway-connection.vue'),
@@ -162,7 +194,12 @@ export async function setupRouter(app: App) {
   createProgressGuard(router);
   createDocumentTitleGuard(router);
   router.beforeEach(async to => {
-    if (to.name === 'password-setup' || to.name === 'password-recovery' || to.name === 'gateway-connection')
+    if (
+      to.name === 'invitation' ||
+      to.name === 'password-setup' ||
+      to.name === 'password-recovery' ||
+      to.name === 'gateway-connection'
+    )
       return true;
     await startConsole();
     const active =
@@ -173,6 +210,7 @@ export async function setupRouter(app: App) {
       active === 'PLATFORM'
         ? [
             'oauth-clients',
+            'platform-administrators',
             'oauth-client-detail',
             'home',
             'tenants',
@@ -182,7 +220,7 @@ export async function setupRouter(app: App) {
             'quota-definitions',
             'quota-detail'
           ]
-        : ['workbench'];
+        : ['workbench', 'tenant-settings'];
     if (active && !allowed.includes(String(to.name))) return home;
     return true;
   });
@@ -194,11 +232,12 @@ export async function setupRouter(app: App) {
     const active = state.status === 'authenticated' ? state.snapshot?.activeContext?.type : undefined;
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
     const name = String(router.currentRoute.value.name);
-    if (['password-setup', 'password-recovery', 'gateway-connection'].includes(name)) return;
+    if (['invitation', 'password-setup', 'password-recovery', 'gateway-connection'].includes(name)) return;
     const allowed =
       active === 'PLATFORM'
         ? [
             'oauth-clients',
+            'platform-administrators',
             'oauth-client-detail',
             'home',
             'tenants',
@@ -208,7 +247,7 @@ export async function setupRouter(app: App) {
             'quota-definitions',
             'quota-detail'
           ]
-        : ['workbench'];
+        : ['workbench', 'tenant-settings'];
     if (!active || !allowed.includes(name)) router.replace(active ? home : '/login');
   });
   await router.isReady();

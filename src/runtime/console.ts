@@ -1,5 +1,13 @@
 import { shallowRef } from 'vue';
-import type { InvitationsApi, OrganizationApi, RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import type {
+  BrandAssetsApi,
+  Console,
+  InvitationsApi,
+  MembersApi,
+  OrganizationApi,
+  PermissionsApi,
+  RemoteManifestsApi
+} from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
@@ -11,6 +19,7 @@ import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
 import type { PermissionCatalogApi } from '@/service/forge/permissions';
 import type { TenantRoleApi } from '@/service/forge/tenant-roles';
+import type { PlatformAdminApi } from '@/service/forge/platform-administrators';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -31,8 +40,13 @@ let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
 let permissions: PermissionCatalogApi | undefined;
 let invitations: InvitationsApi | undefined;
+let members: MembersApi | undefined;
+let effectivePermissions: PermissionsApi | undefined;
+let acceptance: Console.InvitationAcceptanceApi | undefined;
 let roles: TenantRoleApi | undefined;
+let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
+let brandAssets: BrandAssetsApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -43,13 +57,18 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     const transport = createConsoleTransport(origin);
     runtime = new ConsoleSessionRuntime(transport, createBrowserCoordination(origin), {
       key: operationKey,
-      resolveBrand: resolveConsoleBrand
+      resolveBrand: snapshot => resolveConsoleBrand(snapshot, origin)
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
     invitations = transport.invitations;
+    members = transport.members;
+    effectivePermissions = transport.effectivePermissions;
+    acceptance = transport.acceptance;
     roles = transport.roles;
+    platformAdministrators = transport.administrators;
     organization = transport.organization;
+    brandAssets = transport.brandAssets;
     manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
@@ -111,14 +130,39 @@ export function consoleInvitations(): InvitationsApi {
   return invitations!;
 }
 
+export function consoleMembers(): MembersApi {
+  consoleRuntime();
+  return members!;
+}
+
+export function consoleEffectivePermissions(): PermissionsApi {
+  consoleRuntime();
+  return effectivePermissions!;
+}
+
+export function consoleInvitationAcceptance(): Console.InvitationAcceptanceApi {
+  consoleRuntime();
+  return acceptance!;
+}
+
 export function consoleTenantRoles() {
   consoleRuntime();
   return roles!;
 }
 
+export function consolePlatformAdministrators(): PlatformAdminApi {
+  consoleRuntime();
+  return platformAdministrators!;
+}
+
 export function consoleOrganization() {
   consoleRuntime();
   return organization!;
+}
+
+export function consoleBrandAssets() {
+  consoleRuntime();
+  return brandAssets!;
 }
 
 export function discoverBusinessRemotes(signal: AbortSignal) {

@@ -93,6 +93,48 @@ const local: App.I18n.Schema = {
     states: { PENDING: 'Pending', ACCEPTED: 'Accepted', REVOKED: 'Revoked', EXPIRED: 'Expired' },
     deliveryStates: { PENDING: 'Pending', SENT: 'Sent', FAILED: 'Failed' }
   },
+  invitationAcceptance: {
+    title: 'Accept invitation',
+    intro: 'Sign in with the invited account, then explicitly accept this invitation.',
+    currentIdentity: 'Signed in as',
+    accept: 'Accept invitation',
+    refresh: 'Refresh access',
+    success: 'You joined the company. Your workspace stays as selected; an administrator can now grant your role.',
+    invalid: 'The invitation link is invalid. Open the latest link from your email.',
+    unavailable: 'The result cannot be confirmed. Keep this page open and retry.',
+    errors: {
+      INVITATION_INVALID: 'The link is invalid or has been replaced. Open the latest invitation email.',
+      INVITATION_IDENTITY_MISMATCH: 'This invitation belongs to another account. Sign out and use the invited email.',
+      INVITATION_REVOKED: 'This invitation was revoked. Ask the administrator for a new invitation.',
+      INVITATION_EXPIRED: 'This invitation has expired. Ask the administrator for a new invitation.',
+      INVITATION_ALREADY_ACCEPTED: 'This invitation has already been accepted.',
+      INVITATION_NOT_PENDING: 'This invitation is no longer available. Refresh or ask for a new one.',
+      MEMBERSHIP_ALREADY_EXISTS: 'You already belong to this company.',
+      QUOTA_EXCEEDED: 'This company has no remaining member seats. Ask an administrator to increase its limit.',
+      SUBSCRIPTION_REQUIRED: 'This company needs an active subscription before you can join.',
+      INVITATION_ACTIVATION_COMPENSATING: 'The seat is being released after an interrupted attempt. Retry shortly.',
+      INVITATION_ACCEPTANCE_RETRY_REQUIRED: 'The interrupted attempt was safely reversed. Retry to join.',
+      INVITATION_ACCEPTANCE_IN_PROGRESS: 'Another acceptance attempt is finishing. Retry shortly.'
+    }
+  },
+  members: {
+    title: 'Members',
+    refresh: 'Refresh members',
+    loading: 'Loading members…',
+    forbidden: 'Only a Tenant Administrator can view the member directory.',
+    unavailable: 'Members are temporarily unavailable. Try again.',
+    empty: 'No members yet.',
+    identity: 'Identity',
+    status: 'Status',
+    enabled: 'Enabled',
+    disabled: 'Disabled'
+  },
+  waiting: {
+    title: 'Waiting for access',
+    message: 'Your membership is active, but no Permission has been granted. Ask an administrator to assign a role.',
+    refresh: 'Refresh permissions',
+    unavailable: 'Current permissions cannot be confirmed. Refresh to try again.'
+  },
   tenantRoles: {
     title: 'Tenant roles',
     reload: 'Refresh roles',
@@ -118,6 +160,32 @@ const local: App.I18n.Schema = {
     conflict: 'The role changed or is assigned to members. Refresh and try again.',
     invalid: 'Use 3–64 uppercase letters, digits or underscores, and select valid permissions.'
   },
+  platformAdministrators: {
+    title: 'Platform administrators',
+    description:
+      'Grant the fixed PLATFORM_ADMIN role by email. A new identity receives a first password setup message; an existing password stays unchanged.',
+    email: 'Email',
+    grant: 'Grant platform administrator',
+    list: 'Current administrators',
+    reload: 'Refresh',
+    empty: 'No platform administrators are listed.',
+    passwordStatus: 'Password credential',
+    passwordReady: 'Ready',
+    passwordPending: 'Setup or recovery required',
+    pending: 'The result for {email} is not confirmed. Retry the same request.',
+    retry: 'Retry original request',
+    results: {
+      PENDING: 'The role was granted and the setup message is pending. Retry the same request later.',
+      DELIVERED: 'The role was granted and the setup message was accepted. The password is not yet established.',
+      PASSWORD_READY: 'The role was granted. The existing password was not changed.',
+      RECOVERY_REQUIRED: 'The role was granted. This identity must use password recovery; no setup message was sent.',
+      ALREADY_GRANTED: 'This identity already has PLATFORM_ADMIN.',
+      invalid: 'Enter a valid email address.',
+      forbidden: 'Platform administrator authorization is required.',
+      conflict: 'The request conflicts with an earlier operation. Refresh and try again.',
+      unavailable: 'The result is unavailable. Retry the original request before creating another.'
+    }
+  },
   organization: {
     title: 'Organization units',
     reload: 'Refresh organization',
@@ -141,6 +209,22 @@ const local: App.I18n.Schema = {
       conflict: 'A cycle or existing association prevents this change.',
       forbidden: 'This membership cannot manage the organization.',
       unavailable: 'The organization service is temporarily unavailable. Try again.'
+    }
+  },
+  brandAssets: {
+    settings: 'Tenant settings',
+    title: 'Brand images',
+    explanation: 'Upload a PNG to preview it here. Uploading does not change the live brand profile.',
+    logo: 'Logo PNG',
+    favicon: 'Favicon PNG',
+    logoLimit: 'Up to 2 MiB and 2048 pixels on either side.',
+    faviconLimit: 'Square, 32–256 pixels, up to 256 KiB.',
+    uploading: 'Uploading and checking image…',
+    preview: 'Isolated image preview',
+    errors: {
+      invalid: 'Choose a valid static PNG within the size and dimension limits.',
+      forbidden: 'This membership cannot manage brand images.',
+      unavailable: 'Brand storage is temporarily unavailable. Try again.'
     }
   },
   remote: {
@@ -725,6 +809,7 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    'platform-administrators': 'Platform administrators',
     'oauth-clients': 'OAuth Clients',
     'oauth-client-detail': 'OAuth Client details',
     plans: 'Plans',
@@ -734,6 +819,7 @@ const local: App.I18n.Schema = {
     tenants: 'Tenants',
     'tenant-detail': 'Tenant details',
     workbench: 'Company workspace',
+    'tenant-settings': 'Tenant settings',
     login: 'Login',
     403: 'No Permission',
     404: 'Page Not Found',

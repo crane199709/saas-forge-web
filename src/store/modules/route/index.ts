@@ -107,6 +107,18 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
               routePath: tenant ? '/workbench' : '/home',
               icon: SvgIconVNode({ icon: 'mdi:home-outline', fontSize: 20 })
             },
+            ...(tenant
+              ? [
+                  {
+                    key: 'tenant-settings',
+                    label: $t('brandAssets.settings'),
+                    i18nKey: 'brandAssets.settings' as const,
+                    routeKey: 'tenant-settings' as const,
+                    routePath: '/tenant-settings' as const,
+                    icon: SvgIconVNode({ icon: 'mdi:cog-outline', fontSize: 20 })
+                  }
+                ]
+              : []),
             ...(!tenant
               ? [
                   {
@@ -124,6 +136,14 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     routeKey: 'quota-definitions' as const,
                     routePath: '/quota-definitions' as const,
                     icon: SvgIconVNode({ icon: 'mdi:counter', fontSize: 20 })
+                  },
+                  {
+                    key: 'platform-administrators',
+                    label: $t('platformAdministrators.title'),
+                    i18nKey: 'platformAdministrators.title' as const,
+                    routeKey: 'platform-administrators' as const,
+                    routePath: '/platform-administrators' as const,
+                    icon: SvgIconVNode({ icon: 'mdi:shield-account-outline', fontSize: 20 })
                   },
                   {
                     key: 'oauth-clients',

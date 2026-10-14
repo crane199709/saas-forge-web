@@ -370,6 +370,49 @@ declare namespace App {
         states: { PENDING: string; ACCEPTED: string; REVOKED: string; EXPIRED: string };
         deliveryStates: { PENDING: string; SENT: string; FAILED: string };
       };
+      invitationAcceptance: {
+        title: string;
+        intro: string;
+        currentIdentity: string;
+        accept: string;
+        refresh: string;
+        success: string;
+        invalid: string;
+        unavailable: string;
+        errors: Record<
+          | 'INVITATION_INVALID'
+          | 'INVITATION_IDENTITY_MISMATCH'
+          | 'INVITATION_REVOKED'
+          | 'INVITATION_EXPIRED'
+          | 'INVITATION_ALREADY_ACCEPTED'
+          | 'INVITATION_NOT_PENDING'
+          | 'MEMBERSHIP_ALREADY_EXISTS'
+          | 'QUOTA_EXCEEDED'
+          | 'SUBSCRIPTION_REQUIRED'
+          | 'INVITATION_ACTIVATION_COMPENSATING'
+          | 'INVITATION_ACCEPTANCE_RETRY_REQUIRED'
+          | 'INVITATION_ACCEPTANCE_IN_PROGRESS',
+          string
+        >;
+      };
+      members: {
+        title: string;
+        refresh: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        identity: string;
+        status: string;
+        enabled: string;
+        disabled: string;
+      };
+      waiting: {
+        title: string;
+        message: string;
+        refresh: string;
+        unavailable: string;
+      };
       tenantRoles: {
         title: string;
         reload: string;
@@ -395,6 +438,31 @@ declare namespace App {
         conflict: string;
         invalid: string;
       };
+      platformAdministrators: {
+        title: string;
+        description: string;
+        email: string;
+        grant: string;
+        list: string;
+        reload: string;
+        empty: string;
+        passwordStatus: string;
+        passwordReady: string;
+        passwordPending: string;
+        pending: string;
+        retry: string;
+        results: {
+          PENDING: string;
+          DELIVERED: string;
+          PASSWORD_READY: string;
+          RECOVERY_REQUIRED: string;
+          ALREADY_GRANTED: string;
+          invalid: string;
+          forbidden: string;
+          conflict: string;
+          unavailable: string;
+        };
+      };
       organization: {
         title: string;
         reload: string;
@@ -419,6 +487,18 @@ declare namespace App {
           forbidden: string;
           unavailable: string;
         };
+      };
+      brandAssets: {
+        settings: string;
+        title: string;
+        explanation: string;
+        logo: string;
+        favicon: string;
+        logoLimit: string;
+        faviconLimit: string;
+        uploading: string;
+        preview: string;
+        errors: { invalid: string; forbidden: string; unavailable: string };
       };
       manifest: {
         title: string;
