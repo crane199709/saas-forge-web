@@ -66,7 +66,13 @@ async function load() {
 }
 
 async function disable(item: Member) {
-  if (busy.value || item.status !== 'ENABLED' || item.disableStatus !== 'NONE') return;
+  if (
+    busy.value ||
+    item.status !== 'ENABLED' ||
+    !['NONE', 'COMPLETED'].includes(item.disableStatus) ||
+    !['NONE', 'COMPLETED', 'QUOTA_REJECTED', 'COMPENSATED'].includes(item.enableStatus)
+  )
+    return;
   try {
     await ElMessageBox.confirm($t('members.confirmDisable'), $t('members.disable'));
   } catch {
@@ -85,6 +91,44 @@ async function disable(item: Member) {
         ? $t('members.disableConflict')
         : $t('members.disableFailed')
     );
+  } finally {
+    busy.value = null;
+    await load();
+  }
+}
+
+async function enable(item: Member) {
+  if (
+    busy.value ||
+    item.status !== 'DISABLED' ||
+    item.disableStatus !== 'COMPLETED' ||
+    !['NONE', 'COMPLETED', 'QUOTA_REJECTED', 'COMPENSATED'].includes(item.enableStatus)
+  )
+    return;
+  try {
+    await ElMessageBox.confirm($t('members.confirmEnable'), $t('members.enable'));
+  } catch {
+    return;
+  }
+  busy.value = item.membershipId;
+  try {
+    const progress = await consoleMembers().enableMembership(
+      { membershipId: item.membershipId, idempotencyKey: operationKey() },
+      { signal: AbortSignal.timeout(12000), redirect: 'error' }
+    );
+    ElMessage.info($t(progress.pending ? 'members.enablePending' : 'members.enableCompleted'));
+  } catch (error) {
+    if (error instanceof ResponseError && error.response.status === 409) {
+      const problem: unknown = await error.response.json().catch(() => null);
+      const code = problem && typeof problem === 'object' && 'code' in problem ? problem.code : null;
+      let message: 'members.enableQuotaExceeded' | 'members.enableCompensated' | 'members.enableConflict' =
+        'members.enableConflict';
+      if (code === 'MAX_USERS_EXCEEDED') message = 'members.enableQuotaExceeded';
+      if (code === 'MEMBERSHIP_ENABLE_COMPENSATED') message = 'members.enableCompensated';
+      ElMessage.error($t(message));
+    } else {
+      ElMessage.error($t('members.enableFailed'));
+    }
   } finally {
     busy.value = null;
     await load();
@@ -208,13 +252,30 @@ onBeforeUnmount(() => {
           <span v-else-if="row.disableStatus === 'RECOVERY_REQUIRED'" role="status">
             {{ $t('members.recoveryRequired') }}
           </span>
+          <span v-else-if="row.enableStatus === 'CONSUMING'" role="status">{{ $t('members.enablePending') }}</span>
+          <span v-else-if="row.enableStatus === 'COMPENSATION_PENDING'" role="status">
+            {{ $t('members.enableCompensating') }}
+          </span>
+          <span v-else-if="row.enableStatus === 'FENCE_PENDING'" role="status">
+            {{ $t('members.enableFencePending') }}
+          </span>
+          <span v-else-if="row.enableStatus === 'QUOTA_REJECTED'" role="status">
+            {{ $t('members.enableQuotaExceeded') }}
+          </span>
+          <span v-else-if="row.enableStatus === 'COMPENSATED'" role="status">
+            {{ $t('members.enableCompensated') }}
+          </span>
           <span v-else>{{ $t('members.noPendingOperation') }}</span>
         </template>
       </ElTableColumn>
       <ElTableColumn :label="$t('members.actions')" min-width="190">
         <template #default="{ row }">
           <ElButton
-            v-if="row.status === 'ENABLED' && row.disableStatus === 'NONE'"
+            v-if="
+              row.status === 'ENABLED' &&
+              ['NONE', 'COMPLETED'].includes(row.disableStatus) &&
+              ['NONE', 'COMPLETED', 'QUOTA_REJECTED', 'COMPENSATED'].includes(row.enableStatus)
+            "
             type="danger"
             :loading="busy === row.membershipId"
             :aria-label="`${$t('members.disable')} ${row.invitedEmail || row.identityId}`"
@@ -229,6 +290,19 @@ onBeforeUnmount(() => {
             @click="recover(row)"
           >
             {{ $t('members.recover') }}
+          </ElButton>
+          <ElButton
+            v-else-if="
+              row.status === 'DISABLED' &&
+              row.disableStatus === 'COMPLETED' &&
+              ['NONE', 'COMPLETED', 'QUOTA_REJECTED', 'COMPENSATED'].includes(row.enableStatus)
+            "
+            type="primary"
+            :loading="busy === row.membershipId"
+            :aria-label="`${$t('members.enable')} ${row.invitedEmail || row.identityId}`"
+            @click="enable(row)"
+          >
+            {{ $t('members.enable') }}
           </ElButton>
         </template>
       </ElTableColumn>

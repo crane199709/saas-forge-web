@@ -416,7 +416,9 @@ declare namespace App {
         operation: string;
         actions: string;
         disable: string;
+        enable: string;
         confirmDisable: string;
+        confirmEnable: string;
         revoking: string;
         releasePending: string;
         recoveryRequired: string;
@@ -426,6 +428,14 @@ declare namespace App {
         disableCompleted: string;
         disableConflict: string;
         disableFailed: string;
+        enablePending: string;
+        enableCompensating: string;
+        enableFencePending: string;
+        enableCompleted: string;
+        enableQuotaExceeded: string;
+        enableCompensated: string;
+        enableConflict: string;
+        enableFailed: string;
         roles: string;
         manageRoles: string;
         loadingRoles: string;
