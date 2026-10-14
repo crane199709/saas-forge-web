@@ -141,6 +141,22 @@ const local: App.I18n.Schema = {
       unavailable: '组织服务暂时不可用，请稍后重试。'
     }
   },
+  brandAssets: {
+    settings: '租户设置',
+    title: '品牌图片',
+    explanation: '上传 PNG 后仅在此处预览；上传不会改变当前生效的品牌配置。',
+    logo: 'Logo PNG',
+    favicon: '网站图标 PNG',
+    logoLimit: '不超过 2 MiB，宽高各不超过 2048 像素。',
+    faviconLimit: '正方形，边长 32～256 像素，不超过 256 KiB。',
+    uploading: '正在上传并校验图片…',
+    preview: '隔离图片预览',
+    errors: {
+      invalid: '请选择符合文件大小和尺寸限制的静态 PNG。',
+      forbidden: '当前成员没有品牌图片管理权限。',
+      unavailable: '品牌存储暂时不可用，请稍后重试。'
+    }
+  },
   remote: {
     businessEmpty: '暂无已启用的业务模块。',
     recoverSession: '恢复会话',
@@ -700,6 +716,7 @@ const local: App.I18n.Schema = {
     tenants: '租户管理',
     'tenant-detail': '租户详情',
     workbench: '公司工作台',
+    'tenant-settings': '租户设置',
     login: '登录',
     403: '无权限',
     404: '页面不存在',
