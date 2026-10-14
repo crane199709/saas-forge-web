@@ -471,7 +471,8 @@ const local: App.I18n.Schema = {
   lifecycle: {
     title: '租户生命周期',
     check: '核查生命周期',
-    hint: '操作以最新后台许可为准。冻结将撤销租户会话；解除冻结后，成员必须重新登录并通过资格校验。',
+    hint: '操作以最新后台许可为准。冻结可解除；关闭将永久终止租户访问。两种操作均先撤销租户会话。',
+    closed: '此租户已永久关闭，无法恢复访问。成员、业务、审计及独立订阅记录保留。',
     unknown: '操作结果未知，已禁止新操作。请核查权威进展，不要重复提交。',
     progress: '操作进展',
     operation: '原操作 ID',
@@ -479,12 +480,17 @@ const local: App.I18n.Schema = {
       suspend: '冻结租户',
       resume: '解除冻结',
       recover: '恢复冻结操作',
+      close: '永久关闭租户',
+      recoverClosure: '继续关闭操作',
       continue: '继续原操作'
     },
     confirm: {
       suspend: '确认冻结此租户？其受保护访问和现有租户会话将失效。',
       resume: '确认解除冻结？旧会话不会恢复，成员需要重新登录。',
       recover: '确认恢复原冻结流程？不会新建冻结或解除冻结操作。',
+      close:
+        '确认永久关闭此租户？系统将先撤销租户范围会话，完成后无法恢复访问。成员、业务、审计和订阅记录不会自动删除。',
+      recoverClosure: '确认继续原关闭流程？租户访问保持阻断，完成后永久关闭。',
       continue: '确认继续后台记录的原生命周期操作？'
     },
     states: {
@@ -492,7 +498,7 @@ const local: App.I18n.Schema = {
       PENDING: '处理中',
       COMPLETED: '已完成',
       RETRY_REQUIRED: '需要重试',
-      RECOVERY_REQUIRED: '需要恢复冻结'
+      RECOVERY_REQUIRED: '需要继续原操作'
     }
   },
   tenants: {

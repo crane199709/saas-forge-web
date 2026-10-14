@@ -11,7 +11,9 @@ const initial = {
   canSuspend: true,
   canResume: false,
   canRecoverSuspension: false,
-  canContinue: false
+  canContinue: false,
+  canClose: true,
+  canRecoverClosure: false
 };
 function setup(storage = new Map<string, string>()) {
   let state = {
@@ -63,6 +65,7 @@ test('pending suspension cannot authorize resume and continuation uses the origi
     action: 'SUSPEND',
     state: 'PENDING',
     canSuspend: false,
+    canClose: false,
     canContinue: true
   };
   const requests = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
@@ -81,6 +84,35 @@ test('pending suspension cannot authorize resume and continuation uses the origi
     await workspace.run('resume');
     await workspace.run('continue');
     assert.equal(requests.mock.calls.filter(call => call.arguments[1]?.method !== 'GET').length, 1);
+  } finally {
+    workspace.dispose();
+    requests.mock.restore();
+  }
+});
+
+test('closure posts the formal operation and never offers resumption after completion', async () => {
+  let snapshot = initial;
+  const requests = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    if (init.method === 'GET') return Response.json(snapshot);
+    assert.equal(url.endsWith(`/tenants/${tenantId}/closures`), true);
+    snapshot = {
+      ...initial,
+      operationId,
+      action: 'CLOSE',
+      state: 'COMPLETED',
+      canSuspend: false,
+      canClose: false
+    } as typeof initial;
+    return Response.json({ id: tenantId });
+  });
+  const { workspace } = setup();
+  try {
+    await workspace.check(tenantId);
+    assert.equal(workspace.can('close'), true);
+    await workspace.run('close');
+    assert.equal(workspace.state.snapshot?.action, 'CLOSE');
+    assert.equal(workspace.can('resume'), false);
+    assert.equal(workspace.can('close'), false);
   } finally {
     workspace.dispose();
     requests.mock.restore();
@@ -134,6 +166,7 @@ test('an unknown continuation can retry only the same server-allowed original op
     action: 'SUSPEND',
     state: 'PENDING',
     canSuspend: false,
+    canClose: false,
     canContinue: true
   };
   let writes = 0;
@@ -160,7 +193,15 @@ test('an unknown continuation can retry only the same server-allowed original op
 
 for (const latest of [
   { ...initial, canSuspend: false },
-  { ...initial, operationId, action: 'SUSPEND', state: 'PENDING', canSuspend: false, canContinue: true },
+  {
+    ...initial,
+    operationId,
+    action: 'SUSPEND',
+    state: 'PENDING',
+    canSuspend: false,
+    canClose: false,
+    canContinue: true
+  },
   { ...initial, canResume: true },
   { ...initial, canContinue: true }
 ])
@@ -239,6 +280,7 @@ test('unknown recovery can recover the same server-allowed suspension again usin
     action: 'SUSPEND',
     state: 'RECOVERY_REQUIRED',
     canSuspend: false,
+    canClose: false,
     canRecoverSuspension: true
   };
   const keys: (string | null)[] = [];
@@ -264,6 +306,37 @@ test('unknown recovery can recover the same server-allowed suspension again usin
   }
 });
 
+test('closure recovery continues the blocked operation without enabling resumption', async () => {
+  const snapshot = {
+    ...initial,
+    operationId,
+    action: 'CLOSE',
+    state: 'RECOVERY_REQUIRED',
+    canSuspend: false,
+    canClose: false,
+    canRecoverClosure: true
+  };
+  let calls = 0;
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    if (init.method === 'GET') return Response.json(snapshot);
+    assert(url.endsWith('/closure-recoveries'));
+    calls += 1;
+    return Response.json({ id: tenantId });
+  });
+  const { workspace } = setup();
+  try {
+    await workspace.check(tenantId);
+    assert.equal(workspace.can('resume'), false);
+    assert.equal(workspace.can('recover'), false);
+    assert.equal(workspace.can('recoverClosure'), true);
+    await workspace.run('recoverClosure');
+    assert.equal(calls, 1);
+  } finally {
+    workspace.dispose();
+    request.mock.restore();
+  }
+});
+
 test('an authoritative exhausted recovery releases only its recovery key, keeping the original workflow', async () => {
   const snapshot = {
     ...initial,
@@ -271,6 +344,7 @@ test('an authoritative exhausted recovery releases only its recovery key, keepin
     action: 'SUSPEND',
     state: 'RECOVERY_REQUIRED',
     canSuspend: false,
+    canClose: false,
     canRecoverSuspension: true
   };
   const keys: (string | null)[] = [];
