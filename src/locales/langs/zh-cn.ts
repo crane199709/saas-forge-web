@@ -183,6 +183,20 @@ const local: App.I18n.Schema = {
     passwordStatus: '密码凭据',
     passwordReady: '已建立',
     passwordPending: '待设置或恢复',
+    actions: '操作',
+    revoke: '撤销管理员',
+    cancel: '取消',
+    revokeConfirm: '确定撤销 {email} 的平台管理员权限吗？其平台会话将结束，合法公司会话保留。',
+    revokePending: '{email} 的撤权结果尚未确认，请重试原请求。',
+    revokeResults: {
+      revoked: '平台管理员权限已撤销。',
+      'last-admin': '必须至少保留一名已设置常规密码的平台管理员。',
+      missing: '该身份当前没有平台管理员权限。',
+      forbidden: '需要平台管理员权限。',
+      conflict: '请求与先前操作冲突，请刷新后重试。',
+      invalid: '撤权请求无效。',
+      unavailable: '撤权结果暂不可用，请重试原请求。'
+    },
     pending: '{email} 的结果尚未确认，请重试原请求。',
     retry: '重试原请求',
     results: {
