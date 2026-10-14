@@ -169,6 +169,47 @@ const local: App.I18n.Schema = {
     conflict: 'The role changed or is assigned to members. Refresh and try again.',
     invalid: 'Use 3–64 uppercase letters, digits or underscores, and select valid permissions.'
   },
+  platformAdministrators: {
+    title: 'Platform administrators',
+    description:
+      'Grant the fixed PLATFORM_ADMIN role by email. A new identity receives a first password setup message; an existing password stays unchanged.',
+    email: 'Email',
+    grant: 'Grant platform administrator',
+    list: 'Current administrators',
+    reload: 'Refresh',
+    empty: 'No platform administrators are listed.',
+    passwordStatus: 'Password credential',
+    passwordReady: 'Ready',
+    passwordPending: 'Setup or recovery required',
+    actions: 'Actions',
+    revoke: 'Revoke administrator',
+    cancel: 'Cancel',
+    revokeConfirm:
+      'Revoke platform administrator access for {email}? Platform sessions will end; valid company sessions remain.',
+    revokePending: 'The revocation result for {email} is not confirmed. Retry the same request.',
+    revokeResults: {
+      revoked: 'Platform administrator access was revoked.',
+      'last-admin': 'Keep at least one administrator with a regular password.',
+      missing: 'This identity has no current platform administrator role.',
+      forbidden: 'Platform administrator authorization is required.',
+      conflict: 'The request conflicts with an earlier operation. Refresh and try again.',
+      invalid: 'The revocation request is invalid.',
+      unavailable: 'The result is unavailable. Retry the original request.'
+    },
+    pending: 'The result for {email} is not confirmed. Retry the same request.',
+    retry: 'Retry original request',
+    results: {
+      PENDING: 'The role was granted and the setup message is pending. Retry the same request later.',
+      DELIVERED: 'The role was granted and the setup message was accepted. The password is not yet established.',
+      PASSWORD_READY: 'The role was granted. The existing password was not changed.',
+      RECOVERY_REQUIRED: 'The role was granted. This identity must use password recovery; no setup message was sent.',
+      ALREADY_GRANTED: 'This identity already has PLATFORM_ADMIN.',
+      invalid: 'Enter a valid email address.',
+      forbidden: 'Platform administrator authorization is required.',
+      conflict: 'The request conflicts with an earlier operation. Refresh and try again.',
+      unavailable: 'The result is unavailable. Retry the original request before creating another.'
+    }
+  },
   organization: {
     title: 'Organization units',
     reload: 'Refresh organization',
@@ -192,6 +233,22 @@ const local: App.I18n.Schema = {
       conflict: 'A cycle or existing association prevents this change.',
       forbidden: 'This membership cannot manage the organization.',
       unavailable: 'The organization service is temporarily unavailable. Try again.'
+    }
+  },
+  brandAssets: {
+    settings: 'Tenant settings',
+    title: 'Brand images',
+    explanation: 'Upload a PNG to preview it here. Uploading does not change the live brand profile.',
+    logo: 'Logo PNG',
+    favicon: 'Favicon PNG',
+    logoLimit: 'Up to 2 MiB and 2048 pixels on either side.',
+    faviconLimit: 'Square, 32–256 pixels, up to 256 KiB.',
+    uploading: 'Uploading and checking image…',
+    preview: 'Isolated image preview',
+    errors: {
+      invalid: 'Choose a valid static PNG within the size and dimension limits.',
+      forbidden: 'This membership cannot manage brand images.',
+      unavailable: 'Brand storage is temporarily unavailable. Try again.'
     }
   },
   remote: {
@@ -454,7 +511,9 @@ const local: App.I18n.Schema = {
   lifecycle: {
     title: 'Tenant lifecycle',
     check: 'Check lifecycle',
-    hint: 'Actions follow current server permission. Suspension revokes tenant sessions; resumption requires members to sign in again and pass eligibility checks.',
+    hint: 'Actions follow current server permission. Suspension can be lifted; closure permanently ends tenant access. Both revoke tenant sessions first.',
+    closed:
+      'This tenant is permanently closed. Access cannot be restored. Membership, business, audit, and separate subscription records remain.',
     unknown:
       'The operation result is unknown. New actions are blocked. Check authoritative progress before continuing.',
     progress: 'Progress',
@@ -463,12 +522,17 @@ const local: App.I18n.Schema = {
       suspend: 'Suspend tenant',
       resume: 'Resume tenant',
       recover: 'Recover suspension',
+      close: 'Permanently close tenant',
+      recoverClosure: 'Continue closure',
       continue: 'Continue original operation'
     },
     confirm: {
       suspend: 'Suspend this tenant? Protected access and existing tenant sessions will be revoked.',
       resume: 'Resume this tenant? Old sessions will remain invalid; members must sign in again.',
       recover: 'Recover the original suspension workflow without starting a new suspension or resumption?',
+      close:
+        'Permanently close this tenant? Tenant sessions are revoked first, then access cannot be restored. Membership, business, audit, and subscription records remain.',
+      recoverClosure: 'Continue the original closure? Access remains blocked and completion is permanent.',
       continue: 'Continue the original lifecycle operation recorded by the server?'
     },
     states: {
@@ -476,7 +540,7 @@ const local: App.I18n.Schema = {
       PENDING: 'Processing',
       COMPLETED: 'Completed',
       RETRY_REQUIRED: 'Retry required',
-      RECOVERY_REQUIRED: 'Suspension recovery required'
+      RECOVERY_REQUIRED: 'Original operation requires recovery'
     }
   },
   tenants: {
@@ -769,6 +833,7 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    'platform-administrators': 'Platform administrators',
     'oauth-clients': 'OAuth Clients',
     'oauth-client-detail': 'OAuth Client details',
     plans: 'Plans',
@@ -778,6 +843,7 @@ const local: App.I18n.Schema = {
     tenants: 'Tenants',
     'tenant-detail': 'Tenant details',
     workbench: 'Company workspace',
+    'tenant-settings': 'Tenant settings',
     login: 'Login',
     403: 'No Permission',
     404: 'Page Not Found',

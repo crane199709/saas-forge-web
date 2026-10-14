@@ -85,6 +85,18 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/platform-administrators',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'platform-administrators',
+          component: () => import('@/pages/platform-administrators.vue'),
+          meta: { title: 'Platform administrators', i18nKey: 'platformAdministrators.title' }
+        }
+      ]
+    },
+    {
       path: '/oauth-clients',
       component: () => import('@/layouts/base-layout/index.vue'),
       children: [
@@ -155,6 +167,18 @@ export const router = createRouter({
       ]
     },
     {
+      path: '/tenant-settings',
+      component: () => import('@/layouts/base-layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'tenant-settings',
+          component: () => import('@/pages/tenant-settings.vue'),
+          meta: { title: 'Tenant settings', i18nKey: 'brandAssets.settings' }
+        }
+      ]
+    },
+    {
       path: '/connection',
       name: 'gateway-connection',
       component: () => import('@/pages/gateway-connection.vue'),
@@ -186,6 +210,7 @@ export async function setupRouter(app: App) {
       active === 'PLATFORM'
         ? [
             'oauth-clients',
+            'platform-administrators',
             'oauth-client-detail',
             'home',
             'tenants',
@@ -195,7 +220,7 @@ export async function setupRouter(app: App) {
             'quota-definitions',
             'quota-detail'
           ]
-        : ['workbench'];
+        : ['workbench', 'tenant-settings'];
     if (active && !allowed.includes(String(to.name))) return home;
     return true;
   });
@@ -212,6 +237,7 @@ export async function setupRouter(app: App) {
       active === 'PLATFORM'
         ? [
             'oauth-clients',
+            'platform-administrators',
             'oauth-client-detail',
             'home',
             'tenants',
@@ -221,7 +247,7 @@ export async function setupRouter(app: App) {
             'quota-definitions',
             'quota-detail'
           ]
-        : ['workbench'];
+        : ['workbench', 'tenant-settings'];
     if (!active || !allowed.includes(name)) router.replace(active ? home : '/login');
   });
   await router.isReady();

@@ -445,6 +445,45 @@ declare namespace App {
         conflict: string;
         invalid: string;
       };
+      platformAdministrators: {
+        title: string;
+        description: string;
+        email: string;
+        grant: string;
+        list: string;
+        reload: string;
+        empty: string;
+        passwordStatus: string;
+        passwordReady: string;
+        passwordPending: string;
+        actions: string;
+        revoke: string;
+        cancel: string;
+        revokeConfirm: string;
+        revokePending: string;
+        revokeResults: {
+          revoked: string;
+          'last-admin': string;
+          missing: string;
+          forbidden: string;
+          conflict: string;
+          invalid: string;
+          unavailable: string;
+        };
+        pending: string;
+        retry: string;
+        results: {
+          PENDING: string;
+          DELIVERED: string;
+          PASSWORD_READY: string;
+          RECOVERY_REQUIRED: string;
+          ALREADY_GRANTED: string;
+          invalid: string;
+          forbidden: string;
+          conflict: string;
+          unavailable: string;
+        };
+      };
       organization: {
         title: string;
         reload: string;
@@ -469,6 +508,18 @@ declare namespace App {
           forbidden: string;
           unavailable: string;
         };
+      };
+      brandAssets: {
+        settings: string;
+        title: string;
+        explanation: string;
+        logo: string;
+        favicon: string;
+        logoLimit: string;
+        faviconLimit: string;
+        uploading: string;
+        preview: string;
+        errors: { invalid: string; forbidden: string; unavailable: string };
       };
       manifest: {
         title: string;
@@ -720,11 +771,26 @@ declare namespace App {
         title: string;
         check: string;
         hint: string;
+        closed: string;
         unknown: string;
         progress: string;
         operation: string;
-        actions: { suspend: string; resume: string; recover: string; continue: string };
-        confirm: { suspend: string; resume: string; recover: string; continue: string };
+        actions: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
+        confirm: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
         states: { NONE: string; PENDING: string; COMPLETED: string; RETRY_REQUIRED: string; RECOVERY_REQUIRED: string };
       };
       tenants: {

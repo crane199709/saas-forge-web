@@ -18,6 +18,8 @@ declare module "@elegant-router/types" {
     "root": "/";
     "not-found": "/:pathMatch(.*)*";
     "workbench": "/workbench";
+    "platform-administrators": "/platform-administrators";
+    "tenant-settings": "/tenant-settings";
     "oauth-clients": "/oauth-clients";
     "oauth-client-detail": "/oauth-clients/:id";
     "tenants": "/tenants";
@@ -117,6 +119,8 @@ declare module "@elegant-router/types" {
     | "root"
     | "not-found"
     | "workbench"
+    | "platform-administrators"
+    | "tenant-settings"
     | "oauth-clients"
     | "oauth-client-detail"
     | "tenants"
@@ -174,6 +178,8 @@ declare module "@elegant-router/types" {
     | "root"
     | "not-found"
     | "workbench"
+    | "platform-administrators"
+    | "tenant-settings"
     | "oauth-clients"
     | "oauth-client-detail"
     | "tenants"
@@ -245,6 +251,8 @@ declare module "@elegant-router/types" {
     | "root"
     | "not-found"
     | "workbench"
+    | "platform-administrators"
+    | "tenant-settings"
     | "oauth-clients"
     | "oauth-client-detail"
     | "tenants"

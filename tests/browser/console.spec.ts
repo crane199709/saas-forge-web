@@ -132,7 +132,9 @@ async function prepare(
           canSuspend: false,
           canResume: false,
           canRecoverSuspension: false,
-          canContinue: false
+          canContinue: false,
+          canClose: false,
+          canRecoverClosure: false
         };
       else {
         unexpected.push(path);
@@ -394,6 +396,49 @@ test('tenant detail renders real sections with accessible headings', async ({ co
   await stable(page);
   await audit(page);
   await expect(page).toHaveScreenshot('tenant-detail-en.png');
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('tenant closure requires confirmation and permanently removes resumption', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  let closed = false;
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}/lifecycle`, async route => {
+    return route.fulfill({
+      json: {
+        tenantId: tenant.id,
+        ...(closed ? { operationId: '019944ca-0000-7000-8000-000000000005', action: 'CLOSE' } : {}),
+        state: closed ? 'COMPLETED' : 'NONE',
+        canSuspend: !closed,
+        canResume: false,
+        canRecoverSuspension: false,
+        canContinue: false,
+        canClose: !closed,
+        canRecoverClosure: false
+      }
+    });
+  });
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}/closures`, async route => {
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().headers()['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
+    closed = true;
+    return route.fulfill({ json: { ...tenant, status: 'CLOSED' } });
+  });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const close = page.getByRole('button', { name: 'Permanently close tenant' });
+  await expect(close).toBeEnabled();
+  await close.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Permanently close this tenant?', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  expect(closed).toBe(false);
+  await close.click();
+  await page.getByRole('button', { name: 'Confirm' }).click();
+  await expect(page.getByText('This tenant is permanently closed.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Resume tenant' })).toBeDisabled();
+  await expect(close).toBeDisabled();
+  await stable(page);
+  await audit(page);
   expect(state.errors).toEqual([]);
   expect(state.unexpected).toEqual([]);
 });
