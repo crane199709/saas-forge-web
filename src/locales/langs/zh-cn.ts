@@ -298,6 +298,25 @@ const local: App.I18n.Schema = {
       unavailable: '品牌存储暂时不可用，请稍后重试。'
     }
   },
+  brandProfile: {
+    title: '租户品牌',
+    description: '显示名称与租户管理名称相互独立。保存前请上传 Logo 和网站图标，五项设置会一起生效。',
+    displayName: '品牌显示名称',
+    primaryColor: '主色（十六进制）',
+    accentColor: '强调色（十六进制）',
+    logo: 'Logo 素材',
+    favicon: '网站图标素材',
+    missing: '尚未选择',
+    loading: '正在读取品牌配置…',
+    reload: '重新读取',
+    preview: '隔离预览',
+    save: '保存品牌',
+    forbidden: '当前成员没有品牌管理权限。',
+    stale: '品牌已由其他人更新。你的输入已保留；请重新读取后确认再保存。',
+    asset: '所选素材已失效或不属于当前租户，请重新上传。',
+    invalid: '请填写完整名称、两张有效 PNG 素材和可读的十六进制颜色。',
+    unavailable: '品牌配置暂时不可用，请稍后重试。'
+  },
   remote: {
     businessEmpty: '暂无已启用的业务模块。',
     recoverSession: '恢复会话',
@@ -307,7 +326,6 @@ const local: App.I18n.Schema = {
     name: '显示名称',
     submit: '验证共享反馈',
     success: '{name} 已继承宿主主题。',
-    brand: '当前品牌',
     number: '精确数字',
     money: '精确金额',
     date: '日历日期',

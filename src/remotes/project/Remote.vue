@@ -4,7 +4,7 @@ import { ElAlert, ElButton, ElCard, ElForm, ElFormItem, ElInput, ElOption, ElSel
 import type { Project } from '@crane199709/saas-forge-api-client';
 import type { ProjectHost, ProjectTextKey } from '../project-host';
 
-const props = defineProps<{ host: ProjectHost; text(key: ProjectTextKey): string; brandName: string }>();
+const props = defineProps<{ host: ProjectHost; text(key: ProjectTextKey): string }>();
 defineOptions({ name: 'ProjectTaskRemote' });
 const projects = ref<Project.Project[]>([]);
 const tasks = ref<Project.Task[]>([]);
@@ -132,7 +132,7 @@ onMounted(() => action(() => projectPage()));
 
 <template>
   <section data-testid="project-remote" class="space-y-16px" :aria-busy="busy">
-    <h2 class="text-18px font-semibold">{{ text('projects') }} · {{ brandName }}</h2>
+    <h2 class="text-18px font-semibold">{{ text('projects') }}</h2>
     <ElAlert v-if="failed" :title="text('failed')" type="error" :closable="false" role="alert" />
     <ElAlert
       v-if="permissionState === 'denied'"

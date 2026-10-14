@@ -11,7 +11,6 @@ const submitted = ref<string>();
 <template>
   <section data-testid="brand-remote" class="space-y-16px">
     <h3 class="text-18px font-semibold">{{ props.host.text('title') }}</h3>
-    <p>{{ props.host.text('brand') }}: {{ props.host.brandName }}</p>
     <ElCard shadow="never">
       <ElForm
         :aria-label="props.host.text('form')"

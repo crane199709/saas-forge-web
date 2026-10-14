@@ -8,6 +8,8 @@ export interface ConsoleBrand {
   accentColor: string;
 }
 
+const generatedAsset = /^\/brands\/[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
 /** 保持既有 /brands/ 匿名受控素材边界；禁止外域、重定向和路径逃逸。 */
 export function controlledBrandAsset(value: unknown): value is string {
   if (typeof value !== 'string' || !value.startsWith('/brands/') || /[%\\\s?#]/.test(value)) return false;
@@ -17,9 +19,7 @@ export function controlledBrandAsset(value: unknown): value is string {
 
 /** 新素材由 API Gateway 公开读取，已有平台素材仍由 Console 静态资源提供。 */
 export function brandAssetReadUrl(path: string, apiOrigin: string): string {
-  return /^\/brands\/[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(path)
-    ? `${apiOrigin}${path}`
-    : path;
+  return generatedAsset.test(path) ? `${apiOrigin}${path}` : path;
 }
 
 function readableColor(value: unknown): value is string {
@@ -43,12 +43,27 @@ export function validBrand(profile: Console.ConsoleTenantBrand): boolean {
   );
 }
 
+/** 新写入只引用平台生成的本代 PNG ID；旧可选静态引用仍只用于读取兼容。 */
+export function writableBrand(profile: Console.ConsoleTenantBrand): boolean {
+  return (
+    validBrand(profile) && generatedAsset.test(profile.logoUrl ?? '') && generatedAsset.test(profile.faviconUrl ?? '')
+  );
+}
+
 /** 完整 Profile 和两个素材都通过才应用品牌；任何失败整体回退，不沿用上一公司。 */
 export async function resolveConsoleBrand(
   snapshot: Console.ConsoleSessionSnapshot,
   apiOrigin = ''
 ): Promise<ConsoleBrand | undefined> {
   const profile = snapshot.activeContext?.type === 'TENANT' ? snapshot.activeContext.brand : undefined;
+  return resolveBrandProfile(profile, apiOrigin);
+}
+
+/** 管理页隔离预览和 Shell 使用同一个完整 Profile 解析边界。 */
+export async function resolveBrandProfile(
+  profile: Console.ConsoleTenantBrand | undefined,
+  apiOrigin = ''
+): Promise<ConsoleBrand | undefined> {
   if (!profile || !validBrand(profile)) return undefined;
   const urls: string[] = [];
   const controller = new AbortController();

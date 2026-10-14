@@ -44,7 +44,7 @@ export const useThemeStore = defineStore(SetupStoreId.Theme, () => {
     const colors: App.Theme.ThemeColor = {
       primary: consoleState.value.brand?.primaryColor ?? themeColor,
       ...otherColor,
-      info: consoleState.value.brand?.accentColor ?? (isInfoFollowPrimary ? themeColor : otherColor.info)
+      info: isInfoFollowPrimary ? themeColor : otherColor.info
     };
     return colors;
   });
@@ -194,6 +194,16 @@ export const useThemeStore = defineStore(SetupStoreId.Theme, () => {
         setupThemeVarsToGlobal();
         // 只持久化用户偏好；权威 Tenant 品牌不进入本地存储。
         localStg.set('themeColor', settings.value.themeColor);
+      },
+      { immediate: true }
+    );
+
+    watch(
+      [() => consoleState.value.brand, () => settings.value.themeColor],
+      ([brand, themeColor]) => {
+        // Remote 仅继承只读色彩 Token；信息、成功、警告和危险状态色不被品牌覆盖。
+        document.documentElement.style.setProperty('--sf-brand-primary', brand?.primaryColor ?? themeColor);
+        document.documentElement.style.setProperty('--sf-brand-accent', brand?.accentColor ?? themeColor);
       },
       { immediate: true }
     );

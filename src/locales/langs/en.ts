@@ -304,6 +304,26 @@ const local: App.I18n.Schema = {
       unavailable: 'Brand storage is temporarily unavailable. Try again.'
     }
   },
+  brandProfile: {
+    title: 'Tenant brand',
+    description:
+      'The brand name is separate from the tenant management name. Upload a logo and favicon before saving; all five settings take effect together.',
+    displayName: 'Brand display name',
+    primaryColor: 'Primary color (hex)',
+    accentColor: 'Accent color (hex)',
+    logo: 'Logo asset',
+    favicon: 'Favicon asset',
+    missing: 'Not selected',
+    loading: 'Loading brand profile…',
+    reload: 'Reload',
+    preview: 'Isolated preview',
+    save: 'Save brand',
+    forbidden: 'This membership cannot manage the brand.',
+    stale: 'Someone else updated this brand. Your input is preserved; reload and confirm before saving.',
+    asset: 'A selected asset is unavailable or belongs to another tenant. Upload a new asset.',
+    invalid: 'Enter a complete name, two valid PNG assets, and readable hex colors.',
+    unavailable: 'Brand profile is temporarily unavailable. Try again.'
+  },
   remote: {
     businessEmpty: 'No business modules are enabled.',
     recoverSession: 'Recover session',
@@ -313,7 +333,6 @@ const local: App.I18n.Schema = {
     name: 'Display name',
     submit: 'Verify shared feedback',
     success: '{name} inherited the host theme.',
-    brand: 'Current brand',
     number: 'Exact number',
     money: 'Exact amount',
     date: 'Calendar date',

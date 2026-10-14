@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { mock, test } from 'node:test';
-import { brandAssetReadUrl, controlledBrandAsset, resolveConsoleBrand, validBrand } from '../src/runtime/console-brand';
+import {
+  brandAssetReadUrl,
+  controlledBrandAsset,
+  releaseConsoleBrand,
+  resolveBrandProfile,
+  resolveConsoleBrand,
+  validBrand,
+  writableBrand
+} from '../src/runtime/console-brand';
 
 test('generated brand references read from the controlled API origin', () => {
   const id = '019535d9-0001-7000-8000-000000000028';
@@ -27,6 +35,7 @@ const snapshot = {
 
 test('brand profiles reject external assets, path escapes, incomplete profiles and unreadable colors', () => {
   assert.equal(validBrand(brand), true);
+  assert.equal(writableBrand(brand), false);
   for (const url of [
     'https://evil.test/a.svg',
     '//evil.test/a.svg',
@@ -83,6 +92,46 @@ test('a failed favicon releases the loaded logo and never exposes a partial tena
   } finally {
     fetchMock.mock.restore();
     revoked.mock.restore();
+    if (originalImage) Object.defineProperty(globalThis, 'Image', originalImage);
+    else Reflect.deleteProperty(globalThis, 'Image');
+  }
+});
+
+test('isolated preview resolves one complete five-field profile without changing the session snapshot', async () => {
+  const originalImage = Object.getOwnPropertyDescriptor(globalThis, 'Image');
+  Object.defineProperty(globalThis, 'Image', {
+    configurable: true,
+    value: class {
+      src = '';
+      naturalWidth = 32;
+      naturalHeight = 32;
+      async decode() {
+        assert.match(this.src, /^blob:/);
+      }
+    }
+  });
+  const fetchMock = mock.method(
+    globalThis,
+    'fetch',
+    async () => new Response(new Blob(['png'], { type: 'image/png' }), { headers: { 'content-type': 'image/png' } })
+  );
+  const profile = {
+    displayName: 'Acme brand',
+    logoUrl: '/brands/019535d9-0001-7000-8000-000000000011',
+    faviconUrl: '/brands/019535d9-0001-7000-8000-000000000012',
+    primaryColor: '#123456',
+    accentColor: '#234567'
+  };
+  try {
+    const resolved = await resolveBrandProfile(profile, 'https://api.saas.forge.test');
+    assert.equal(resolved?.displayName, 'Acme brand');
+    assert.equal(resolved?.primaryColor, '#123456');
+    assert.match(resolved?.logoUrl ?? '', /^blob:/);
+    assert.equal(fetchMock.mock.callCount(), 2);
+    assert.equal(snapshot.activeContext.brand.displayName, 'Company A');
+    releaseConsoleBrand(resolved);
+  } finally {
+    fetchMock.mock.restore();
     if (originalImage) Object.defineProperty(globalThis, 'Image', originalImage);
     else Reflect.deleteProperty(globalThis, 'Image');
   }

@@ -1,10 +1,9 @@
-/** Remote 的只读展示能力；不传递会话、Client、凭据或认证 Runtime。 */
+/** Remote 的只读展示能力；品牌只经宿主 Theme Token 继承。 */
 export interface RemoteDisplayHost {
   text(
-    key: 'title' | 'form' | 'name' | 'submit' | 'success' | 'brand' | 'number' | 'money' | 'date' | 'instant',
+    key: 'title' | 'form' | 'name' | 'submit' | 'success' | 'number' | 'money' | 'date' | 'instant',
     values?: Record<string, string>
   ): string;
-  readonly brandName: string;
   number(value: string): string;
   money(value: string, currency: string): string;
   date(value: string): string;
