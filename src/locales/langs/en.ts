@@ -172,6 +172,21 @@ const local: App.I18n.Schema = {
     passwordStatus: 'Password credential',
     passwordReady: 'Ready',
     passwordPending: 'Setup or recovery required',
+    actions: 'Actions',
+    revoke: 'Revoke administrator',
+    cancel: 'Cancel',
+    revokeConfirm:
+      'Revoke platform administrator access for {email}? Platform sessions will end; valid company sessions remain.',
+    revokePending: 'The revocation result for {email} is not confirmed. Retry the same request.',
+    revokeResults: {
+      revoked: 'Platform administrator access was revoked.',
+      'last-admin': 'Keep at least one administrator with a regular password.',
+      missing: 'This identity has no current platform administrator role.',
+      forbidden: 'Platform administrator authorization is required.',
+      conflict: 'The request conflicts with an earlier operation. Refresh and try again.',
+      invalid: 'The revocation request is invalid.',
+      unavailable: 'The result is unavailable. Retry the original request.'
+    },
     pending: 'The result for {email} is not confirmed. Retry the same request.',
     retry: 'Retry original request',
     results: {
