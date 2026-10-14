@@ -118,6 +118,32 @@ const local: App.I18n.Schema = {
     conflict: 'The role changed or is assigned to members. Refresh and try again.',
     invalid: 'Use 3–64 uppercase letters, digits or underscores, and select valid permissions.'
   },
+  platformAdministrators: {
+    title: 'Platform administrators',
+    description:
+      'Grant the fixed PLATFORM_ADMIN role by email. A new identity receives a first password setup message; an existing password stays unchanged.',
+    email: 'Email',
+    grant: 'Grant platform administrator',
+    list: 'Current administrators',
+    reload: 'Refresh',
+    empty: 'No platform administrators are listed.',
+    passwordStatus: 'Password credential',
+    passwordReady: 'Ready',
+    passwordPending: 'Setup or recovery required',
+    pending: 'The result for {email} is not confirmed. Retry the same request.',
+    retry: 'Retry original request',
+    results: {
+      PENDING: 'The role was granted and the setup message is pending. Retry the same request later.',
+      DELIVERED: 'The role was granted and the setup message was accepted. The password is not yet established.',
+      PASSWORD_READY: 'The role was granted. The existing password was not changed.',
+      RECOVERY_REQUIRED: 'The role was granted. This identity must use password recovery; no setup message was sent.',
+      ALREADY_GRANTED: 'This identity already has PLATFORM_ADMIN.',
+      invalid: 'Enter a valid email address.',
+      forbidden: 'Platform administrator authorization is required.',
+      conflict: 'The request conflicts with an earlier operation. Refresh and try again.',
+      unavailable: 'The result is unavailable. Retry the original request before creating another.'
+    }
+  },
   organization: {
     title: 'Organization units',
     reload: 'Refresh organization',
@@ -734,6 +760,7 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    'platform-administrators': 'Platform administrators',
     'oauth-clients': 'OAuth Clients',
     'oauth-client-detail': 'OAuth Client details',
     plans: 'Plans',

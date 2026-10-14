@@ -16,6 +16,7 @@ import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
 import type { PermissionCatalogApi } from '@/service/forge/permissions';
 import type { TenantRoleApi } from '@/service/forge/tenant-roles';
+import type { PlatformAdminApi } from '@/service/forge/platform-administrators';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -37,6 +38,7 @@ let projectBridge: ReturnType<typeof createProjectHost> | undefined;
 let permissions: PermissionCatalogApi | undefined;
 let invitations: InvitationsApi | undefined;
 let roles: TenantRoleApi | undefined;
+let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
 let brandAssets: BrandAssetsApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
@@ -55,6 +57,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     permissions = transport.permissions;
     invitations = transport.invitations;
     roles = transport.roles;
+    platformAdministrators = transport.administrators;
     organization = transport.organization;
     brandAssets = transport.brandAssets;
     manifests = transport.manifests;
@@ -121,6 +124,11 @@ export function consoleInvitations(): InvitationsApi {
 export function consoleTenantRoles() {
   consoleRuntime();
   return roles!;
+}
+
+export function consolePlatformAdministrators(): PlatformAdminApi {
+  consoleRuntime();
+  return platformAdministrators!;
 }
 
 export function consoleOrganization() {

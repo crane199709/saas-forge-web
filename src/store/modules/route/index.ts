@@ -138,6 +138,14 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
                     icon: SvgIconVNode({ icon: 'mdi:counter', fontSize: 20 })
                   },
                   {
+                    key: 'platform-administrators',
+                    label: $t('platformAdministrators.title'),
+                    i18nKey: 'platformAdministrators.title' as const,
+                    routeKey: 'platform-administrators' as const,
+                    routePath: '/platform-administrators' as const,
+                    icon: SvgIconVNode({ icon: 'mdi:shield-account-outline', fontSize: 20 })
+                  },
+                  {
                     key: 'oauth-clients',
                     label: $t('oauth.title'),
                     i18nKey: 'oauth.title' as const,

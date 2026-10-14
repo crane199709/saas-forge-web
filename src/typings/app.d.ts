@@ -395,6 +395,31 @@ declare namespace App {
         conflict: string;
         invalid: string;
       };
+      platformAdministrators: {
+        title: string;
+        description: string;
+        email: string;
+        grant: string;
+        list: string;
+        reload: string;
+        empty: string;
+        passwordStatus: string;
+        passwordReady: string;
+        passwordPending: string;
+        pending: string;
+        retry: string;
+        results: {
+          PENDING: string;
+          DELIVERED: string;
+          PASSWORD_READY: string;
+          RECOVERY_REQUIRED: string;
+          ALREADY_GRANTED: string;
+          invalid: string;
+          forbidden: string;
+          conflict: string;
+          unavailable: string;
+        };
+      };
       organization: {
         title: string;
         reload: string;
