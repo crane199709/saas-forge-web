@@ -673,6 +673,17 @@ declare namespace App {
         setupUnavailable: string;
         setupSubmitting: string;
         backToLogin: string;
+        forgotPassword: string;
+        recoveryTitle: string;
+        recoveryIntro: string;
+        recoverySend: string;
+        recoveryRequested: string;
+        recoveryNewPassword: string;
+        recoveryPending: string;
+        recoveryComplete: string;
+        recoveryInvalid: string;
+        recoveryUnknown: string;
+        recoveryUnavailable: string;
         passwordRules: string;
         passwordInvalid: string;
         passwordChanged: string;
