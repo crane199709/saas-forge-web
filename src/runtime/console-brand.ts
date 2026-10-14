@@ -15,6 +15,13 @@ export function controlledBrandAsset(value: unknown): value is string {
   return url.origin === 'https://brand.invalid' && url.pathname.startsWith('/brands/') && url.pathname.length > 8;
 }
 
+/** 新素材由 API Gateway 公开读取，已有平台素材仍由 Console 静态资源提供。 */
+export function brandAssetReadUrl(path: string, apiOrigin: string): string {
+  return /^\/brands\/[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(path)
+    ? `${apiOrigin}${path}`
+    : path;
+}
+
 function readableColor(value: unknown): value is string {
   if (typeof value !== 'string' || !/^#[0-9a-f]{6}$/i.test(value)) return false;
   const rgb = [1, 3, 5].map(index => Number.parseInt(value.slice(index, index + 2), 16) / 255);
@@ -37,7 +44,10 @@ export function validBrand(profile: Console.ConsoleTenantBrand): boolean {
 }
 
 /** 完整 Profile 和两个素材都通过才应用品牌；任何失败整体回退，不沿用上一公司。 */
-export async function resolveConsoleBrand(snapshot: Console.ConsoleSessionSnapshot): Promise<ConsoleBrand | undefined> {
+export async function resolveConsoleBrand(
+  snapshot: Console.ConsoleSessionSnapshot,
+  apiOrigin = ''
+): Promise<ConsoleBrand | undefined> {
   const profile = snapshot.activeContext?.type === 'TENANT' ? snapshot.activeContext.brand : undefined;
   if (!profile || !validBrand(profile)) return undefined;
   const urls: string[] = [];
@@ -46,7 +56,11 @@ export async function resolveConsoleBrand(snapshot: Console.ConsoleSessionSnapsh
   try {
     const assets = await Promise.allSettled(
       [profile.logoUrl!, profile.faviconUrl!].map(async (url, index) => {
-        const response = await fetch(url, { credentials: 'omit', redirect: 'error', signal: controller.signal });
+        const response = await fetch(brandAssetReadUrl(url, apiOrigin), {
+          credentials: 'omit',
+          redirect: 'error',
+          signal: controller.signal
+        });
         const mime = response.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase();
         const allowed =
           index === 0

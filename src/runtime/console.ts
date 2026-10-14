@@ -1,5 +1,6 @@
 import { shallowRef } from 'vue';
 import type {
+  BrandAssetsApi,
   Console,
   InvitationsApi,
   MembersApi,
@@ -18,6 +19,7 @@ import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
 import type { PermissionCatalogApi } from '@/service/forge/permissions';
 import type { TenantRoleApi } from '@/service/forge/tenant-roles';
+import type { PlatformAdminApi } from '@/service/forge/platform-administrators';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -42,7 +44,9 @@ let members: MembersApi | undefined;
 let effectivePermissions: PermissionsApi | undefined;
 let acceptance: Console.InvitationAcceptanceApi | undefined;
 let roles: TenantRoleApi | undefined;
+let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
+let brandAssets: BrandAssetsApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -53,7 +57,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     const transport = createConsoleTransport(origin);
     runtime = new ConsoleSessionRuntime(transport, createBrowserCoordination(origin), {
       key: operationKey,
-      resolveBrand: resolveConsoleBrand
+      resolveBrand: snapshot => resolveConsoleBrand(snapshot, origin)
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
@@ -62,7 +66,9 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     effectivePermissions = transport.effectivePermissions;
     acceptance = transport.acceptance;
     roles = transport.roles;
+    platformAdministrators = transport.administrators;
     organization = transport.organization;
+    brandAssets = transport.brandAssets;
     manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
@@ -144,9 +150,19 @@ export function consoleTenantRoles() {
   return roles!;
 }
 
+export function consolePlatformAdministrators(): PlatformAdminApi {
+  consoleRuntime();
+  return platformAdministrators!;
+}
+
 export function consoleOrganization() {
   consoleRuntime();
   return organization!;
+}
+
+export function consoleBrandAssets() {
+  consoleRuntime();
+  return brandAssets!;
 }
 
 export function discoverBusinessRemotes(signal: AbortSignal) {

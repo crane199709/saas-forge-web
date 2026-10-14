@@ -1,4 +1,5 @@
 import {
+  BrandAssetsApi,
   Configuration,
   Console,
   InvitationsApi,
@@ -16,8 +17,10 @@ import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
 import { createPermissionApi } from './permissions';
 import { createTenantRoleApi } from './tenant-roles';
+import { createPlatformAdminApi } from './platform-administrators';
 import type { PermissionCatalogApi } from './permissions';
 import type { TenantRoleApi } from './tenant-roles';
+import type { PlatformAdminApi } from './platform-administrators';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
 export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
@@ -26,12 +29,14 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   oauth: OAuthClientsApi;
   projects: Project.DefaultApi;
   organization: OrganizationApi;
+  brandAssets: BrandAssetsApi;
   permissions: PermissionCatalogApi;
   invitations: InvitationsApi;
   members: MembersApi;
   effectivePermissions: PermissionsApi;
   acceptance: Console.InvitationAcceptanceApi;
   roles: TenantRoleApi;
+  administrators: PlatformAdminApi;
   manifests: RemoteManifestsApi;
 } {
   const basePath = requireHttpsOrigin(apiOrigin);
@@ -84,7 +89,9 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     effectivePermissions: new PermissionsApi(jsonConfiguration),
     acceptance,
     roles: createTenantRoleApi(basePath, () => token ?? ''),
+    administrators: createPlatformAdminApi(basePath, () => token ?? ''),
     organization: new OrganizationApi(jsonConfiguration),
+    brandAssets: new BrandAssetsApi(businessConfiguration),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,

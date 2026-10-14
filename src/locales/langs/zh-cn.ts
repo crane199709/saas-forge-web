@@ -158,6 +158,31 @@ const local: App.I18n.Schema = {
     conflict: '角色已变化或已有成员绑定，请刷新后重试。',
     invalid: '角色标识须为 3～64 位大写字母、数字或下划线，并选择有效权限。'
   },
+  platformAdministrators: {
+    title: '平台管理员',
+    description: '按邮箱授予固定 PLATFORM_ADMIN。新身份收到首次密码设置邮件；已有密码不会改变。',
+    email: '邮箱',
+    grant: '授予平台管理员',
+    list: '当前平台管理员',
+    reload: '刷新',
+    empty: '暂无平台管理员。',
+    passwordStatus: '密码凭据',
+    passwordReady: '已建立',
+    passwordPending: '待设置或恢复',
+    pending: '{email} 的结果尚未确认，请重试原请求。',
+    retry: '重试原请求',
+    results: {
+      PENDING: '角色已授予，首次设置邮件正在投递；请稍后重试原请求查看结果。',
+      DELIVERED: '角色已授予，首次设置邮件已被接受；密码尚未建立。',
+      PASSWORD_READY: '角色已授予，已有密码未改变。',
+      RECOVERY_REQUIRED: '角色已授予；该身份须使用密码恢复，未发送首次设置邮件。',
+      ALREADY_GRANTED: '该身份已经拥有 PLATFORM_ADMIN。',
+      invalid: '请输入有效邮箱。',
+      forbidden: '需要平台管理员权限。',
+      conflict: '请求与先前操作冲突，请刷新后重试。',
+      unavailable: '结果暂不可用，请先重试原请求。'
+    }
+  },
   organization: {
     title: '组织单元',
     reload: '刷新组织',
@@ -181,6 +206,22 @@ const local: App.I18n.Schema = {
       conflict: '存在循环关系或非空关联，无法完成此操作。',
       forbidden: '当前成员没有组织维护权限。',
       unavailable: '组织服务暂时不可用，请稍后重试。'
+    }
+  },
+  brandAssets: {
+    settings: '租户设置',
+    title: '品牌图片',
+    explanation: '上传 PNG 后仅在此处预览；上传不会改变当前生效的品牌配置。',
+    logo: 'Logo PNG',
+    favicon: '网站图标 PNG',
+    logoLimit: '不超过 2 MiB，宽高各不超过 2048 像素。',
+    faviconLimit: '正方形，边长 32～256 像素，不超过 256 KiB。',
+    uploading: '正在上传并校验图片…',
+    preview: '隔离图片预览',
+    errors: {
+      invalid: '请选择符合文件大小和尺寸限制的静态 PNG。',
+      forbidden: '当前成员没有品牌图片管理权限。',
+      unavailable: '品牌存储暂时不可用，请稍后重试。'
     }
   },
   remote: {
@@ -733,6 +774,7 @@ const local: App.I18n.Schema = {
     }
   },
   route: {
+    'platform-administrators': '平台管理员',
     'oauth-clients': 'OAuth Client 管理',
     'oauth-client-detail': 'OAuth Client 详情',
     plans: '套餐管理',
@@ -742,6 +784,7 @@ const local: App.I18n.Schema = {
     tenants: '租户管理',
     'tenant-detail': '租户详情',
     workbench: '公司工作台',
+    'tenant-settings': '租户设置',
     login: '登录',
     403: '无权限',
     404: '页面不存在',
