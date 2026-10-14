@@ -406,6 +406,20 @@ declare namespace App {
         passwordStatus: string;
         passwordReady: string;
         passwordPending: string;
+        actions: string;
+        revoke: string;
+        cancel: string;
+        revokeConfirm: string;
+        revokePending: string;
+        revokeResults: {
+          revoked: string;
+          'last-admin': string;
+          missing: string;
+          forbidden: string;
+          conflict: string;
+          invalid: string;
+          unavailable: string;
+        };
         pending: string;
         retry: string;
         results: {
