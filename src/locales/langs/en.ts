@@ -136,7 +136,21 @@ const local: App.I18n.Schema = {
     identity: 'Identity',
     status: 'Status',
     enabled: 'Enabled',
-    disabled: 'Disabled'
+    disabled: 'Disabled',
+    roles: 'Roles',
+    manageRoles: 'Manage roles',
+    loadingRoles: 'Loading role assignments…',
+    unavailableRoles: 'Role assignments are unavailable. Close and try again.',
+    noRoles: 'This member has no roles yet.',
+    chooseRole: 'Choose a role to assign',
+    assignRole: 'Assign role',
+    revokeRole: 'Revoke',
+    roleError: {
+      forbidden: 'Your administrator access changed. Refresh this page.',
+      'last-administrator': 'The last enabled Tenant Administrator cannot be removed.',
+      missing: 'The member or role no longer exists. Refresh this page.',
+      unavailable: 'The role change result is unavailable. Refresh before retrying.'
+    }
   },
   waiting: {
     title: 'Waiting for access',
