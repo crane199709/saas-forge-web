@@ -4,6 +4,7 @@ import { consoleState } from '@/runtime/console';
 import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
 import BusinessRemote from './business-remote.vue';
+import PermissionCatalog from './permission-catalog.vue';
 
 const RemoteAcceptance =
   import.meta.env.DEV || import.meta.env.MODE === 'static-acceptance'
@@ -43,6 +44,8 @@ onMounted(async () => {
       :key="`${consoleState.snapshot.sessionId}:${consoleState.snapshot.revision}`"
       :enabled="consoleState.status === 'authenticated'"
     />
+    <ElDivider />
+    <PermissionCatalog />
     <ElDivider />
     <BusinessRemote />
     <ElDivider />
