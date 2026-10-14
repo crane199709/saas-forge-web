@@ -107,6 +107,18 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
               routePath: tenant ? '/workbench' : '/home',
               icon: SvgIconVNode({ icon: 'mdi:home-outline', fontSize: 20 })
             },
+            ...(tenant
+              ? [
+                  {
+                    key: 'tenant-settings',
+                    label: $t('brandAssets.settings'),
+                    i18nKey: 'brandAssets.settings' as const,
+                    routeKey: 'tenant-settings' as const,
+                    routePath: '/tenant-settings' as const,
+                    icon: SvgIconVNode({ icon: 'mdi:cog-outline', fontSize: 20 })
+                  }
+                ]
+              : []),
             ...(!tenant
               ? [
                   {

@@ -169,6 +169,22 @@ const local: App.I18n.Schema = {
       unavailable: 'The organization service is temporarily unavailable. Try again.'
     }
   },
+  brandAssets: {
+    settings: 'Tenant settings',
+    title: 'Brand images',
+    explanation: 'Upload a PNG to preview it here. Uploading does not change the live brand profile.',
+    logo: 'Logo PNG',
+    favicon: 'Favicon PNG',
+    logoLimit: 'Up to 2 MiB and 2048 pixels on either side.',
+    faviconLimit: 'Square, 32–256 pixels, up to 256 KiB.',
+    uploading: 'Uploading and checking image…',
+    preview: 'Isolated image preview',
+    errors: {
+      invalid: 'Choose a valid static PNG within the size and dimension limits.',
+      forbidden: 'This membership cannot manage brand images.',
+      unavailable: 'Brand storage is temporarily unavailable. Try again.'
+    }
+  },
   remote: {
     businessEmpty: 'No business modules are enabled.',
     recoverSession: 'Recover session',
@@ -754,6 +770,7 @@ const local: App.I18n.Schema = {
     tenants: 'Tenants',
     'tenant-detail': 'Tenant details',
     workbench: 'Company workspace',
+    'tenant-settings': 'Tenant settings',
     login: 'Login',
     403: 'No Permission',
     404: 'Page Not Found',

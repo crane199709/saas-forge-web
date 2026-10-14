@@ -1,4 +1,5 @@
 import {
+  BrandAssetsApi,
   Configuration,
   Console,
   InvitationsApi,
@@ -26,6 +27,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   oauth: OAuthClientsApi;
   projects: Project.DefaultApi;
   organization: OrganizationApi;
+  brandAssets: BrandAssetsApi;
   permissions: PermissionCatalogApi;
   invitations: InvitationsApi;
   roles: TenantRoleApi;
@@ -78,6 +80,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     roles: createTenantRoleApi(basePath, () => token ?? ''),
     administrators: createPlatformAdminApi(basePath, () => token ?? ''),
     organization: new OrganizationApi(jsonConfiguration),
+    brandAssets: new BrandAssetsApi(businessConfiguration),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,

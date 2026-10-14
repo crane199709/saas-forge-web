@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { mock, test } from 'node:test';
-import { controlledBrandAsset, resolveConsoleBrand, validBrand } from '../src/runtime/console-brand';
+import { brandAssetReadUrl, controlledBrandAsset, resolveConsoleBrand, validBrand } from '../src/runtime/console-brand';
+
+test('generated brand references read from the controlled API origin', () => {
+  const id = '019535d9-0001-7000-8000-000000000028';
+  assert.equal(
+    brandAssetReadUrl(`/brands/${id}`, 'https://api.saas.forge.test'),
+    `https://api.saas.forge.test/brands/${id}`
+  );
+  assert.equal(brandAssetReadUrl('/brands/platform.svg', 'https://api.saas.forge.test'), '/brands/platform.svg');
+});
 
 const brand = {
   displayName: 'Company A',

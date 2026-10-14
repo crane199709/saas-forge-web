@@ -445,6 +445,18 @@ declare namespace App {
           unavailable: string;
         };
       };
+      brandAssets: {
+        settings: string;
+        title: string;
+        explanation: string;
+        logo: string;
+        favicon: string;
+        logoLimit: string;
+        faviconLimit: string;
+        uploading: string;
+        preview: string;
+        errors: { invalid: string; forbidden: string; unavailable: string };
+      };
       manifest: {
         title: string;
         module: string;

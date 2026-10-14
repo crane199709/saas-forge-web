@@ -1,5 +1,10 @@
 import { shallowRef } from 'vue';
-import type { InvitationsApi, OrganizationApi, RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import type {
+  BrandAssetsApi,
+  InvitationsApi,
+  OrganizationApi,
+  RemoteManifestsApi
+} from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
@@ -35,6 +40,7 @@ let invitations: InvitationsApi | undefined;
 let roles: TenantRoleApi | undefined;
 let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
+let brandAssets: BrandAssetsApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -45,7 +51,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     const transport = createConsoleTransport(origin);
     runtime = new ConsoleSessionRuntime(transport, createBrowserCoordination(origin), {
       key: operationKey,
-      resolveBrand: resolveConsoleBrand
+      resolveBrand: snapshot => resolveConsoleBrand(snapshot, origin)
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
@@ -53,6 +59,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     roles = transport.roles;
     platformAdministrators = transport.administrators;
     organization = transport.organization;
+    brandAssets = transport.brandAssets;
     manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
@@ -127,6 +134,11 @@ export function consolePlatformAdministrators(): PlatformAdminApi {
 export function consoleOrganization() {
   consoleRuntime();
   return organization!;
+}
+
+export function consoleBrandAssets() {
+  consoleRuntime();
+  return brandAssets!;
 }
 
 export function discoverBusinessRemotes(signal: AbortSignal) {
