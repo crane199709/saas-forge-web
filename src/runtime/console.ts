@@ -1,8 +1,11 @@
 import { shallowRef } from 'vue';
 import type {
   BrandAssetsApi,
+  Console,
   InvitationsApi,
+  MembersApi,
   OrganizationApi,
+  PermissionsApi,
   RemoteManifestsApi
 } from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
@@ -37,6 +40,9 @@ let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
 let permissions: PermissionCatalogApi | undefined;
 let invitations: InvitationsApi | undefined;
+let members: MembersApi | undefined;
+let effectivePermissions: PermissionsApi | undefined;
+let acceptance: Console.InvitationAcceptanceApi | undefined;
 let roles: TenantRoleApi | undefined;
 let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
@@ -56,6 +62,9 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
     permissions = transport.permissions;
     invitations = transport.invitations;
+    members = transport.members;
+    effectivePermissions = transport.effectivePermissions;
+    acceptance = transport.acceptance;
     roles = transport.roles;
     platformAdministrators = transport.administrators;
     organization = transport.organization;
@@ -119,6 +128,21 @@ export function consolePermissionCatalog() {
 export function consoleInvitations(): InvitationsApi {
   consoleRuntime();
   return invitations!;
+}
+
+export function consoleMembers(): MembersApi {
+  consoleRuntime();
+  return members!;
+}
+
+export function consoleEffectivePermissions(): PermissionsApi {
+  consoleRuntime();
+  return effectivePermissions!;
+}
+
+export function consoleInvitationAcceptance(): Console.InvitationAcceptanceApi {
+  consoleRuntime();
+  return acceptance!;
 }
 
 export function consoleTenantRoles() {

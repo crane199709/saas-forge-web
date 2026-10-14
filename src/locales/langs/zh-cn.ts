@@ -91,6 +91,48 @@ const local: App.I18n.Schema = {
     states: { PENDING: '待处理', ACCEPTED: '已接受', REVOKED: '已撤销', EXPIRED: '已过期' },
     deliveryStates: { PENDING: '待投递', SENT: '已投递', FAILED: '投递失败' }
   },
+  invitationAcceptance: {
+    title: '接受邀请',
+    intro: '请先使用受邀账号登录，再明确接受这份邀请。',
+    currentIdentity: '当前登录账号',
+    accept: '接受邀请',
+    refresh: '刷新访问状态',
+    success: '已加入公司。当前工作上下文未自动切换；管理员现在可以为你分配角色。',
+    invalid: '邀请链接无效，请从邮件重新打开最新链接。',
+    unavailable: '暂时无法确认结果，请保留此页面并重试。',
+    errors: {
+      INVITATION_INVALID: '链接无效或已被重发替换，请打开最新邀请邮件。',
+      INVITATION_IDENTITY_MISMATCH: '此邀请属于其他账号。请退出后使用受邀邮箱登录。',
+      INVITATION_REVOKED: '邀请已撤销，请联系管理员重新邀请。',
+      INVITATION_EXPIRED: '邀请已过期，请联系管理员重新邀请。',
+      INVITATION_ALREADY_ACCEPTED: '此邀请已经接受。',
+      INVITATION_NOT_PENDING: '此邀请已不可用，请刷新或联系管理员。',
+      MEMBERSHIP_ALREADY_EXISTS: '你已经是该公司的成员。',
+      QUOTA_EXCEEDED: '公司成员名额已用尽，请联系管理员调整额度。',
+      SUBSCRIPTION_REQUIRED: '公司需要有效订阅才能加入。',
+      INVITATION_ACTIVATION_COMPENSATING: '中断尝试正在释放名额，请稍后重试。',
+      INVITATION_ACCEPTANCE_RETRY_REQUIRED: '中断尝试已安全补偿，请重新尝试加入。',
+      INVITATION_ACCEPTANCE_IN_PROGRESS: '另一入会尝试尚在完成，请稍后重试。'
+    }
+  },
+  members: {
+    title: '成员',
+    refresh: '刷新成员',
+    loading: '正在读取成员…',
+    forbidden: '仅 Tenant Administrator 可以查看成员列表。',
+    unavailable: '成员列表暂时不可用，请重试。',
+    empty: '暂无成员。',
+    identity: 'Identity',
+    status: '状态',
+    enabled: '已启用',
+    disabled: '已禁用'
+  },
+  waiting: {
+    title: '等待授权',
+    message: '你的成员关系已启用，但还没有获得 Permission。请联系管理员分配角色。',
+    refresh: '刷新权限',
+    unavailable: '暂时无法确认当前权限，请刷新后重试。'
+  },
   tenantRoles: {
     title: '租户角色',
     reload: '刷新角色',
