@@ -1,6 +1,7 @@
 import {
   Configuration,
   Console,
+  InvitationsApi,
   OAuthClientsApi,
   PlatformEntitlementBootstrapApi,
   PlatformTenantsApi,
@@ -20,6 +21,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   oauth: OAuthClientsApi;
   projects: Project.DefaultApi;
   permissions: PermissionCatalogApi;
+  invitations: InvitationsApi;
   manifests: RemoteManifestsApi;
 } {
   const basePath = requireHttpsOrigin(apiOrigin);
@@ -64,6 +66,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   });
   return {
     permissions: createPermissionApi(basePath, () => token ?? ''),
+    invitations: new InvitationsApi(jsonConfiguration),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,
