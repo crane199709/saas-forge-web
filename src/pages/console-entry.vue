@@ -84,6 +84,9 @@ async function submit() {
         <ElButton native-type="submit" type="primary" size="large" class="w-full" :disabled="busy">
           {{ $t('console.signIn') }}
         </ElButton>
+        <RouterLink class="mt-16px inline-block" to="/password-recovery">
+          {{ $t('console.forgotPassword') }}
+        </RouterLink>
       </form>
       <InitialPassword
         v-if="consoleState.status === 'restricted' && consoleState.snapshot?.state === 'PASSWORD_CHANGE_REQUIRED'"

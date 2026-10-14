@@ -370,6 +370,31 @@ declare namespace App {
         conflict: string;
         invalid: string;
       };
+      organization: {
+        title: string;
+        reload: string;
+        loading: string;
+        empty: string;
+        addRoot: string;
+        addChild: string;
+        rename: string;
+        move: string;
+        delete: string;
+        deleteConfirm: string;
+        name: string;
+        parent: string;
+        root: string;
+        cancel: string;
+        save: string;
+        actions: { create: string; rename: string; move: string };
+        errors: {
+          invalid: string;
+          missing: string;
+          conflict: string;
+          forbidden: string;
+          unavailable: string;
+        };
+      };
       manifest: {
         title: string;
         module: string;
@@ -724,6 +749,17 @@ declare namespace App {
         setupUnavailable: string;
         setupSubmitting: string;
         backToLogin: string;
+        forgotPassword: string;
+        recoveryTitle: string;
+        recoveryIntro: string;
+        recoverySend: string;
+        recoveryRequested: string;
+        recoveryNewPassword: string;
+        recoveryPending: string;
+        recoveryComplete: string;
+        recoveryInvalid: string;
+        recoveryUnknown: string;
+        recoveryUnavailable: string;
         passwordRules: string;
         passwordInvalid: string;
         passwordChanged: string;

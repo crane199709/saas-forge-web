@@ -78,6 +78,7 @@ async function prepare(
         body = { ...session, accessToken: 'ui-fixture-token', tokenType: 'Bearer', expiresIn: 900 };
       else if (options.tenant && path === '/api/v1/permissions')
         body = { items: [{ code: 'example:project:list', enabled: true }] };
+      else if (options.tenant && path === '/api/v1/organization/units') body = { items: [] };
       else if (options.tenant && path === '/api/v1/tenant-roles')
         body = {
           items: [
@@ -154,6 +155,13 @@ async function prepare(
     }
     unexpected.push(url.origin);
     await route.abort();
+  });
+  await context.route('https://api.ui.test/api/v2/auth/password-recover*', async route => {
+    const request = route.request().url().endsWith('/password-recovery-requests');
+    await route.fulfill({
+      status: request ? 202 : 200,
+      json: { status: request ? 'ACCEPTED' : 'COMPLETED' }
+    });
   });
   return { errors, unexpected };
 }
@@ -255,6 +263,28 @@ for (const locale of ['zh-CN', 'en']) {
     });
   }
 }
+
+test('password recovery email and one-use link render and accept keyboard input', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`${origin}/login`);
+  await page.getByRole('link', { name: 'Forgot password?' }).click();
+  await expect(page).toHaveURL(`${origin}/password-recovery`);
+  await page.getByRole('textbox', { name: 'Email' }).fill('person@example.test');
+  await page.getByRole('button', { name: 'Send recovery link' }).click();
+  await expect(page.getByRole('status')).toContainText('If this address belongs to a recoverable account');
+  await audit(page);
+
+  await page.goto(`${origin}/password-recovery#token=${'A'.repeat(43)}`);
+  await expect(page).toHaveURL(`${origin}/password-recovery`);
+  await page.getByRole('textbox', { name: 'New password', exact: true }).fill('New-password-2026');
+  await page.getByRole('textbox', { name: 'Confirm new password' }).fill('New-password-2026');
+  await page.getByRole('button', { name: 'Set a new password' }).click();
+  await expect(page.getByRole('status')).toContainText('Password recovered and previous sessions ended');
+  await audit(page);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
 
 for (const width of [1440, 1024]) {
   for (const dark of [false, true]) {
@@ -591,7 +621,8 @@ for (const locale of ['zh-CN', 'en']) {
     await page.getByRole('button', { name: chinese ? '折叠菜单' : 'Collapse Menu', exact: true }).click();
     await expect(menu).toHaveClass(/el-menu--collapse/);
     /* eslint-disable no-await-in-loop -- 菜单悬停需串行，避免覆盖前一个名称提示。 */
-    for (const [index, label] of names.entries()) {
+    for (let index = 0; index < names.length; index += 1) {
+      const label = names[index];
       const item = menu.getByRole('menuitem').nth(index);
       await expect(item).toHaveAccessibleName(label);
       await item.hover();

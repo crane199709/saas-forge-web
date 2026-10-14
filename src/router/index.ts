@@ -8,6 +8,7 @@ import {
   createWebHistory
 } from 'vue-router';
 import { capturePasswordSetupLink } from '@/runtime/password-setup-link';
+import { capturePasswordRecoveryLink } from '@/runtime/password-recovery-link';
 import { consoleState, startConsole } from '@/runtime/console';
 import { createProgressGuard } from './guard/progress';
 import { createDocumentTitleGuard } from './guard/title';
@@ -21,6 +22,7 @@ const historyCreatorMap: Record<Env.RouterHistoryMode, (base?: string) => Router
 };
 
 capturePasswordSetupLink();
+capturePasswordRecoveryLink();
 
 export const router = createRouter({
   history: historyCreatorMap[VITE_ROUTER_HISTORY_MODE](VITE_BASE_URL),
@@ -29,6 +31,12 @@ export const router = createRouter({
       path: '/password-setup',
       name: 'password-setup',
       component: () => import('@/pages/password-setup.vue'),
+      meta: { title: 'SaaS Forge', constant: true }
+    },
+    {
+      path: '/password-recovery',
+      name: 'password-recovery',
+      component: () => import('@/pages/password-recovery.vue'),
       meta: { title: 'SaaS Forge', constant: true }
     },
     { path: '/', name: 'root', redirect: '/home' },
@@ -154,7 +162,8 @@ export async function setupRouter(app: App) {
   createProgressGuard(router);
   createDocumentTitleGuard(router);
   router.beforeEach(async to => {
-    if (to.name === 'password-setup' || to.name === 'gateway-connection') return true;
+    if (to.name === 'password-setup' || to.name === 'password-recovery' || to.name === 'gateway-connection')
+      return true;
     await startConsole();
     const active =
       consoleState.value.status === 'authenticated' ? consoleState.value.snapshot?.activeContext?.type : undefined;
@@ -185,7 +194,7 @@ export async function setupRouter(app: App) {
     const active = state.status === 'authenticated' ? state.snapshot?.activeContext?.type : undefined;
     const home = active === 'PLATFORM' ? '/home' : '/workbench';
     const name = String(router.currentRoute.value.name);
-    if (['password-setup', 'gateway-connection'].includes(name)) return;
+    if (['password-setup', 'password-recovery', 'gateway-connection'].includes(name)) return;
     const allowed =
       active === 'PLATFORM'
         ? [
