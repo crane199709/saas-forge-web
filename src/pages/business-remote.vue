@@ -8,6 +8,8 @@ import { loadBusinessRemote } from '@/runtime/business-remote-loader';
 import { $t } from '@/locales';
 import type { ProjectTextKey } from '@/remotes/project-host';
 
+defineProps<{ permissions: string[]; refreshPermissions(): Promise<void> }>();
+
 const component = shallowRef<Component>();
 const status = ref<'loading' | 'empty' | 'failed' | 'ready'>('loading');
 const host = consoleProjectHost();
@@ -102,6 +104,8 @@ onBeforeUnmount(unload);
       v-show="consoleState.status === 'authenticated'"
       :host="host"
       :text="text"
+      :permissions="permissions"
+      :refresh-permissions="refreshPermissions"
     />
   </section>
 </template>

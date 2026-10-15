@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
+import process from 'node:process';
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -803,4 +805,68 @@ test('collapsed sidebar keeps a visible icon for each menu entry', async ({ cont
       expect(box!.height).toBeGreaterThan(0);
     })
   );
+});
+
+test('create-only Project role keeps its draft through 403 and recovers a 503 write', async ({ context, page }) => {
+  execFileSync(process.execPath, ['scripts/build-project-remote.mjs', origin]);
+  const manifest = JSON.parse(readFileSync('dist/business-remotes/project/1.1.0/manifest-declaration.json', 'utf8'));
+  const remote = readFileSync('dist/business-remotes/project/1.1.0/remote.js');
+  const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
+  await page.route('**/api/v1/permissions/effective', route =>
+    route.fulfill({ json: { codes: ['example:project:create'] } })
+  );
+  await page.route('**/api/v1/remote-manifests/enabled*', route =>
+    route.fulfill({
+      json: { items: [{ ...manifest, id: '019944ca-0000-7000-8000-000000000030' }], hasMore: false, nextCursor: null }
+    })
+  );
+  await page.route(manifest.source, route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'text/javascript',
+      headers: { 'Access-Control-Allow-Origin': origin },
+      body: remote
+    })
+  );
+  await page.route('**/api/v1/invitations**', route =>
+    route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } })
+  );
+  await page.route('**/api/v1/members**', route => route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } }));
+  let writes = 0;
+  let lists = 0;
+  await page.route('**/api/v1/projects', route => {
+    if (route.request().method() === 'GET') {
+      lists += 1;
+      return route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } });
+    }
+    writes += 1;
+    if (writes === 1) return route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } });
+    if (writes === 2) return route.fulfill({ status: 503, json: { code: 'PERMISSION_AUTHORITY_UNAVAILABLE' } });
+    return route.fulfill({
+      status: 201,
+      json: {
+        id: '019944ca-0000-7000-8000-000000000031',
+        name: 'Limited project',
+        description: null,
+        version: 1
+      }
+    });
+  });
+  await page.goto(`${origin}/workbench`);
+  const remotePanel = page.getByTestId('project-remote');
+  await expect(remotePanel).toBeVisible();
+  const form = remotePanel.getByRole('form', { name: 'Projects' });
+  await form.getByRole('textbox', { name: 'Project name' }).fill('Limited project');
+  await form.getByRole('button', { name: 'Create' }).click();
+  await expect(remotePanel.getByRole('alert')).toContainText('lacks permission');
+  await expect(form.getByRole('textbox', { name: 'Project name' })).toHaveValue('Limited project');
+  await form.getByRole('button', { name: 'Create' }).click();
+  await expect(remotePanel.getByRole('button', { name: 'Recover original operation' })).toBeVisible();
+  await remotePanel.getByRole('button', { name: 'Recover original operation' }).click();
+  await expect(remotePanel.getByText('019944ca-0000-7000-8000-000000000031')).toBeVisible();
+  await expect(form.getByRole('textbox', { name: 'Project name' })).toHaveValue('');
+  expect(lists).toBe(0);
+  expect(writes).toBe(3);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors.filter(error => !/(403|503)/.test(error))).toEqual([]);
 });
