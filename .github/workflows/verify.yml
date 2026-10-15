@@ -42,4 +42,5 @@ jobs:
         with:
           name: ui-regression-failure
           path: .ui-results/
+          include-hidden-files: true
           retention-days: 7
