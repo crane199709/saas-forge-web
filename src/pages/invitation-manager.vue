@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { ResponseError } from '@crane199709/saas-forge-api-client';
 import type { Invitation } from '@crane199709/saas-forge-api-client';
 import { consoleInvitations, consoleState } from '@/runtime/console';
+import { captureConsoleActionContext, sameConsoleActionContext } from '@/runtime/console-action-context';
 import { $t } from '@/locales';
 
 const api = consoleInvitations();
@@ -59,6 +60,8 @@ async function create() {
 
 async function change(item: Invitation, operation: 'resend' | 'revoke') {
   if (submitting.value) return;
+  const context = captureConsoleActionContext(consoleState.value, 'TENANT');
+  if (!context) return;
   if (operation === 'revoke') {
     try {
       await ElMessageBox.confirm($t('invitations.confirmRevoke'), $t('invitations.revoke'));
@@ -66,6 +69,7 @@ async function change(item: Invitation, operation: 'resend' | 'revoke') {
       return;
     }
   }
+  if (submitting.value || !sameConsoleActionContext(context, consoleState.value)) return;
   submitting.value = true;
   try {
     const options = { signal: AbortSignal.timeout(12000), redirect: 'error' as const };

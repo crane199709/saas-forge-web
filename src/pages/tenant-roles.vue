@@ -5,6 +5,7 @@ import type { PermissionEntry } from '@/service/forge/permissions';
 import { TenantRoleFailure } from '@/service/forge/tenant-roles';
 import type { TenantRole } from '@/service/forge/tenant-roles';
 import { consolePermissionCatalog, consoleState, consoleTenantRoles } from '@/runtime/console';
+import { captureConsoleActionContext, sameConsoleActionContext } from '@/runtime/console-action-context';
 import { $t } from '@/locales';
 
 const api = consoleTenantRoles();
@@ -82,6 +83,8 @@ async function save() {
 
 async function remove(role: TenantRole) {
   if (role.systemManaged || role.assignedMembers) return;
+  const context = captureConsoleActionContext(consoleState.value, 'TENANT');
+  if (!context) return;
   try {
     await ElMessageBox.confirm($t('tenantRoles.confirmDelete', { role: role.roleKey }), $t('tenantRoles.delete'), {
       type: 'warning',
@@ -91,6 +94,7 @@ async function remove(role: TenantRole) {
   } catch {
     return;
   }
+  if (!sameConsoleActionContext(context, consoleState.value)) return;
   const started = generation;
   try {
     await api.delete(role.id);

@@ -393,6 +393,36 @@ test('new invitee requests first password setup from the invitation page', async
   expect(state.errors).toEqual([]);
 });
 
+test('compensated invitation acceptance starts a fresh operation while an unknown result retries the original', async ({
+  context,
+  page
+}) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  const keys: string[] = [];
+  await page.route('https://api.ui.test/api/v2/auth/invitation-acceptances', async route => {
+    keys.push(route.request().headers()['idempotency-key']);
+    if (keys.length === 1) return route.fulfill({ status: 503, json: { code: 'AUTHORITY_UNAVAILABLE' } });
+    if (keys.length === 2)
+      return route.fulfill({ status: 409, json: { code: 'INVITATION_ACCEPTANCE_RETRY_REQUIRED' } });
+    return route.fulfill({ json: {} });
+  });
+  await page.goto(`${origin}/invitation#token=${'A'.repeat(43)}`);
+  const accept = page.getByRole('button', { name: 'Accept invitation' });
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await expect.poll(() => keys.length).toBe(1);
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await expect.poll(() => keys.length).toBe(2);
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await expect.poll(() => keys.length).toBe(3);
+  expect(keys[0]).toBe(keys[1]);
+  expect(keys[2]).not.toBe(keys[1]);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors.filter(error => !/(409|503)/.test(error))).toEqual([]);
+});
+
 for (const width of [1440, 1024]) {
   for (const dark of [false, true]) {
     test(`workspace ${width} ${dark ? 'dark' : 'light'}`, async ({ context, page }) => {
