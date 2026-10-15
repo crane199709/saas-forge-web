@@ -53,4 +53,16 @@ node scripts/verify-stage4-product.mjs \
 
 输出为仓库外权限 0700 的新目录及 0600 的 `stage4-product-observations.json`，`kind=stage4-product-observations`、`scope=selected-real-chrome-paths`。它保留失败/未执行状态，不等于完整 `stage4-browser` 报告；组织移动/多归属、角色委派与拒绝、邀请接受/等待授权、品牌冲突/回退、Project/Task 十操作允许与拒绝等仍须同轮直接验收。旧 `verify-project-remote.mjs` 可作为 Project/Task 基本 CRUD 与跨 Tenant 404 的补充，但不能代替同 Tenant 不同角色拒绝或撤权即时失败。
 
+### 本轮 Mailpit 一次性链接辅助器
+
+邀请、首次密码设置和密码恢复均须消费本轮 Mailpit **新增**邮件。`scripts/stage4-mailpit-link.mjs` 只从回环 Mailpit 读取邮件：先在触发业务操作前记录该收件人的消息 ID，再等待新邮件；仅接受 handoff 所指 Console HTTPS Origin 下的 `/invitation`、`/password-setup` 或 `/password-recovery` 链接。0600 配置包含 `handoff` 绝对路径、`mailbox`（例如本轮 `http://127.0.0.1:8025`）及本轮独占的 `.test` `recipient`。快照和链接文件必须放在仓库外、所有者独占的目录，且路径不存在。命令只打印消息 ID 和链接的 SHA-256，不打印 Token 或邮件正文。
+
+```sh
+node scripts/stage4-mailpit-link.mjs snapshot /absolute/private/mailbox-config.json /absolute/private/new-snapshot.json
+# 在真实 Chrome 中触发邀请、密码设置或恢复邮件，然后：
+node scripts/stage4-mailpit-link.mjs wait /absolute/private/mailbox-config.json /absolute/private/new-snapshot.json /invitation /absolute/private/new-link.txt
+```
+
+后续只让受限 Chrome driver 从 0600 链接文件导航；不得把原始链接写进日志、截图、验收报告或命令行参数。若同一快照后出现多封匹配邮件，辅助器拒绝选择，以免误用旧链接。取得链接仅证明邮件到达，不证明身份绑定、接受、等待授权或全局会话撤销成功。
+
 场景名称与覆盖边界见脚本的 `required` 常量及后端仓库 `docs/acceptance/issue-240-stage4-fresh.md`。当后续切片改变正式契约或场景时，同步修订要求并在真实报告生成器中执行，不能通过删掉必需项获得通过。完整原始脱敏报告、SHA-256 清单和最终结论在执行后落入版本控制的验收目录；本地 `.scratch/` 只放中间材料。
