@@ -22,6 +22,7 @@ import type { TenantRoleApi } from '@/service/forge/tenant-roles';
 import type { MembershipRoleApi } from '@/service/forge/membership-roles';
 import type { PlatformAdminApi } from '@/service/forge/platform-administrators';
 import type { BrandProfileApi } from '@/service/forge/brand-profile';
+import type { BrandPolicyApi } from '@/service/forge/brand-policy';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -51,6 +52,7 @@ let platformAdministrators: PlatformAdminApi | undefined;
 let organization: OrganizationApi | undefined;
 let brandAssets: BrandAssetsApi | undefined;
 let brandProfiles: BrandProfileApi | undefined;
+let brandPolicy: BrandPolicyApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -75,6 +77,7 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     organization = transport.organization;
     brandAssets = transport.brandAssets;
     brandProfiles = transport.brandProfiles;
+    brandPolicy = transport.brandPolicy;
     manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
@@ -179,6 +182,11 @@ export function consoleBrandAssets() {
 export function consoleBrandProfiles() {
   consoleRuntime();
   return brandProfiles!;
+}
+
+export function consoleBrandPolicy(): BrandPolicyApi {
+  consoleRuntime();
+  return brandPolicy!;
 }
 
 export function discoverBusinessRemotes(signal: AbortSignal) {

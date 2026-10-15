@@ -561,6 +561,20 @@ declare namespace App {
         asset: string;
         invalid: string;
         unavailable: string;
+        policyDisabled: string;
+      };
+      brandPolicy: {
+        title: string;
+        description: string;
+        assetId: string;
+        disable: string;
+        cancel: string;
+        confirm: string;
+        disabled: string;
+        invalid: string;
+        missing: string;
+        forbidden: string;
+        unavailable: string;
       };
       manifest: {
         title: string;

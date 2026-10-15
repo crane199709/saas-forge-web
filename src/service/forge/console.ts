@@ -25,6 +25,8 @@ import type { MembershipRoleApi } from './membership-roles';
 import type { PlatformAdminApi } from './platform-administrators';
 import { createBrandProfileApi } from './brand-profile';
 import type { BrandProfileApi } from './brand-profile';
+import { createBrandPolicyApi } from './brand-policy';
+import type { BrandPolicyApi } from './brand-policy';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
 export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
@@ -35,6 +37,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   organization: OrganizationApi;
   brandAssets: BrandAssetsApi;
   brandProfiles: BrandProfileApi;
+  brandPolicy: BrandPolicyApi;
   permissions: PermissionCatalogApi;
   invitations: InvitationsApi;
   members: MembersApi;
@@ -100,6 +103,7 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     organization: new OrganizationApi(jsonConfiguration),
     brandAssets: new BrandAssetsApi(businessConfiguration),
     brandProfiles: createBrandProfileApi(basePath, () => token ?? ''),
+    brandPolicy: createBrandPolicyApi(basePath, () => token ?? ''),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,

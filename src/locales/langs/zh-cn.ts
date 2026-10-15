@@ -290,7 +290,21 @@ const local: App.I18n.Schema = {
     stale: '品牌已由其他人更新。你的输入已保留；请重新读取后确认再保存。',
     asset: '所选素材已失效或不属于当前租户，请重新上传。',
     invalid: '请填写完整名称、两张有效 PNG 素材和可读的十六进制颜色。',
-    unavailable: '品牌配置暂时不可用，请稍后重试。'
+    unavailable: '品牌配置暂时不可用，请稍后重试。',
+    policyDisabled: '已保存品牌因素材失效或平台政策禁用而暂停生效。请上传合规替换素材并保存完整品牌配置。'
+  },
+  brandPolicy: {
+    title: '品牌素材政策',
+    description: '按平台素材 ID 永久禁用违规图片。此操作不修改租户品牌；租户需替换素材并保存。',
+    assetId: '素材 ID 或 /brands/ 引用',
+    disable: '永久禁用',
+    cancel: '取消',
+    confirm: '确定永久禁用图片 {id}？后续公开读取会被拒绝，此操作不可撤销。',
+    disabled: '租户 {tenantId} 的 {kind} 图片已禁用。租户可上传并保存替换素材。',
+    invalid: '请输入有效的平台生成素材 ID。',
+    missing: '素材不存在或无法执行政策禁用。',
+    forbidden: '需要当前有效的平台管理员会话。',
+    unavailable: '品牌政策操作暂时不可用，请稍后重试。'
   },
   remote: {
     businessEmpty: '暂无已启用的业务模块。',
