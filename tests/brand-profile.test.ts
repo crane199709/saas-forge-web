@@ -46,3 +46,18 @@ test('stale brand profile save is a distinct recoverable conflict', async () => 
     request.mock.restore();
   }
 });
+
+test('expired asset save reports a recoverable asset failure through the formal operation', async () => {
+  const request = mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
+    assert.deepEqual(JSON.parse(String(init.body)), change);
+    return Response.json({ code: 'BRAND_PROFILE_ASSET_UNAVAILABLE' }, { status: 409 });
+  });
+  try {
+    await assert.rejects(
+      createBrandProfileApi('https://api.example.test', () => 'user-access-token').save(2, change),
+      (error: unknown) => error instanceof BrandProfileFailure && error.code === 'asset'
+    );
+  } finally {
+    request.mock.restore();
+  }
+});

@@ -24,6 +24,7 @@ const failure = ref<'stale' | 'asset' | 'invalid' | 'unavailable'>();
 const saving = ref(false);
 const preview = ref<ConsoleBrand>();
 const previewBusy = ref(false);
+const savedAssetInvalid = ref(false);
 let generation = 0;
 let previewGeneration = 0;
 let controller = new AbortController();
@@ -42,6 +43,7 @@ function invalidate() {
   clearPreview();
   previewBusy.value = false;
   saving.value = false;
+  savedAssetInvalid.value = false;
 }
 
 function applyLoaded(value: BrandProfileRevision) {
@@ -69,6 +71,15 @@ async function load() {
     const value = await api.read(controller.signal);
     if (started !== generation) return;
     applyLoaded(value);
+    if (value.profile) {
+      const resolved = await resolveBrandProfile(value.profile, import.meta.env.VITE_API_ORIGIN);
+      if (started !== generation) {
+        releaseConsoleBrand(resolved);
+        return;
+      }
+      savedAssetInvalid.value = !resolved;
+      releaseConsoleBrand(resolved);
+    }
   } catch (error) {
     if (started !== generation) return;
     status.value = error instanceof BrandProfileFailure && error.code === 'forbidden' ? 'forbidden' : 'unavailable';
@@ -124,6 +135,7 @@ async function save() {
     if (!Number.isSafeInteger(saved.revision) || !saved.profile || !validBrand(saved.profile))
       throw new Error('Invalid authoritative profile');
     revision.value = saved.revision;
+    savedAssetInvalid.value = false;
     form.value = {
       displayName: saved.profile.displayName,
       logoUrl: saved.profile.logoUrl!,
@@ -177,6 +189,14 @@ onBeforeUnmount(invalidate);
         :title="$t('brandProfile.unavailable')"
       />
       <template v-else>
+        <ElAlert
+          v-if="savedAssetInvalid"
+          class="mb-12px"
+          type="warning"
+          role="status"
+          :closable="false"
+          :title="$t('brandProfile.policyDisabled')"
+        />
         <ElAlert
           v-if="failure"
           class="mb-12px"

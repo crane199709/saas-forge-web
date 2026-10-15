@@ -329,9 +329,25 @@ const local: App.I18n.Schema = {
     save: 'Save brand',
     forbidden: 'This membership cannot manage the brand.',
     stale: 'Someone else updated this brand. Your input is preserved; reload and confirm before saving.',
-    asset: 'A selected asset is unavailable or belongs to another tenant. Upload a new asset.',
+    asset: 'A selected asset has expired, been disabled, or belongs to another tenant. Upload a new asset.',
     invalid: 'Enter a complete name, two valid PNG assets, and readable hex colors.',
-    unavailable: 'Brand profile is temporarily unavailable. Try again.'
+    unavailable: 'Brand profile is temporarily unavailable. Try again.',
+    policyDisabled:
+      'The saved brand is inactive because an image is unavailable or disabled by platform policy. Upload a compliant replacement and save the full profile to restore it.'
+  },
+  brandPolicy: {
+    title: 'Brand image policy',
+    description:
+      'Permanently disable a violating image by its platform asset ID. This does not edit the tenant brand; the tenant must replace and save it.',
+    assetId: 'Asset ID or /brands/ reference',
+    disable: 'Disable permanently',
+    cancel: 'Cancel',
+    confirm: 'Permanently disable image {id}? Future public reads will fail and this cannot be undone.',
+    disabled: '{kind} image disabled for tenant {tenantId}. The tenant can upload and save a replacement.',
+    invalid: 'Enter a valid platform generated asset ID.',
+    missing: 'This asset does not exist or is unavailable for policy action.',
+    forbidden: 'A current platform administrator session is required.',
+    unavailable: 'Brand policy is temporarily unavailable. Try again.'
   },
   remote: {
     businessEmpty: 'No business modules are enabled.',

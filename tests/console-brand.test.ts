@@ -66,6 +66,23 @@ test('invalid brand asset MIME types fall back to the platform brand', async () 
   }
 });
 
+test('policy disabled PNG returns 404 and all five tenant brand fields fall back together', async () => {
+  const profile = {
+    displayName: 'Policy brand',
+    logoUrl: '/brands/019535d9-0001-7000-8000-000000000011',
+    faviconUrl: '/brands/019535d9-0001-7000-8000-000000000012',
+    primaryColor: '#123456',
+    accentColor: '#234567'
+  };
+  const fetchMock = mock.method(globalThis, 'fetch', async () => new Response('', { status: 404 }));
+  try {
+    assert.equal(await resolveBrandProfile(profile, 'https://api.saas.forge.test'), undefined);
+    assert.equal(fetchMock.mock.callCount(), 2);
+  } finally {
+    fetchMock.mock.restore();
+  }
+});
+
 test('a failed favicon releases the loaded logo and never exposes a partial tenant brand', async () => {
   const originalImage = Object.getOwnPropertyDescriptor(globalThis, 'Image');
   Object.defineProperty(globalThis, 'Image', {
