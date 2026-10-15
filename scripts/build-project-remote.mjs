@@ -42,7 +42,19 @@ const require = name => { if (name === 'vue') return dependencies.vue; if (name 
 ${outputs[0].code}
 return module.exports.default || module.exports;
 }\n`;
-const version = '1.0.0';
+const version = '1.1.0';
+const permissions = [
+  'example:project:create',
+  'example:project:list',
+  'example:project:read',
+  'example:project:update',
+  'example:project:delete',
+  'example:task:create',
+  'example:task:list',
+  'example:task:read',
+  'example:task:update',
+  'example:task:delete'
+];
 const directory = `${root}dist/business-remotes/project/${version}`;
 await mkdir(directory, { recursive: true });
 await writeFile(`${directory}/remote.js`, script);
@@ -54,7 +66,8 @@ await writeFile(
       version,
       source: `https://remote.${origin.hostname.slice(8)}/project/${version}/remote.js`,
       uiVersion: `vue@${vueVersion};element-plus@${elementPlusVersion}`,
-      entrySha256: createHash('sha256').update(script).digest('hex')
+      entrySha256: createHash('sha256').update(script).digest('hex'),
+      permissions
     },
     null,
     2

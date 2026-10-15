@@ -38,6 +38,13 @@ const local: App.I18n.Schema = {
     inProgress: '进行中',
     done: '已完成',
     edit: '编辑',
+    read: '查看',
+    targetProject: '按 ID 操作项目',
+    targetTask: '按 ID 操作任务',
+    projectId: '项目 ID',
+    taskId: '任务 ID',
+    expectedVersion: '当前版本',
+    openTarget: '打开项目',
     status: '状态',
     create: '创建',
     save: '保存',
@@ -50,9 +57,11 @@ const local: App.I18n.Schema = {
     failed: '操作未能完成，请重新读取记录或恢复会话后重试。',
     recover: '恢复原操作',
     unknown: '原操作结果待确认，请先恢复，避免重复提交。',
-    permissionAllowed: '当前权限允许查看项目列表。',
+    permissionAllowed: '已读取获授权的项目列表。',
     permissionDenied: '当前成员没有执行此操作的权限。',
-    permissionUnavailable: '权限服务暂时不可用，请稍后重试。'
+    permissionUnavailable: '权限服务暂时不可用，请稍后重试。',
+    noOperations: '当前没有可用的 Project/Task 操作，请联系管理员授权。',
+    refreshPermissions: '刷新操作权限'
   },
   permissionCatalog: {
     title: '权限目录',

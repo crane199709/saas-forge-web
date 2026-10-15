@@ -40,6 +40,13 @@ const local: App.I18n.Schema = {
     inProgress: 'In progress',
     done: 'Done',
     edit: 'Edit',
+    read: 'Read',
+    targetProject: 'Project by ID',
+    targetTask: 'Task by ID',
+    projectId: 'Project ID',
+    taskId: 'Task ID',
+    expectedVersion: 'Current version',
+    openTarget: 'Open project',
     status: 'Status',
     create: 'Create',
     save: 'Save',
@@ -52,9 +59,11 @@ const local: App.I18n.Schema = {
     failed: 'The operation could not finish. Reload the record or recover your session before retrying.',
     recover: 'Recover original operation',
     unknown: 'The original result needs confirmation. Recover it before submitting another write.',
-    permissionAllowed: 'Your current permission allows the Project list.',
+    permissionAllowed: 'The authorized Project list is loaded.',
     permissionDenied: 'This membership lacks permission for the operation.',
-    permissionUnavailable: 'The permission service is temporarily unavailable. Try again.'
+    permissionUnavailable: 'The permission service is temporarily unavailable. Try again.',
+    noOperations: 'No Project or Task operation is available. Ask an administrator to grant access.',
+    refreshPermissions: 'Refresh operation permissions'
   },
   permissionCatalog: {
     title: 'Permission catalog',

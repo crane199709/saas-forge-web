@@ -160,11 +160,11 @@ try {
   await button(row(a, av.name), '删除').click();
   await row(a, av.name).waitFor({ state: 'hidden' });
   report.checks.push({ name: 'project-task-crud', status: 'passed', projectId: av.id, taskId: av.taskId });
-  await a.route('**/project/1.0.0/remote.js', r => r.abort('failed'));
+  await a.route('**/project/1.1.0/remote.js', r => r.abort('failed'));
   await a.reload();
   await a.getByRole('alert').waitFor();
   assert.equal(await a.getByTestId('project-remote').count(), 0);
-  await a.unroute('**/project/1.0.0/remote.js');
+  await a.unroute('**/project/1.1.0/remote.js');
   await button(a, '重新读取').click();
   await ready(a);
   report.checks.push({ name: 'remote-download-failure-recovery', status: 'passed', fault: 'browser-network-abort' });

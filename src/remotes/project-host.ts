@@ -11,6 +11,13 @@ export type ProjectTextKey =
   | 'inProgress'
   | 'done'
   | 'edit'
+  | 'read'
+  | 'targetProject'
+  | 'targetTask'
+  | 'projectId'
+  | 'taskId'
+  | 'expectedVersion'
+  | 'openTarget'
   | 'create'
   | 'save'
   | 'delete'
@@ -24,20 +31,25 @@ export type ProjectTextKey =
   | 'unknown'
   | 'permissionAllowed'
   | 'permissionDenied'
-  | 'permissionUnavailable';
+  | 'permissionUnavailable'
+  | 'noOperations'
+  | 'refreshPermissions';
 
 /** Shell 只交付业务能力；幂等键、版本条件、会话与底层 Client 保留在 Shell 内。 */
 export interface ProjectHost {
   listProjects(cursor?: string): Promise<Project.ProjectPage>;
   getProject(id: string): Promise<Project.Project>;
   createProject(body: Project.CreateProject): Promise<Project.Project>;
-  updateProject(id: string, body: Project.CreateProject): Promise<Project.Project>;
-  deleteProject(id: string): Promise<void>;
+  updateProject(id: string, body: Project.CreateProject, expectedVersion?: number): Promise<Project.Project>;
+  deleteProject(id: string, expectedVersion?: number): Promise<void>;
   listTasks(projectId: string, cursor?: string): Promise<Project.TaskPage>;
   getTask(projectId: string, id: string): Promise<Project.Task>;
   createTask(projectId: string, body: Project.CreateTask): Promise<Project.Task>;
-  updateTask(projectId: string, id: string, body: Project.UpdateTask): Promise<Project.Task>;
-  deleteTask(projectId: string, id: string): Promise<void>;
-  retryPending(): Promise<void>;
+  updateTask(
+    target: { projectId: string; id: string; expectedVersion?: number },
+    body: Project.UpdateTask
+  ): Promise<Project.Task>;
+  deleteTask(projectId: string, id: string, expectedVersion?: number): Promise<void>;
+  retryPending(): Promise<unknown>;
   pending(): boolean;
 }

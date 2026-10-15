@@ -317,6 +317,13 @@ declare namespace App {
         inProgress: string;
         done: string;
         edit: string;
+        read: string;
+        targetProject: string;
+        targetTask: string;
+        projectId: string;
+        taskId: string;
+        expectedVersion: string;
+        openTarget: string;
         status: string;
         create: string;
         save: string;
@@ -332,6 +339,8 @@ declare namespace App {
         permissionAllowed: string;
         permissionDenied: string;
         permissionUnavailable: string;
+        noOperations: string;
+        refreshPermissions: string;
       };
       permissionCatalog: {
         title: string;
