@@ -23,18 +23,39 @@ function asset(path, maxBytes) {
   assert.equal(readFileSync(path).subarray(0, 8).toString('hex'), '89504e470d0a1a0a', 'PNG_REQUIRED');
 }
 
-function apiResponse(page, origin, { method, path, status, action }) {
+async function apiResponse(page, origin, { method, path, status, action }) {
   const startedAt = new Date().toISOString();
-  return Promise.all([
-    page.waitForResponse(response => {
-      const url = new URL(response.url());
-      return url.origin === origin && url.pathname === path && response.request().method() === method;
+  const captureMutation = path.startsWith('/api/v1/') && method !== 'GET';
+  const previousCount = captureMutation ? await page.evaluate(() => window.stage4MutationResponses?.length ?? 0) : 0;
+  const [response] = await Promise.all([
+    page.waitForResponse(candidate => {
+      const url = new URL(candidate.url());
+      return url.origin === origin && url.pathname === path && candidate.request().method() === method;
     }),
     action()
-  ]).then(([response]) => {
-    assert.equal(response.status(), status, 'API_STATUS_MISMATCH');
-    return { response, startedAt, finishedAt: new Date().toISOString() };
-  });
+  ]);
+  assert.equal(response.status(), status, 'API_STATUS_MISMATCH');
+  if (captureMutation) {
+    const expected = { path, method, status, previousCount };
+    await page.waitForFunction(
+      ({ path: expectedPath, method: expectedMethod, status: expectedStatus, previousCount: count }) =>
+        window.stage4MutationResponses
+          ?.slice(count)
+          .some(item => item.path === expectedPath && item.method === expectedMethod && item.status === expectedStatus),
+      expected
+    );
+    const body = await page.evaluate(
+      ({ path: expectedPath, method: expectedMethod, status: expectedStatus, previousCount: count }) =>
+        window.stage4MutationResponses
+          .slice(count)
+          .findLast(
+            item => item.path === expectedPath && item.method === expectedMethod && item.status === expectedStatus
+          ).body,
+      expected
+    );
+    return { response: { json: async () => body }, startedAt, finishedAt: new Date().toISOString() };
+  }
+  return { response, startedAt, finishedAt: new Date().toISOString() };
 }
 
 async function run(configPath, outputPath) {
@@ -69,7 +90,38 @@ async function run(configPath, outputPath) {
     browser = await chromium.launch({ channel: 'chrome', headless: true, ...chromeRouting(handoff) });
     report.chrome = browser.version();
     const context = await browser.newContext({ locale: 'en', viewport: { width: 1440, height: 1000 } });
-    await context.addInitScript(() => localStorage.setItem('UI_lang', JSON.stringify('en')));
+    await context.addInitScript(() => {
+      localStorage.setItem('SOY_lang', JSON.stringify('en'));
+      window.stage4MutationResponses = [];
+      const original = window.fetch.bind(window);
+      window.fetch = async (...args) => {
+        const response = await original(...args);
+        const url = String(args[0] instanceof Request ? args[0].url : args[0]);
+        const method = String(args[1]?.method ?? (args[0] instanceof Request ? args[0].method : 'GET')).toUpperCase();
+        const path = new URL(url, location.origin).pathname;
+        if (
+          method !== 'GET' &&
+          [
+            '/api/v1/organization/units',
+            '/api/v1/tenant-roles',
+            '/api/v1/invitations',
+            '/api/v1/brand-assets/logo',
+            '/api/v1/brand-assets/favicon',
+            '/api/v1/brand-profile'
+          ].includes(path)
+        ) {
+          try {
+            window.stage4MutationResponses.push({
+              path,
+              method,
+              status: response.status,
+              body: await response.clone().json()
+            });
+          } catch {}
+        }
+        return response;
+      };
+    });
     const page = await context.newPage();
     page.setDefaultTimeout(15000);
     let pageErrors = 0;
