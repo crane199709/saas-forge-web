@@ -320,7 +320,7 @@ const local: App.I18n.Schema = {
     save: 'Save brand',
     forbidden: 'This membership cannot manage the brand.',
     stale: 'Someone else updated this brand. Your input is preserved; reload and confirm before saving.',
-    asset: 'A selected asset is unavailable or belongs to another tenant. Upload a new asset.',
+    asset: 'A selected asset has expired, been disabled, or belongs to another tenant. Upload a new asset.',
     invalid: 'Enter a complete name, two valid PNG assets, and readable hex colors.',
     unavailable: 'Brand profile is temporarily unavailable. Try again.',
     policyDisabled:
