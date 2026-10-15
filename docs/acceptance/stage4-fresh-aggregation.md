@@ -39,4 +39,18 @@ node scripts/stage4-aggregate.mjs /absolute/round/manifest.json /absolute/round/
 
 这是一道证据关联门禁。真实浏览器操作、跨进程故障、受限账号/RLS、Outbox → Audit 持久行验证和敏感信息扫描必须由各自报告的执行者完成。仅生成符合形状的 JSON、阶段 2/3 的旧报告、普通 handoff 冒烟或单仓测试，均不能作为 #240 的直接证据。审计报告需要逐个成功变更关联源事件、Outbox 和已持久 Audit Record；日志、Kafka 投递或消费计数不算持久证明。
 
+### 真实 Chrome 局部产品驱动
+
+`scripts/verify-stage4-product.mjs` 可在本轮 Fresh handoff `ready`、SMTP 已确认指向本轮 Mailpit 后运行。它使用系统 Google Chrome、四域受信 HTTPS、正式 Console UI 和正式 Client；只设置页面语言，不注入 Cookie、Origin、Fetch Metadata 或 Token，也不模拟服务端响应。脚本直接执行：创建两棵组织根节点、创建带 Project Permission 的 Tenant Role、创建一条 `.test` Invitation，以及上传 Logo/Favicon、隔离预览并保存五字段 Brand Profile。每项均核对浏览器经 Gateway 收到的正式 API 状态、资源 ID 与页面结果，并在仅本轮可读的报告中记录 Audit 关联所需的操作时间窗、action、actor 与 resource。Mailpit 的实际收信仍需另行取证。
+
+受限 0600 配置文件包含绝对路径 `handoff`、`tenantAdmin: { email, passwordFile }`、`invitationEmail`（必须为独立的 `.test` 地址）、`rolePermission`（例如 `example:project:list`）、`logoPng`、`faviconPng`。密码只放在另一份 0600 文件；两个 PNG 必须为本轮待上传的有效静态图片，配置和输出均不得提交。
+
+```sh
+node scripts/verify-stage4-product.mjs \
+  /absolute/private/stage4-product-config.json \
+  /absolute/private/new-stage4-product-output
+```
+
+输出为仓库外权限 0700 的新目录及 0600 的 `stage4-product-observations.json`，`kind=stage4-product-observations`、`scope=selected-real-chrome-paths`。它保留失败/未执行状态，不等于完整 `stage4-browser` 报告；组织移动/多归属、角色委派与拒绝、邀请接受/等待授权、品牌冲突/回退、Project/Task 十操作允许与拒绝等仍须同轮直接验收。旧 `verify-project-remote.mjs` 可作为 Project/Task 基本 CRUD 与跨 Tenant 404 的补充，但不能代替同 Tenant 不同角色拒绝或撤权即时失败。
+
 场景名称与覆盖边界见脚本的 `required` 常量及后端仓库 `docs/acceptance/issue-240-stage4-fresh.md`。当后续切片改变正式契约或场景时，同步修订要求并在真实报告生成器中执行，不能通过删掉必需项获得通过。完整原始脱敏报告、SHA-256 清单和最终结论在执行后落入版本控制的验收目录；本地 `.scratch/` 只放中间材料。
