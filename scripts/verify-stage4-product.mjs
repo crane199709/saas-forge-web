@@ -135,6 +135,7 @@ async function run(configPath, outputPath) {
         });
         const created = await window.response.json();
         assert.equal(created.name, name);
+        assert.equal(created.parentId ?? null, null);
         record(
           {
             label: `org-root-${index + 1}`,
@@ -198,6 +199,7 @@ async function run(configPath, outputPath) {
     await runCase('brand-five-fields-preview-and-save', async () => {
       await page.goto(`${handoff.consoleOrigin}/tenant-settings`);
       await page.getByRole('heading', { name: 'Tenant brand' }).waitFor();
+      const uploaded = {};
       for (const [kind, file, max] of [
         ['logo', config.logoPng, 2 * 1024 * 1024],
         ['favicon', config.faviconPng, 256 * 1024]
@@ -210,6 +212,8 @@ async function run(configPath, outputPath) {
           action: () => page.locator(`#brand-${kind}`).setInputFiles(file)
         });
         const created = await window.response.json();
+        assert.match(created.url, /^\/brands\/[0-9a-f-]{36}$/);
+        uploaded[kind] = created.url;
         record(
           {
             label: `brand-${kind}-uploaded`,
@@ -239,7 +243,8 @@ async function run(configPath, outputPath) {
       assert.equal(saved.profile?.displayName, displayName);
       assert.equal(saved.profile.primaryColor, '#123456');
       assert.equal(saved.profile.accentColor, '#234567');
-      assert.ok(saved.profile.logoUrl && saved.profile.faviconUrl);
+      assert.equal(saved.profile.logoUrl, uploaded.logo);
+      assert.equal(saved.profile.faviconUrl, uploaded.favicon);
       record(
         { label: 'brand-profile-saved', source: 'tenant-access', action: 'BRAND_PROFILE_SAVED', resourceId: tenantId },
         window
