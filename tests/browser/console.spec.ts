@@ -80,6 +80,7 @@ async function prepare(
         body = { ...session, accessToken: 'ui-fixture-token', tokenType: 'Bearer', expiresIn: 900 };
       else if (options.tenant && path === '/api/v1/permissions')
         body = { items: [{ code: 'example:project:list', enabled: true }] };
+      else if (options.tenant && path === '/api/v1/permissions/effective') body = { codes: ['example:project:list'] };
       else if (options.tenant && path === '/api/v1/organization/units') body = { items: [] };
       else if (options.tenant && path === '/api/v1/tenant-roles')
         body = {
@@ -173,6 +174,8 @@ async function prepare(
 test('tenant role form is keyboard reachable and shows a newly created role', async ({ context, page }, testInfo) => {
   const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
   let created = false;
+  await page.route('**/api/v1/invitations', route => route.fulfill({ json: { items: [] } }));
+  await page.route('**/api/v1/members', route => route.fulfill({ json: { items: [] } }));
   await page.route('**/api/v1/tenant-roles', async route => {
     if (route.request().method() === 'GET') {
       const items = [
@@ -795,7 +798,7 @@ test('collapsed sidebar keeps a visible icon for each menu entry', async ({ cont
   await page.goto(`${origin}/home`);
   await page.getByRole('button', { name: '折叠菜单', exact: true }).click();
   const entries = page.getByRole('menubar').getByRole('menuitem');
-  await expect(entries).toHaveCount(5);
+  await expect(entries).toHaveCount(6);
   await Promise.all(
     (await entries.all()).map(async item => {
       const icon = item.locator('.el-icon > *').first();
