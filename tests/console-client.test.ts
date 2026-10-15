@@ -132,6 +132,40 @@ test('member disable uses the formal operation and a stable idempotency key', as
   }
 });
 
+test('member enable uses the formal operation and keeps the new quota key stable', async () => {
+  const key = '019944ca-0000-7000-8000-000000000033';
+  const membershipId = '019944ca-0000-7000-8000-000000000044';
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    assert.equal(url, `https://api.example.test/api/v1/members/${membershipId}/enables`);
+    assert.equal(init.method, 'POST');
+    assert.equal(init.credentials, 'omit');
+    assert.equal(init.redirect, 'error');
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('Idempotency-Key'), key);
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site']) assert.equal(headers.get(name), null);
+    return Response.json(
+      {
+        operationId: key,
+        operationStatus: 'FENCE_PENDING',
+        membershipStatus: 'ENABLED',
+        pending: true
+      },
+      { status: 202 }
+    );
+  });
+  try {
+    const result = await createConsoleTransport('https://api.example.test').members.enableMembership(
+      { membershipId, idempotencyKey: key },
+      { redirect: 'error' }
+    );
+    assert.equal(result.pending, true);
+    assert.equal(result.operationStatus, 'FENCE_PENDING');
+  } finally {
+    request.mock.restore();
+  }
+});
+
 test('a missing selection ETag is an unknown result and cannot be treated as the previous revision', async () => {
   const request = mock.method(globalThis, 'fetch', async () => new Response(null, { status: 204 }));
   try {
