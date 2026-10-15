@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { PlatformAdminFailure } from '@/service/forge/platform-administrators';
 import type { PlatformAdministrator } from '@/service/forge/platform-administrators';
 import { consolePlatformAdministrators, consoleState } from '@/runtime/console';
+import { captureConsoleActionContext, sameConsoleActionContext } from '@/runtime/console-action-context';
 import { operationKey } from '@/runtime/browser-coordination';
 import { $t } from '@/locales';
 
@@ -129,6 +130,8 @@ async function grant() {
 
 async function revoke(row?: PlatformAdministrator) {
   if (revoking.value || !owner()) return;
+  const context = captureConsoleActionContext(consoleState.value, 'PLATFORM');
+  if (!context) return;
   if (!revokePending.value && row) {
     try {
       await ElMessageBox.confirm(
@@ -144,6 +147,7 @@ async function revoke(row?: PlatformAdministrator) {
       return;
     }
   }
+  if (!sameConsoleActionContext(context, consoleState.value)) return;
   const attempt =
     revokePending.value ??
     (row

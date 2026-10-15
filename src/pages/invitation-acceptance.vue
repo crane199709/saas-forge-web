@@ -146,6 +146,8 @@ async function accept() {
         problem && typeof problem === 'object' && 'code' in problem && typeof problem.code === 'string'
           ? problem.code
           : 'UNAVAILABLE';
+      // 已完成 Quota 补偿的消费 ID 不得复用；未完成或结果未知的尝试仍复用原键。
+      if (errorCode.value === 'INVITATION_ACCEPTANCE_RETRY_REQUIRED') key = operationKey();
     } else {
       errorCode.value = 'UNAVAILABLE';
     }
