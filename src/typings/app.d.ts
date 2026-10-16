@@ -966,6 +966,8 @@ declare namespace App {
         logout: string;
         blocked: string;
         logoutPending: string;
+        authServiceUnavailable: string;
+        logoutServiceUnavailable: string;
         noContext: string;
         initial: string;
         changePassword: string;

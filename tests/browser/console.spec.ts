@@ -328,6 +328,58 @@ async function stable(page: Page) {
 }
 
 for (const locale of ['zh-CN', 'en']) {
+  test(`authentication outage and pending logout recover ${locale}`, async ({ context, page }) => {
+    const state = await prepare(context, { locale });
+    let unavailable = true;
+    const logoutRequests: string[] = [];
+    await context.route('https://api.ui.test/api/v2/auth/**', async route => {
+      if (unavailable) {
+        await route.fulfill({ status: 503, json: { code: 'UPSTREAM_UNAVAILABLE' } });
+      } else if (route.request().url().endsWith('/logout')) {
+        logoutRequests.push(route.request().headers()['idempotency-key']);
+        await route.fulfill({ status: 204 });
+      } else await route.fallback();
+    });
+    await page.goto(`${origin}/login`);
+    const text =
+      locale === 'zh-CN'
+        ? {
+            outage: '认证服务暂时不可用，请稍后重试。',
+            pending: '认证服务暂时不可用，退出尚未完成。服务恢复后请重试以完成会话撤销。',
+            retry: '重试',
+            logout: '退出当前 Console 的全部标签页',
+            login: '登录'
+          }
+        : {
+            outage: 'The authentication service is temporarily unavailable. Please retry later.',
+            pending:
+              'The authentication service is temporarily unavailable and sign-out is pending. Retry when the service recovers to finish revoking this session.',
+            retry: 'Retry',
+            logout: 'Sign out everywhere in this Console',
+            login: 'Sign in'
+          };
+    await expect(page.getByText(text.outage, { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: text.logout, exact: true }).click();
+    await expect(page.getByText(text.pending, { exact: true })).toBeVisible();
+    const storageKey = 'sf:console:https://api.ui.test:logout';
+    const intent = await page.evaluate(key => localStorage.getItem(key), storageKey);
+    expect(intent).not.toBeNull();
+    await page.reload();
+    await expect(page.getByText(text.pending, { exact: true })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: locale === 'zh-CN' ? '邮箱' : 'Email', exact: true })).toHaveCount(
+      0
+    );
+    unavailable = false;
+    await page.getByRole('button', { name: text.retry, exact: true }).click();
+    await expect(page.getByRole('button', { name: text.login, exact: true })).toBeVisible();
+    expect(logoutRequests).toEqual([JSON.parse(intent!).key]);
+    expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
+    expect(state.unexpected).toEqual([]);
+    expect(state.errors.filter(error => !error.includes('503'))).toEqual([]);
+  });
+}
+
+for (const locale of ['zh-CN', 'en']) {
   for (const failed of [false, true]) {
     test(`login ${locale} ${failed ? 'recovery' : 'ready'}`, async ({ context, page }) => {
       const state = await prepare(context, { locale, failed });

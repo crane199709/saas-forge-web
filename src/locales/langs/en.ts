@@ -764,6 +764,9 @@ const local: App.I18n.Schema = {
     logout: 'Sign out everywhere in this Console',
     blocked: 'The session could not be confirmed. Protected content is hidden.',
     logoutPending: 'Sign-out is pending. Retry to finish revoking this session.',
+    authServiceUnavailable: 'The authentication service is temporarily unavailable. Please retry later.',
+    logoutServiceUnavailable:
+      'The authentication service is temporarily unavailable and sign-out is pending. Retry when the service recovers to finish revoking this session.',
     noContext: 'This account has no available workspace. Contact your administrator or sign in with another account.',
     initial: 'This account must change its initial password before entering a workspace.',
     selection: 'Choose a workspace to continue.',

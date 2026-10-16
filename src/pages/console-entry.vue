@@ -44,6 +44,16 @@ const message = computed(() => {
   if (state.snapshot?.activeContext?.type === 'TENANT') return $t('console.tenant');
   return '';
 });
+const alertMessage = computed(() => {
+  const state = consoleState.value;
+  if (
+    ['UPSTREAM_UNAVAILABLE', 'UPSTREAM_TIMEOUT', 'UPSTREAM_INVALID_RESPONSE', 'SERVICE_UNAVAILABLE'].includes(
+      state.problem ?? ''
+    )
+  )
+    return $t(state.status === 'logoutPending' ? 'console.logoutServiceUnavailable' : 'console.authServiceUnavailable');
+  return message.value;
+});
 async function submit() {
   if (busy.value) return;
   invalid.value = !email.value.includes('@') || !password.value;
@@ -57,7 +67,7 @@ async function submit() {
 <template>
   <LoginShell>
     <div aria-live="polite" :aria-busy="busy">
-      <ElAlert v-if="message" :title="message" :closable="false" type="warning" class="mb-20px" />
+      <ElAlert v-if="alertMessage" :title="alertMessage" :closable="false" type="warning" class="mb-20px" />
       <p v-if="busy" role="status">{{ $t('console.loading') }}</p>
       <form v-if="consoleState.status === 'anonymous'" @submit.prevent="submit">
         <ElFormItem :label="$t('console.email')">

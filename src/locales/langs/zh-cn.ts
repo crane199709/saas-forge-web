@@ -729,6 +729,8 @@ const local: App.I18n.Schema = {
     logout: '退出当前 Console 的全部标签页',
     blocked: '无法确认当前会话，已隐藏受保护内容。',
     logoutPending: '退出尚未完成，请重试以完成会话撤销。',
+    authServiceUnavailable: '认证服务暂时不可用，请稍后重试。',
+    logoutServiceUnavailable: '认证服务暂时不可用，退出尚未完成。服务恢复后请重试以完成会话撤销。',
     noContext: '当前账号没有可用的工作上下文。请联系管理员，或退出后使用其他账号登录。',
     initial: '当前账号需要先修改初始密码，才能进入工作台。',
     selection: '请选择要进入的工作区。',
