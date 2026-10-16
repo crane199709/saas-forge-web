@@ -33,6 +33,29 @@ test('formal login operation owns CSRF and revision but leaves browser credentia
   }
 });
 
+test('invitation first setup uses the formal anonymous operation without browser-managed headers', async () => {
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    assert.equal(url, 'https://api.example.test/api/v1/invitation-password-setups');
+    assert.equal(init.credentials, 'omit');
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('Idempotency-Key'), '019944ca-0000-7000-8000-000000000003');
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site', 'Authorization']) assert.equal(headers.get(name), null);
+    assert.deepEqual(JSON.parse(String(init.body)), { token: 'A'.repeat(43) });
+    return Response.json({ status: 'MAIL_SERVICE_ACCEPTED' });
+  });
+  try {
+    const result = await createConsoleTransport('https://api.example.test').invitations.requestInvitationPasswordSetup({
+      idempotencyKey: '019944ca-0000-7000-8000-000000000003',
+      xSFCSRF: '1',
+      invitationPasswordSetupRequest: { token: 'A'.repeat(43) }
+    });
+    assert.equal(result.status, 'MAIL_SERVICE_ACCEPTED');
+  } finally {
+    request.mock.restore();
+  }
+});
+
 test('refresh retains the operation key and exposes only a typed Problem code on rejection', async () => {
   const request = mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
     const headers = new Headers(init.headers);
@@ -69,6 +92,75 @@ test('formal context selection resolves its authoritative revision without expos
       ),
       '9007199254740993'
     );
+  } finally {
+    request.mock.restore();
+  }
+});
+
+test('member disable uses the formal operation and a stable idempotency key', async () => {
+  const key = '019944ca-0000-7000-8000-000000000003';
+  const membershipId = '019944ca-0000-7000-8000-000000000004';
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    assert.equal(url, `https://api.example.test/api/v1/members/${membershipId}/disables`);
+    assert.equal(init.method, 'POST');
+    assert.equal(init.credentials, 'omit');
+    assert.equal(init.redirect, 'error');
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('Idempotency-Key'), key);
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site']) assert.equal(headers.get(name), null);
+    return Response.json(
+      {
+        operationId: key,
+        operationStatus: 'REVOKING',
+        membershipStatus: 'ENABLED',
+        pending: true,
+        recoveryRequired: false
+      },
+      { status: 202 }
+    );
+  });
+  try {
+    const result = await createConsoleTransport('https://api.example.test').members.disableMembership(
+      { membershipId, idempotencyKey: key },
+      { redirect: 'error' }
+    );
+    assert.equal(result.pending, true);
+    assert.equal(result.operationStatus, 'REVOKING');
+  } finally {
+    request.mock.restore();
+  }
+});
+
+test('member enable uses the formal operation and keeps the new quota key stable', async () => {
+  const key = '019944ca-0000-7000-8000-000000000033';
+  const membershipId = '019944ca-0000-7000-8000-000000000044';
+  const request = mock.method(globalThis, 'fetch', async (url: string, init: RequestInit) => {
+    assert.equal(url, `https://api.example.test/api/v1/members/${membershipId}/enables`);
+    assert.equal(init.method, 'POST');
+    assert.equal(init.credentials, 'omit');
+    assert.equal(init.redirect, 'error');
+    const headers = new Headers(init.headers);
+    assert.equal(headers.get('Idempotency-Key'), key);
+    assert.equal(headers.get('X-SF-CSRF'), '1');
+    for (const name of ['Cookie', 'Origin', 'Sec-Fetch-Site']) assert.equal(headers.get(name), null);
+    return Response.json(
+      {
+        operationId: key,
+        operationStatus: 'FENCE_PENDING',
+        membershipStatus: 'ENABLED',
+        pending: true
+      },
+      { status: 202 }
+    );
+  });
+  try {
+    const result = await createConsoleTransport('https://api.example.test').members.enableMembership(
+      { membershipId, idempotencyKey: key },
+      { redirect: 'error' }
+    );
+    assert.equal(result.pending, true);
+    assert.equal(result.operationStatus, 'FENCE_PENDING');
   } finally {
     request.mock.restore();
   }

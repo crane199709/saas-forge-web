@@ -1,7 +1,12 @@
 import {
+  BrandAssetsApi,
   Configuration,
   Console,
+  InvitationsApi,
+  MembersApi,
   OAuthClientsApi,
+  OrganizationApi,
+  PermissionsApi,
   PlatformEntitlementBootstrapApi,
   PlatformTenantsApi,
   Project,
@@ -10,6 +15,18 @@ import {
 import { SessionFailure } from '../../runtime/console-session';
 import type { ConsoleTransport } from '../../runtime/console-session';
 import { requireHttpsOrigin } from './config';
+import { createPermissionApi } from './permissions';
+import { createTenantRoleApi } from './tenant-roles';
+import { createMembershipRoleApi } from './membership-roles';
+import { createPlatformAdminApi } from './platform-administrators';
+import type { PermissionCatalogApi } from './permissions';
+import type { TenantRoleApi } from './tenant-roles';
+import type { MembershipRoleApi } from './membership-roles';
+import type { PlatformAdminApi } from './platform-administrators';
+import { createBrandProfileApi } from './brand-profile';
+import type { BrandProfileApi } from './brand-profile';
+import { createBrandPolicyApi } from './brand-policy';
+import type { BrandPolicyApi } from './brand-policy';
 
 /** The sole HTTP boundary owns CSRF/revision headers; browser-managed credentials are never page arguments. */
 export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
@@ -17,6 +34,18 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
   entitlements: PlatformEntitlementBootstrapApi;
   oauth: OAuthClientsApi;
   projects: Project.DefaultApi;
+  organization: OrganizationApi;
+  brandAssets: BrandAssetsApi;
+  brandProfiles: BrandProfileApi;
+  brandPolicy: BrandPolicyApi;
+  permissions: PermissionCatalogApi;
+  invitations: InvitationsApi;
+  members: MembersApi;
+  effectivePermissions: PermissionsApi;
+  acceptance: Console.InvitationAcceptanceApi;
+  roles: TenantRoleApi;
+  membershipRoles: MembershipRoleApi;
+  administrators: PlatformAdminApi;
   manifests: RemoteManifestsApi;
 } {
   const basePath = requireHttpsOrigin(apiOrigin);
@@ -27,6 +56,9 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
       credentials: 'include',
       accessToken: () => token ?? ''
     })
+  );
+  const acceptance = new Console.InvitationAcceptanceApi(
+    new Console.Configuration({ basePath, credentials: 'include' })
   );
   const options = () => ({
     redirect: 'error' as const,
@@ -60,6 +92,18 @@ export function createConsoleTransport(apiOrigin: unknown): ConsoleTransport & {
     headers: { ...businessOptions.headers, 'Content-Type': 'application/json' }
   });
   return {
+    permissions: createPermissionApi(basePath, () => token ?? ''),
+    invitations: new InvitationsApi(jsonConfiguration),
+    members: new MembersApi(jsonConfiguration),
+    effectivePermissions: new PermissionsApi(jsonConfiguration),
+    acceptance,
+    roles: createTenantRoleApi(basePath, () => token ?? ''),
+    membershipRoles: createMembershipRoleApi(basePath, () => token ?? ''),
+    administrators: createPlatformAdminApi(basePath, () => token ?? ''),
+    organization: new OrganizationApi(jsonConfiguration),
+    brandAssets: new BrandAssetsApi(businessConfiguration),
+    brandProfiles: createBrandProfileApi(basePath, () => token ?? ''),
+    brandPolicy: createBrandPolicyApi(basePath, () => token ?? ''),
     projects: new Project.DefaultApi(
       new Project.Configuration({
         ...businessOptions,

@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
+import process from 'node:process';
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -26,7 +28,7 @@ const snapshot = {
 // 生产构建 + 正式路由 + 模拟 HTTP，仅证明前端回归，不能替代 Chrome/Gateway/Fresh 验收。
 async function prepare(
   context: BrowserContext,
-  options: { locale?: string; authenticated?: boolean; failed?: boolean } = {}
+  options: { locale?: string; authenticated?: boolean; failed?: boolean; tenant?: boolean } = {}
 ) {
   const errors: string[] = [];
   const unexpected: string[] = [];
@@ -41,6 +43,7 @@ async function prepare(
   };
   context.pages().forEach(observePage);
   context.on('page', observePage);
+  // eslint-disable-next-line complexity -- 共享 HTTP 夹具需要区分正式 Console 的多个 operation。
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (url.origin === origin) {
@@ -50,15 +53,49 @@ async function prepare(
     }
     if (url.origin === 'https://api.ui.test') {
       const path = url.pathname;
+      const session = options.tenant
+        ? {
+            ...snapshot,
+            activeContext: { type: 'TENANT', membershipId: '019944ca-0000-7000-8000-000000000006' },
+            availableContexts: {
+              platform: false,
+              companies: [
+                {
+                  tenantId: tenant.id,
+                  tenantDisplayName: tenant.displayName,
+                  membershipId: '019944ca-0000-7000-8000-000000000006'
+                }
+              ]
+            }
+          }
+        : snapshot;
       let body: unknown;
       if (path.endsWith('/bootstrap'))
         body = { revision: '1', sessionPresent: Boolean(options.authenticated || options.failed), transition: 'NONE' };
       else if (options.failed && path.endsWith('/session')) {
         await route.fulfill({ status: 503, json: { code: 'SESSION_SECURITY_UNAVAILABLE' } });
         return;
-      } else if (path.endsWith('/session')) body = snapshot;
+      } else if (path.endsWith('/session')) body = session;
       else if (path.endsWith('/refresh') || path.endsWith('/login'))
-        body = { ...snapshot, accessToken: 'ui-fixture-token', tokenType: 'Bearer', expiresIn: 900 };
+        body = { ...session, accessToken: 'ui-fixture-token', tokenType: 'Bearer', expiresIn: 900 };
+      else if (options.tenant && path === '/api/v1/permissions')
+        body = { items: [{ code: 'example:project:list', enabled: true }] };
+      else if (options.tenant && path === '/api/v1/permissions/effective') body = { codes: ['example:project:list'] };
+      else if (options.tenant && path === '/api/v1/organization/units') body = { items: [] };
+      else if (options.tenant && path === '/api/v1/tenant-roles')
+        body = {
+          items: [
+            {
+              id: '019944ca-0000-7000-8000-000000000007',
+              roleKey: 'TENANT_ADMINISTRATOR',
+              systemManaged: true,
+              permissions: [],
+              assignedMembers: 1
+            }
+          ]
+        };
+      else if (options.tenant && path === '/api/v1/remote-manifests/enabled')
+        body = { items: [], hasMore: false, nextCursor: null };
       else if (path === '/api/v1/platform/tenants') body = { items: [tenant], hasMore: false, nextCursor: null };
       else if (path === '/api/v1/platform/tenant-creations') body = { items: [], hasMore: false, nextCursor: null };
       else if (path === `/api/v1/platform/tenants/${tenant.id}`) body = tenant;
@@ -98,7 +135,9 @@ async function prepare(
           canSuspend: false,
           canResume: false,
           canRecoverSuspension: false,
-          canContinue: false
+          canContinue: false,
+          canClose: false,
+          canRecoverClosure: false
         };
       else {
         unexpected.push(path);
@@ -122,8 +161,153 @@ async function prepare(
     unexpected.push(url.origin);
     await route.abort();
   });
+  await context.route('https://api.ui.test/api/v2/auth/password-recover*', async route => {
+    const request = route.request().url().endsWith('/password-recovery-requests');
+    await route.fulfill({
+      status: request ? 202 : 200,
+      json: { status: request ? 'ACCEPTED' : 'COMPLETED' }
+    });
+  });
   return { errors, unexpected };
 }
+
+test('tenant role form is keyboard reachable and shows a newly created role', async ({ context, page }, testInfo) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
+  let created = false;
+  await page.route('**/api/v1/invitations', route => route.fulfill({ json: { items: [] } }));
+  await page.route('**/api/v1/members', route => route.fulfill({ json: { items: [] } }));
+  await page.route('**/api/v1/tenant-roles', async route => {
+    if (route.request().method() === 'GET') {
+      const items = [
+        {
+          id: '019944ca-0000-7000-8000-000000000007',
+          roleKey: 'TENANT_ADMINISTRATOR',
+          systemManaged: true,
+          permissions: [] as string[],
+          assignedMembers: 1
+        }
+      ];
+      if (created)
+        items.push({
+          id: '019944ca-0000-7000-8000-000000000008',
+          roleKey: 'REPORT_READER',
+          systemManaged: false,
+          permissions: ['example:project:list'],
+          assignedMembers: 0
+        });
+      return route.fulfill({ json: { items } });
+    }
+    if (route.request().method() !== 'POST') return route.fallback();
+    expect(route.request().postDataJSON()).toEqual({ roleKey: 'REPORT_READER', permissions: ['example:project:list'] });
+    created = true;
+    return route.fulfill({
+      status: 201,
+      json: {
+        id: '019944ca-0000-7000-8000-000000000008',
+        roleKey: 'REPORT_READER',
+        systemManaged: false,
+        permissions: ['example:project:list'],
+        assignedMembers: 0
+      }
+    });
+  });
+  await page.goto(`${origin}/workbench`);
+  await expect(page.getByRole('heading', { name: 'Tenant roles' })).toBeVisible();
+  await stable(page);
+  await audit(page);
+  const create = page.getByRole('button', { name: 'Create role' });
+  await create.focus();
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Create role' });
+  await expect(dialog).toBeVisible();
+  await audit(page, true);
+  await dialog.getByRole('textbox', { name: 'Role key' }).fill('REPORT_READER');
+  await dialog.getByText('example:project:list', { exact: true }).click();
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole('cell', { name: 'REPORT_READER' })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('tenant-roles.png'), fullPage: false });
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('disabled member can gain and lose multiple organization units without changing roles', async ({
+  context,
+  page
+}, testInfo) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
+  const membershipId = '019944ca-0000-7000-8000-000000000020';
+  const first = '019944ca-0000-7000-8000-000000000021';
+  const second = '019944ca-0000-7000-8000-000000000022';
+  const assignments = new Set<string>();
+  const actions: string[] = [];
+  await page.route('**/api/v1/permissions/effective', route =>
+    route.fulfill({ json: { codes: ['system:organization:manage'] } })
+  );
+  await page.route('**/api/v1/invitations', route => route.fulfill({ json: { items: [] } }));
+  await page.route('**/api/v1/organization/units', route =>
+    route.fulfill({
+      json: {
+        organizationId: tenant.id,
+        items: [
+          { id: first, name: 'Engineering', memberCount: 0 },
+          { id: second, name: 'Operations', memberCount: 0 }
+        ]
+      }
+    })
+  );
+  await page.route('**/api/v1/members**', async route => {
+    const { pathname } = new URL(route.request().url());
+    const method = route.request().method();
+    if (pathname === '/api/v1/members' && method === 'GET') {
+      return route.fulfill({
+        json: {
+          items: [{ membershipId, identityId: '019944ca-0000-7000-8000-000000000023', status: 'DISABLED' }]
+        }
+      });
+    }
+    if (pathname === `/api/v1/members/${membershipId}/organization-units` && method === 'GET')
+      return route.fulfill({ json: { unitIds: [...assignments] } });
+    if (pathname === `/api/v1/members/${membershipId}/organization-units` && method === 'POST') {
+      const { unitId } = route.request().postDataJSON();
+      assignments.add(unitId);
+      actions.push(`add:${unitId}`);
+      return route.fulfill({ status: 201, body: '' });
+    }
+    if (pathname.startsWith(`/api/v1/members/${membershipId}/organization-units/`) && method === 'DELETE') {
+      const unitId = pathname.split('/').at(-1)!;
+      assignments.delete(unitId);
+      actions.push(`remove:${unitId}`);
+      return route.fulfill({ status: 204, body: '' });
+    }
+    return route.abort();
+  });
+  await page.goto(`${origin}/workbench`);
+  await expect(page.getByRole('heading', { name: 'Members' })).toBeVisible();
+  await page.getByRole('button', { name: 'Manage associations' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Organization units' });
+  await expect(dialog.getByText('No organization units are assigned.')).toBeVisible();
+  await audit(page, true);
+  const select = dialog.getByRole('combobox', { name: 'Add association' });
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('option', { name: 'Engineering' }).click();
+  await dialog.getByRole('button', { name: 'Add association' }).click();
+  await expect(dialog.getByRole('button', { name: 'Engineering · Remove association' })).toBeVisible();
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('option', { name: 'Operations' }).click();
+  await dialog.getByRole('button', { name: 'Add association' }).click();
+  await expect(dialog.getByRole('button', { name: 'Operations · Remove association' })).toBeVisible();
+  await audit(page, true);
+  await page.screenshot({ path: testInfo.outputPath('member-organizations.png'), fullPage: false });
+  await dialog.getByRole('button', { name: 'Engineering · Remove association' }).click();
+  await expect(dialog.getByRole('button', { name: 'Engineering · Remove association' })).toHaveCount(0);
+  expect(actions).toEqual([`add:${first}`, `add:${second}`, `remove:${first}`]);
+  expect([...assignments]).toEqual([second]);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
 
 async function audit(page: Page, dialog = false) {
   await page.addScriptTag({ content: axe });
@@ -164,6 +348,116 @@ for (const locale of ['zh-CN', 'en']) {
     });
   }
 }
+
+test('password recovery email and one-use link render and accept keyboard input', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`${origin}/login`);
+  await page.getByRole('link', { name: 'Forgot password?' }).click();
+  await expect(page).toHaveURL(`${origin}/password-recovery`);
+  await page.getByRole('textbox', { name: 'Email' }).fill('person@example.test');
+  await page.getByRole('button', { name: 'Send recovery link' }).click();
+  await expect(page.getByRole('status')).toContainText('If this address belongs to a recoverable account');
+  await audit(page);
+
+  await page.goto(`${origin}/password-recovery#token=${'A'.repeat(43)}`);
+  await expect(page).toHaveURL(`${origin}/password-recovery`);
+  await page.getByRole('textbox', { name: 'New password', exact: true }).fill('New-password-2026');
+  await page.getByRole('textbox', { name: 'Confirm new password' }).fill('New-password-2026');
+  await page.getByRole('button', { name: 'Set a new password' }).click();
+  await expect(page.getByRole('status')).toContainText('Password recovered and previous sessions ended');
+  await audit(page);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('completed recovery after pending retry directs the user to sign in', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en' });
+  let calls = 0;
+  await page.route('https://api.ui.test/api/v2/auth/password-recoveries', async route => {
+    calls += 1;
+    await route.fulfill(
+      calls === 1
+        ? { status: 202, json: { status: 'PENDING' } }
+        : {
+            status: 410,
+            json: {
+              type: 'urn:saas.forge:problem:password-recovery-token-invalid',
+              title: 'Recovery link unavailable',
+              status: 410,
+              detail: 'Recovery link unavailable',
+              code: 'PASSWORD_RECOVERY_TOKEN_INVALID',
+              traceId: '0123456789abcdef0123456789abcdef'
+            }
+          }
+    );
+  });
+  await page.goto(`${origin}/password-recovery#token=${'A'.repeat(43)}`);
+  const submit = async () => {
+    await page.getByRole('textbox', { name: 'New password', exact: true }).fill('New-password-2026');
+    await page.getByRole('textbox', { name: 'Confirm new password' }).fill('New-password-2026');
+    await page.getByRole('button', { name: 'Set a new password' }).click();
+  };
+  await submit();
+  await expect(page.getByRole('status')).toContainText('Previous sessions are still being revoked.');
+  await submit();
+  await expect(page.getByRole('status')).toContainText('If you already set a new password, try signing in with it.');
+  await expect(page.getByRole('button', { name: 'Return to sign in' })).toBeVisible();
+  expect(calls).toBe(2);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('new invitee requests first password setup from the invitation page', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en' });
+  const keys: string[] = [];
+  await page.route('https://api.ui.test/api/v1/invitation-password-setups', async route => {
+    const request = route.request();
+    expect(request.method()).toBe('POST');
+    expect(request.postDataJSON()).toEqual({ token: 'A'.repeat(43) });
+    keys.push(request.headers()['idempotency-key']);
+    await route.fulfill({ json: { status: 'MAIL_SERVICE_ACCEPTED' } });
+  });
+  await page.goto(`${origin}/invitation#token=${'A'.repeat(43)}`);
+  await expect(page).toHaveURL(`${origin}/invitation`);
+  await page.getByRole('button', { name: 'Set up a password' }).click();
+  await expect(page.getByRole('status').last()).toContainText('The mail service accepted');
+  await page.getByRole('button', { name: 'Resend setup email' }).click();
+  await expect.poll(() => keys.length).toBe(2);
+  expect(keys[0]).not.toBe(keys[1]);
+  await audit(page);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('compensated invitation acceptance starts a fresh operation while an unknown result retries the original', async ({
+  context,
+  page
+}) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  const keys: string[] = [];
+  await page.route('https://api.ui.test/api/v2/auth/invitation-acceptances', async route => {
+    keys.push(route.request().headers()['idempotency-key']);
+    if (keys.length === 1) return route.fulfill({ status: 503, json: { code: 'AUTHORITY_UNAVAILABLE' } });
+    if (keys.length === 2)
+      return route.fulfill({ status: 409, json: { code: 'INVITATION_ACCEPTANCE_RETRY_REQUIRED' } });
+    return route.fulfill({ json: {} });
+  });
+  await page.goto(`${origin}/invitation#token=${'A'.repeat(43)}`);
+  const accept = page.getByRole('button', { name: 'Accept invitation' });
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await expect.poll(() => keys.length).toBe(1);
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await expect.poll(() => keys.length).toBe(2);
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await expect.poll(() => keys.length).toBe(3);
+  expect(keys[0]).toBe(keys[1]);
+  expect(keys[2]).not.toBe(keys[1]);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors.filter(error => !/(409|503)/.test(error))).toEqual([]);
+});
 
 for (const width of [1440, 1024]) {
   for (const dark of [false, true]) {
@@ -251,6 +545,99 @@ test('tenant detail renders real sections with accessible headings', async ({ co
   await stable(page);
   await audit(page);
   await expect(page).toHaveScreenshot('tenant-detail-en.png');
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('tenant closure requires confirmation and permanently removes resumption', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  let closed = false;
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}/lifecycle`, async route => {
+    return route.fulfill({
+      json: {
+        tenantId: tenant.id,
+        ...(closed ? { operationId: '019944ca-0000-7000-8000-000000000005', action: 'CLOSE' } : {}),
+        state: closed ? 'COMPLETED' : 'NONE',
+        canSuspend: !closed,
+        canResume: false,
+        canRecoverSuspension: false,
+        canContinue: false,
+        canClose: !closed,
+        canRecoverClosure: false
+      }
+    });
+  });
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}/closures`, async route => {
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().headers()['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
+    closed = true;
+    return route.fulfill({ json: { ...tenant, status: 'CLOSED' } });
+  });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const close = page.getByRole('button', { name: 'Permanently close tenant' });
+  await expect(close).toBeEnabled();
+  await close.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Permanently close this tenant?', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  expect(closed).toBe(false);
+  await close.click();
+  await page.getByRole('button', { name: 'Confirm' }).click();
+  await expect(page.getByText('This tenant is permanently closed.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Resume tenant' })).toBeDisabled();
+  await expect(close).toBeDisabled();
+  await stable(page);
+  await audit(page);
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('tenant detail name edit works by keyboard and keeps the independent expiry', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  let updated = false;
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}`, async route => {
+    if (route.request().method() !== 'PUT') return route.fallback();
+    const request = route.request();
+    expect(request.headers()['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
+    expect(request.postDataJSON()).toEqual({ displayName: 'Renamed Company', expiresAt: null });
+    updated = true;
+    return route.fulfill({ json: { ...tenant, displayName: 'Renamed Company' } });
+  });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const edit = page.getByRole('form', { name: 'Manage tenant details' });
+  await expect(edit.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  await edit.getByRole('textbox', { name: 'Tenant name' }).fill('Renamed Company');
+  await audit(page);
+  await edit.getByRole('button', { name: 'Save changes' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Renamed Company', { exact: true }).first()).toBeVisible();
+  expect(updated).toBe(true);
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('tenant expiry edit sets a future deadline and can clear it', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  const requests: (string | null)[] = [];
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}`, async route => {
+    if (route.request().method() !== 'PUT') return route.fallback();
+    const body = route.request().postDataJSON();
+    requests.push(body.expiresAt);
+    return route.fulfill({ json: { ...tenant, expiresAt: body.expiresAt } });
+  });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const edit = page.getByRole('form', { name: 'Manage tenant details' });
+  await edit.getByText('No expiry', { exact: true }).click();
+  const deadline = edit.getByRole('combobox', { name: 'Expires at' });
+  await deadline.fill('2099-01-01 12:00:00');
+  await deadline.press('Tab');
+  await edit.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByText('2099', { exact: false }).first()).toBeVisible();
+  expect(requests[0]).toBe('2099-01-01T12:00:00.000Z');
+  await edit.getByText('No expiry', { exact: true }).click();
+  await edit.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.locator('.el-descriptions').getByText('No expiry')).toBeVisible();
+  expect(requests).toEqual(['2099-01-01T12:00:00.000Z', null]);
   expect(state.errors).toEqual([]);
   expect(state.unexpected).toEqual([]);
 });
@@ -450,7 +837,8 @@ for (const locale of ['zh-CN', 'en']) {
     await page.getByRole('button', { name: chinese ? '折叠菜单' : 'Collapse Menu', exact: true }).click();
     await expect(menu).toHaveClass(/el-menu--collapse/);
     /* eslint-disable no-await-in-loop -- 菜单悬停需串行，避免覆盖前一个名称提示。 */
-    for (const [index, label] of names.entries()) {
+    for (let index = 0; index < names.length; index += 1) {
+      const label = names[index];
       const item = menu.getByRole('menuitem').nth(index);
       await expect(item).toHaveAccessibleName(label);
       await item.hover();
@@ -476,7 +864,7 @@ test('collapsed sidebar keeps a visible icon for each menu entry', async ({ cont
   await page.goto(`${origin}/home`);
   await page.getByRole('button', { name: '折叠菜单', exact: true }).click();
   const entries = page.getByRole('menubar').getByRole('menuitem');
-  await expect(entries).toHaveCount(5);
+  await expect(entries).toHaveCount(6);
   await Promise.all(
     (await entries.all()).map(async item => {
       const icon = item.locator('.el-icon > *').first();
@@ -486,4 +874,68 @@ test('collapsed sidebar keeps a visible icon for each menu entry', async ({ cont
       expect(box!.height).toBeGreaterThan(0);
     })
   );
+});
+
+test('create-only Project role keeps its draft through 403 and recovers a 503 write', async ({ context, page }) => {
+  execFileSync(process.execPath, ['scripts/build-project-remote.mjs', origin]);
+  const manifest = JSON.parse(readFileSync('dist/business-remotes/project/1.1.0/manifest-declaration.json', 'utf8'));
+  const remote = readFileSync('dist/business-remotes/project/1.1.0/remote.js');
+  const state = await prepare(context, { locale: 'en', authenticated: true, tenant: true });
+  await page.route('**/api/v1/permissions/effective', route =>
+    route.fulfill({ json: { codes: ['example:project:create'] } })
+  );
+  await page.route('**/api/v1/remote-manifests/enabled*', route =>
+    route.fulfill({
+      json: { items: [{ ...manifest, id: '019944ca-0000-7000-8000-000000000030' }], hasMore: false, nextCursor: null }
+    })
+  );
+  await page.route(manifest.source, route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'text/javascript',
+      headers: { 'Access-Control-Allow-Origin': origin },
+      body: remote
+    })
+  );
+  await page.route('**/api/v1/invitations**', route =>
+    route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } })
+  );
+  await page.route('**/api/v1/members**', route => route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } }));
+  let writes = 0;
+  let lists = 0;
+  await page.route('**/api/v1/projects', route => {
+    if (route.request().method() === 'GET') {
+      lists += 1;
+      return route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } });
+    }
+    writes += 1;
+    if (writes === 1) return route.fulfill({ status: 403, json: { code: 'PERMISSION_DENIED' } });
+    if (writes === 2) return route.fulfill({ status: 503, json: { code: 'PERMISSION_AUTHORITY_UNAVAILABLE' } });
+    return route.fulfill({
+      status: 201,
+      json: {
+        id: '019944ca-0000-7000-8000-000000000031',
+        name: 'Limited project',
+        description: null,
+        version: 1
+      }
+    });
+  });
+  await page.goto(`${origin}/workbench`);
+  const remotePanel = page.getByTestId('project-remote');
+  await expect(remotePanel).toBeVisible();
+  const form = remotePanel.getByRole('form', { name: 'Projects' });
+  await form.getByRole('textbox', { name: 'Project name' }).fill('Limited project');
+  await form.getByRole('button', { name: 'Create' }).click();
+  await expect(remotePanel.getByRole('alert')).toContainText('lacks permission');
+  await expect(form.getByRole('textbox', { name: 'Project name' })).toHaveValue('Limited project');
+  await form.getByRole('button', { name: 'Create' }).click();
+  await expect(remotePanel.getByRole('button', { name: 'Recover original operation' })).toBeVisible();
+  await remotePanel.getByRole('button', { name: 'Recover original operation' }).click();
+  await expect(remotePanel.getByText('019944ca-0000-7000-8000-000000000031')).toBeVisible();
+  await expect(form.getByRole('textbox', { name: 'Project name' })).toHaveValue('');
+  expect(lists).toBe(0);
+  expect(writes).toBe(3);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors.filter(error => !/(403|503)/.test(error))).toEqual([]);
 });

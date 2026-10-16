@@ -3,7 +3,7 @@ import type { PlatformTenantsApi, TenantLifecycle } from '@crane199709/saas-forg
 import type { SessionView } from '../../runtime/console-session';
 import { TenantFailure, failureCode } from './tenants';
 
-export type LifecycleAction = 'suspend' | 'resume' | 'recover' | 'continue';
+export type LifecycleAction = 'suspend' | 'resume' | 'recover' | 'continue' | 'close' | 'recoverClosure';
 type Pending = { action: LifecycleAction; operationId?: string; state: TenantLifecycle['state'] };
 type Session = { readonly state: SessionView; subscribe(listener: (state: SessionView) => void): () => void };
 export interface LifecycleState {
@@ -14,20 +14,38 @@ export interface LifecycleState {
   problem?: TenantFailure['code'];
 }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+function validFlags(value: TenantLifecycle) {
+  return [
+    value.canSuspend,
+    value.canResume,
+    value.canContinue,
+    value.canRecoverSuspension,
+    value.canClose,
+    value.canRecoverClosure
+  ].every(flag => typeof flag === 'boolean');
+}
+function validActions(value: TenantLifecycle) {
+  return !(
+    (['PENDING', 'RECOVERY_REQUIRED'].includes(value.state) &&
+      (value.canSuspend || value.canResume || value.canClose)) ||
+    (value.canContinue && value.state !== 'PENDING') ||
+    (value.canRecoverSuspension && (value.state !== 'RECOVERY_REQUIRED' || value.action !== 'SUSPEND')) ||
+    (value.canRecoverClosure && (value.state !== 'RECOVERY_REQUIRED' || value.action !== 'CLOSE')) ||
+    (value.canSuspend && value.canResume) ||
+    (value.canClose && value.canRecoverClosure)
+  );
+}
 function validate(value: TenantLifecycle, tenantId: string) {
   if (
     !value ||
     value.tenantId !== tenantId ||
     !['NONE', 'PENDING', 'COMPLETED', 'RETRY_REQUIRED', 'RECOVERY_REQUIRED'].includes(value.state) ||
-    ![value.canSuspend, value.canResume, value.canContinue, value.canRecoverSuspension].every(
-      flag => typeof flag === 'boolean'
-    ) ||
+    !validFlags(value) ||
     (value.state !== 'NONE' &&
-      (!value.operationId || !uuid.test(value.operationId) || !['SUSPEND', 'RESUME'].includes(value.action!))) ||
-    (['PENDING', 'RECOVERY_REQUIRED'].includes(value.state) && (value.canSuspend || value.canResume)) ||
-    (value.canContinue && value.state !== 'PENDING') ||
-    (value.canRecoverSuspension && (value.state !== 'RECOVERY_REQUIRED' || value.action !== 'SUSPEND')) ||
-    (value.canSuspend && value.canResume)
+      (!value.operationId ||
+        !uuid.test(value.operationId) ||
+        !['SUSPEND', 'RESUME', 'CLOSE'].includes(value.action!))) ||
+    !validActions(value)
   )
     throw new TenantFailure('invalid');
   return value;
@@ -104,7 +122,7 @@ export class LifecycleWorkspace {
     const pending = JSON.parse(value) as Pending;
     if (
       !pending ||
-      !['suspend', 'resume', 'recover', 'continue'].includes(pending.action) ||
+      !['suspend', 'resume', 'recover', 'continue', 'close', 'recoverClosure'].includes(pending.action) ||
       !['NONE', 'PENDING', 'COMPLETED', 'RETRY_REQUIRED', 'RECOVERY_REQUIRED'].includes(pending.state) ||
       (pending.operationId !== undefined && !uuid.test(pending.operationId))
     )
@@ -119,12 +137,9 @@ export class LifecycleWorkspace {
     const pending = this.pending(tenantId);
     if (pending) {
       // 只有权威新操作或原操作进展才能解除未知锁；原快照和缺失记录不能证明未提交。
-      const newOperation =
-        snapshot.operationId &&
-        snapshot.operationId !== pending.operationId &&
-        snapshot.action === (pending.action === 'resume' ? 'RESUME' : 'SUSPEND');
+      const newOperation = snapshot.operationId && snapshot.operationId !== pending.operationId;
       const progressed =
-        ['continue', 'recover'].includes(pending.action) &&
+        ['continue', 'recover', 'recoverClosure'].includes(pending.action) &&
         snapshot.operationId === pending.operationId &&
         snapshot.state !== pending.state;
       if (newOperation || progressed) this.context.storage.removeItem(LifecycleWorkspace.storageKey(tenantId));
@@ -160,7 +175,7 @@ export class LifecycleWorkspace {
     return (
       !pending ||
       (pending.action === action &&
-        ['continue', 'recover'].includes(action) &&
+        ['continue', 'recover', 'recoverClosure'].includes(action) &&
         pending.operationId === snapshot.operationId)
     );
   }
@@ -170,7 +185,9 @@ export class LifecycleWorkspace {
       suspend: snapshot.canSuspend,
       resume: snapshot.canResume,
       recover: snapshot.canRecoverSuspension,
-      continue: snapshot.canContinue
+      continue: snapshot.canContinue,
+      close: snapshot.canClose,
+      recoverClosure: snapshot.canRecoverClosure
     }[action];
   }
   async run(action: LifecycleAction): Promise<void> {
@@ -191,10 +208,12 @@ export class LifecycleWorkspace {
           throw new TenantFailure('stale');
         const previousKey = this.recoveryKeys.get(tenantId);
         const idempotencyKey =
-          action === 'recover' && previousKey && previousKey.operationId === snapshot.operationId
+          ['recover', 'recoverClosure'].includes(action) &&
+          previousKey &&
+          previousKey.operationId === snapshot.operationId
             ? previousKey.key
             : this.context.key();
-        if (action === 'recover')
+        if (action === 'recover' || action === 'recoverClosure')
           this.recoveryKeys.set(tenantId, { operationId: snapshot.operationId!, key: idempotencyKey });
         // 跨标签只保留无凭据的未决标记，写入失败时禁止发出变更；幂等键不落盘。
         this.context.storage.setItem(
@@ -206,6 +225,8 @@ export class LifecycleWorkspace {
           if (action === 'continue')
             return this.api.continueTenantLifecycle({ tenantId, operationId: snapshot.operationId! }, options);
           if (action === 'recover') return this.api.recoverTenantSuspension({ tenantId, idempotencyKey }, options);
+          if (action === 'recoverClosure') return this.api.recoverTenantClosure({ tenantId, idempotencyKey }, options);
+          if (action === 'close') return this.api.closeTenant({ tenantId, idempotencyKey }, options);
           if (action === 'resume') return this.api.resumeTenant({ tenantId, idempotencyKey }, options);
           return this.api.suspendTenant({ tenantId, idempotencyKey }, options);
         });
@@ -215,10 +236,13 @@ export class LifecycleWorkspace {
         this.publish({ snapshot: await this.read(tenantId) });
       });
     } catch (error) {
-      if (action === 'recover' && error instanceof ResponseError) {
+      if ((action === 'recover' || action === 'recoverClosure') && error instanceof ResponseError) {
         const body = await error.response.json().catch(() => undefined);
         // 后端明确声明本次恢复已耗尽时，旧键只会重放该结果；下一次恢复仍针对原 workflow。
-        if (generation === this.generation && body?.code === 'TENANT_SUSPENSION_RECOVERY_REQUIRED')
+        if (
+          generation === this.generation &&
+          ['TENANT_SUSPENSION_RECOVERY_REQUIRED', 'TENANT_CLOSURE_RECOVERY_REQUIRED'].includes(body?.code)
+        )
           this.recoveryKeys.delete(tenantId);
       }
       if (generation === this.generation) this.publish({ snapshot: undefined, problem: failureCode(error) });

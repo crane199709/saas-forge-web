@@ -4,6 +4,7 @@ import { consoleState } from '@/runtime/console';
 import { $t } from '@/locales';
 import WorkContexts from './work-contexts.vue';
 import RemoteManifests from './remote-manifests.vue';
+import PlatformBrandPolicy from './platform-brand-policy.vue';
 const heading = useTemplateRef<HTMLElement>('heading');
 onMounted(async () => {
   await nextTick();
@@ -34,5 +35,6 @@ onMounted(async () => {
       <WorkContexts />
     </ElCard>
     <RemoteManifests />
+    <PlatformBrandPolicy />
   </div>
 </template>

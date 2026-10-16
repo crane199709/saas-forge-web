@@ -118,3 +118,50 @@ test('in-progress idempotency stays recoverable, while a definitive version conf
   await assert.rejects(f.host.retryPending(), { code });
   assert.equal(f.host.pending(), false);
 });
+
+test('authority denial is visible and does not reserve a write recovery attempt', async t => {
+  t.mock.method(globalThis, 'fetch', async () => Response.json({ code: 'PERMISSION_DENIED' }, { status: 403 }));
+  const f = setup();
+  t.after(f.dispose);
+  await assert.rejects(f.host.createProject({ name: 'No access' }), { code: 'PERMISSION_DENIED' });
+  assert.equal(f.host.pending(), false);
+});
+
+test('a granted update can use a supplied resource version without requiring read permission', async t => {
+  const requests: RequestInit[] = [];
+  t.mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
+    requests.push(init);
+    return Response.json({ ...project, name: 'Changed', version: 4 });
+  });
+  const f = setup();
+  t.after(f.dispose);
+  await assert.rejects(f.host.updateProject(id, { name: 'Changed' }), { code: 'RESOURCE_RELOAD_REQUIRED' });
+  await f.host.updateProject(id, { name: 'Changed' }, 3);
+  assert.equal(requests.length, 1);
+  assert.equal(new Headers(requests[0].headers).get('If-Match'), '"3"');
+  assert.equal(new Headers(requests[0].headers).get('Idempotency-Key')?.length, 36);
+});
+
+test('Task update uses its supplied version and permission outages keep the tenant session usable', async t => {
+  let attempts = 0;
+  const taskId = '019944ca-0000-7000-8000-000000000003';
+  t.mock.method(globalThis, 'fetch', async (_url: string, init: RequestInit) => {
+    attempts += 1;
+    if (attempts === 1) return Response.json({ code: 'PERMISSION_AUTHORITY_UNAVAILABLE' }, { status: 503 });
+    assert.equal(new Headers(init.headers).get('If-Match'), '"2"');
+    return Response.json({ id: taskId, projectId: id, title: 'Changed', status: 'DONE', version: 3 });
+  });
+  const f = setup();
+  t.after(f.dispose);
+  await assert.rejects(
+    f.host.updateTask({ projectId: id, id: taskId, expectedVersion: 2 }, { title: 'Changed', status: 'DONE' }),
+    {
+      code: 'PERMISSION_AUTHORITY_UNAVAILABLE'
+    }
+  );
+  assert.equal(f.host.pending(), true);
+  const recovered = await f.host.retryPending();
+  assert.equal((recovered as { id: string }).id, taskId);
+  assert.equal(f.host.pending(), false);
+  assert.equal(attempts, 2);
+});

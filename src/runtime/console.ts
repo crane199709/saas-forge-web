@@ -1,5 +1,13 @@
 import { shallowRef } from 'vue';
-import type { RemoteManifestsApi } from '@crane199709/saas-forge-api-client';
+import type {
+  BrandAssetsApi,
+  Console,
+  InvitationsApi,
+  MembersApi,
+  OrganizationApi,
+  PermissionsApi,
+  RemoteManifestsApi
+} from '@crane199709/saas-forge-api-client';
 import { createProjectHost } from '@/service/forge/projects';
 import { NotificationWorkspace } from '@/service/forge/notifications';
 import { InitializationWorkspace } from '@/service/forge/initialization';
@@ -9,6 +17,12 @@ import { OAuthWorkspace } from '@/service/forge/oauth-clients';
 import { EntitlementWorkspace } from '@/service/forge/entitlements';
 import type { EntitlementKind } from '@/service/forge/entitlements';
 import { TenantWorkspace } from '@/service/forge/tenants';
+import type { PermissionCatalogApi } from '@/service/forge/permissions';
+import type { TenantRoleApi } from '@/service/forge/tenant-roles';
+import type { MembershipRoleApi } from '@/service/forge/membership-roles';
+import type { PlatformAdminApi } from '@/service/forge/platform-administrators';
+import type { BrandProfileApi } from '@/service/forge/brand-profile';
+import type { BrandPolicyApi } from '@/service/forge/brand-policy';
 import { createConsoleTransport } from '@/service/forge/console';
 import { GatewayConfigurationError, requireHttpsOrigin } from '@/service/forge/config';
 import { clearAuthStorage } from '@/store/modules/auth/shared';
@@ -27,6 +41,18 @@ let subscriptions: SubscriptionWorkspace | undefined;
 let oauth: OAuthWorkspace | undefined;
 let entitlements: Record<EntitlementKind, EntitlementWorkspace> | undefined;
 let projectBridge: ReturnType<typeof createProjectHost> | undefined;
+let permissions: PermissionCatalogApi | undefined;
+let invitations: InvitationsApi | undefined;
+let members: MembersApi | undefined;
+let effectivePermissions: PermissionsApi | undefined;
+let acceptance: Console.InvitationAcceptanceApi | undefined;
+let roles: TenantRoleApi | undefined;
+let membershipRoles: MembershipRoleApi | undefined;
+let platformAdministrators: PlatformAdminApi | undefined;
+let organization: OrganizationApi | undefined;
+let brandAssets: BrandAssetsApi | undefined;
+let brandProfiles: BrandProfileApi | undefined;
+let brandPolicy: BrandPolicyApi | undefined;
 let manifests: RemoteManifestsApi | undefined;
 let startup: Promise<void> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -37,9 +63,21 @@ export function consoleRuntime(): ConsoleSessionRuntime {
     const transport = createConsoleTransport(origin);
     runtime = new ConsoleSessionRuntime(transport, createBrowserCoordination(origin), {
       key: operationKey,
-      resolveBrand: resolveConsoleBrand
+      resolveBrand: snapshot => resolveConsoleBrand(snapshot, origin)
     });
     projectBridge = createProjectHost(transport.projects, runtime, operationKey);
+    permissions = transport.permissions;
+    invitations = transport.invitations;
+    members = transport.members;
+    effectivePermissions = transport.effectivePermissions;
+    acceptance = transport.acceptance;
+    roles = transport.roles;
+    membershipRoles = transport.membershipRoles;
+    platformAdministrators = transport.administrators;
+    organization = transport.organization;
+    brandAssets = transport.brandAssets;
+    brandProfiles = transport.brandProfiles;
+    brandPolicy = transport.brandPolicy;
     manifests = transport.manifests;
     entitlements = {
       plan: new EntitlementWorkspace('plan', transport.entitlements, { session: runtime, key: operationKey }),
@@ -89,6 +127,66 @@ export function oauthWorkspace(): OAuthWorkspace {
 export function consoleProjectHost() {
   consoleRuntime();
   return projectBridge!.host;
+}
+
+export function consolePermissionCatalog() {
+  consoleRuntime();
+  return permissions!;
+}
+
+export function consoleInvitations(): InvitationsApi {
+  consoleRuntime();
+  return invitations!;
+}
+
+export function consoleMembers(): MembersApi {
+  consoleRuntime();
+  return members!;
+}
+
+export function consoleEffectivePermissions(): PermissionsApi {
+  consoleRuntime();
+  return effectivePermissions!;
+}
+
+export function consoleInvitationAcceptance(): Console.InvitationAcceptanceApi {
+  consoleRuntime();
+  return acceptance!;
+}
+
+export function consoleTenantRoles() {
+  consoleRuntime();
+  return roles!;
+}
+
+export function consoleMembershipRoles(): MembershipRoleApi {
+  consoleRuntime();
+  return membershipRoles!;
+}
+
+export function consolePlatformAdministrators(): PlatformAdminApi {
+  consoleRuntime();
+  return platformAdministrators!;
+}
+
+export function consoleOrganization() {
+  consoleRuntime();
+  return organization!;
+}
+
+export function consoleBrandAssets() {
+  consoleRuntime();
+  return brandAssets!;
+}
+
+export function consoleBrandProfiles() {
+  consoleRuntime();
+  return brandProfiles!;
+}
+
+export function consoleBrandPolicy(): BrandPolicyApi {
+  consoleRuntime();
+  return brandPolicy!;
 }
 
 export function discoverBusinessRemotes(signal: AbortSignal) {

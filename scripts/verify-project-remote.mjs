@@ -38,6 +38,10 @@ const row = (p, name) =>
     .locator('[data-testid="project-remote"] li')
     .filter({ has: p.locator('span').filter({ hasText: new RegExp(`^${name} ·`) }) });
 const ready = p => p.getByTestId('project-remote').waitFor();
+const listText = (p, value) =>
+  p.locator('[data-testid="project-remote"] li span').filter({
+    hasText: new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
+  });
 function observe(p) {
   p.on('response', r => {
     const path = new URL(r.url()).pathname;
@@ -64,14 +68,14 @@ async function create(p, name) {
   const f = p.getByRole('form', { name: '项目', exact: true });
   await f.getByLabel('项目名称', { exact: true }).fill(name);
   await button(f, '创建').click();
-  await p.getByText(`${name} · v1`, { exact: true }).waitFor();
+  await listText(p, `${name} · v1`).waitFor();
   const get = p.waitForRequest(r => r.method() === 'GET' && /\/projects\/[^/]+$/.test(new URL(r.url()).pathname));
   await button(row(p, name), '查看任务').click();
   const id = new URL((await get).url()).pathname.split('/').pop();
   const tasks = p.getByRole('form', { name: '任务', exact: true });
   await tasks.getByLabel('任务标题', { exact: true }).fill(`${name} task`);
   await button(tasks, '创建').click();
-  await p.getByText(`${name} task · 待办 · v1`, { exact: true }).waitFor();
+  await listText(p, `${name} task · 待办 · v1`).waitFor();
   const taskGet = p.waitForRequest(r => r.method() === 'GET' && /\/tasks\/[^/]+$/.test(new URL(r.url()).pathname));
   await button(row(p, `${name} task`), '编辑').click();
   const taskId = new URL((await taskGet).url()).pathname.split('/').pop();
@@ -115,7 +119,7 @@ try {
   report.resources = { tenantA: av, tenantB: bv };
   const project = p => `/api/v1/projects/${p.id}`;
   const task = p => `${project(p)}/tasks/${p.taskId}`;
-  assert.equal(await a.getByText(`${bv.name} · v1`, { exact: true }).count(), 0);
+  assert.equal(await listText(a, `${bv.name} · v1`).count(), 0);
   await foreign(a, { method: 'GET', from: project(av), to: project(bv) }, () =>
     button(row(a, av.name), '查看任务').click()
   );
@@ -124,7 +128,7 @@ try {
   await pf.getByLabel('项目名称', { exact: true }).fill(`${av.name} updated`);
   await foreign(a, { method: 'PUT', from: project(av), to: project(bv) }, () => button(pf, '保存').click());
   await button(pf, '保存').click();
-  await a.getByText(`${av.name} updated · v2`, { exact: true }).waitFor();
+  await listText(a, `${av.name} updated · v2`).waitFor();
   av.name += ' updated';
   await foreign(a, { method: 'DELETE', from: project(av), to: project(bv) }, () =>
     button(row(a, av.name), '删除').click()
@@ -136,7 +140,7 @@ try {
   await tf.getByLabel('任务标题', { exact: true }).fill(`${taskName} updated`);
   await foreign(a, { method: 'PUT', from: task(av), to: task(bv) }, () => button(tf, '保存').click());
   await button(tf, '保存').click();
-  await a.getByText(`${taskName} updated · 待办 · v2`, { exact: true }).waitFor();
+  await listText(a, `${taskName} updated · 待办 · v2`).waitFor();
   await foreign(a, { method: 'DELETE', from: task(av), to: task(bv) }, () =>
     button(row(a, `${taskName} updated`), '删除').click()
   );
@@ -153,18 +157,18 @@ try {
   await b.reload();
   await ready(b);
   await button(row(b, bv.name), '查看任务').click();
-  await b.getByText(`${bv.name} task · 待办 · v1`, { exact: true }).waitFor();
+  await listText(b, `${bv.name} task · 待办 · v1`).waitFor();
   report.checks.push({ name: 'foreign-data-unchanged', status: 'passed' });
   await button(row(a, `${taskName} updated`), '删除').click();
   await row(a, `${taskName} updated`).waitFor({ state: 'hidden' });
   await button(row(a, av.name), '删除').click();
   await row(a, av.name).waitFor({ state: 'hidden' });
   report.checks.push({ name: 'project-task-crud', status: 'passed', projectId: av.id, taskId: av.taskId });
-  await a.route('**/project/1.0.0/remote.js', r => r.abort('failed'));
+  await a.route('**/project/1.1.0/remote.js', r => r.abort('failed'));
   await a.reload();
   await a.getByRole('alert').waitFor();
   assert.equal(await a.getByTestId('project-remote').count(), 0);
-  await a.unroute('**/project/1.0.0/remote.js');
+  await a.unroute('**/project/1.1.0/remote.js');
   await button(a, '重新读取').click();
   await ready(a);
   report.checks.push({ name: 'remote-download-failure-recovery', status: 'passed', fault: 'browser-network-abort' });

@@ -11,6 +11,8 @@ export function setupElegantRouter() {
     customRoutes: {
       names: [
         'workbench',
+        'platform-administrators',
+        'tenant-settings',
         'oauth-clients',
         'oauth-client-detail',
         'tenants',

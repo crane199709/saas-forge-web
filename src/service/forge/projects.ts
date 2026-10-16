@@ -80,7 +80,11 @@ export function createProjectHost(
     tasks.set(`${value.projectId}:${value.id}`, structuredClone(value));
     return value;
   }
-  function version(id: string, projectId?: string) {
+  function version(id: string, projectId?: string, supplied?: number) {
+    if (supplied !== undefined) {
+      if (!Number.isSafeInteger(supplied) || supplied < 1) throw new ProjectFailure('VERSION_REQUIRED');
+      return `"${supplied}"`;
+    }
     const value = projectId ? tasks.get(`${projectId}:${id}`) : projects.get(id);
     if (!value) throw new ProjectFailure('RESOURCE_RELOAD_REQUIRED');
     return `"${value.version}"`;
@@ -117,7 +121,8 @@ export function createProjectHost(
         error instanceof Project.ResponseError &&
         error.response.status >= 400 &&
         error.response.status < 500 &&
-        ![401, 403, 408, 429].includes(error.response.status) &&
+        (![401, 403, 408, 429].includes(error.response.status) ||
+          (error.response.status === 403 && problem.code === 'PERMISSION_DENIED')) &&
         problem.code !== 'IDEMPOTENCY_REQUEST_IN_PROGRESS' &&
         pending === attempt
       )
@@ -144,17 +149,17 @@ export function createProjectHost(
       const request = { idempotencyKey: key(), createProject: structuredClone(body) };
       return await submit(() => api.createProject(request, writeOptions()), rememberProject);
     },
-    async updateProject(id: string, body: Project.CreateProject) {
+    async updateProject(id: string, body: Project.CreateProject, expectedVersion?: number) {
       const request = {
         projectId: id,
         idempotencyKey: key(),
-        ifMatch: version(id),
+        ifMatch: version(id, undefined, expectedVersion),
         createProject: structuredClone(body)
       };
       return await submit(() => api.updateProject(request, writeOptions()), rememberProject);
     },
-    async deleteProject(id: string) {
-      const request = { projectId: id, idempotencyKey: key(), ifMatch: version(id) };
+    async deleteProject(id: string, expectedVersion?: number) {
+      const request = { projectId: id, idempotencyKey: key(), ifMatch: version(id, undefined, expectedVersion) };
       await submit(
         () => api.deleteProject(request, writeOptions()),
         () => projects.delete(id)
@@ -172,26 +177,31 @@ export function createProjectHost(
       const request = { projectId, idempotencyKey: key(), createTask: structuredClone(body) };
       return await submit(() => api.createTask(request, writeOptions()), rememberTask);
     },
-    async updateTask(projectId: string, id: string, body: Project.UpdateTask) {
+    async updateTask(target: { projectId: string; id: string; expectedVersion?: number }, body: Project.UpdateTask) {
       const request = {
-        projectId,
-        taskId: id,
+        projectId: target.projectId,
+        taskId: target.id,
         idempotencyKey: key(),
-        ifMatch: version(id, projectId),
+        ifMatch: version(target.id, target.projectId, target.expectedVersion),
         updateTask: structuredClone(body)
       };
       return await submit(() => api.updateTask(request, writeOptions()), rememberTask);
     },
-    async deleteTask(projectId: string, id: string) {
-      const request = { projectId, taskId: id, idempotencyKey: key(), ifMatch: version(id, projectId) };
+    async deleteTask(projectId: string, id: string, expectedVersion?: number) {
+      const request = {
+        projectId,
+        taskId: id,
+        idempotencyKey: key(),
+        ifMatch: version(id, projectId, expectedVersion)
+      };
       await submit(
         () => api.deleteTask(request, writeOptions()),
         () => tasks.delete(`${projectId}:${id}`)
       );
     },
     async retryPending() {
-      if (!pending) return;
-      await execute(pending);
+      if (!pending) return undefined;
+      return await execute(pending);
     },
     pending: () => Boolean(pending)
   });

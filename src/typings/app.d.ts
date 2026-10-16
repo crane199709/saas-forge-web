@@ -317,6 +317,13 @@ declare namespace App {
         inProgress: string;
         done: string;
         edit: string;
+        read: string;
+        targetProject: string;
+        targetTask: string;
+        projectId: string;
+        taskId: string;
+        expectedVersion: string;
+        openTarget: string;
         status: string;
         create: string;
         save: string;
@@ -329,6 +336,279 @@ declare namespace App {
         failed: string;
         recover: string;
         unknown: string;
+        permissionAllowed: string;
+        permissionDenied: string;
+        permissionUnavailable: string;
+        noOperations: string;
+        refreshPermissions: string;
+      };
+      permissionCatalog: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        code: string;
+        status: string;
+        enabled: string;
+        disabled: string;
+      };
+      invitations: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        email: string;
+        emailHint: string;
+        create: string;
+        created: string;
+        duplicate: string;
+        failed: string;
+        status: string;
+        delivery: string;
+        expiresAt: string;
+        actions: string;
+        resend: string;
+        resent: string;
+        revoke: string;
+        revoked: string;
+        confirmRevoke: string;
+        states: { PENDING: string; ACCEPTED: string; REVOKED: string; EXPIRED: string };
+        deliveryStates: { PENDING: string; SENT: string; FAILED: string };
+      };
+      invitationAcceptance: {
+        title: string;
+        intro: string;
+        requestSetup: string;
+        resendSetup: string;
+        setupSent: string;
+        passwordReady: string;
+        recoveryRequired: string;
+        openRecovery: string;
+        setupUnavailable: string;
+        currentIdentity: string;
+        accept: string;
+        refresh: string;
+        success: string;
+        invalid: string;
+        unavailable: string;
+        errors: Record<
+          | 'INVITATION_INVALID'
+          | 'INVITATION_IDENTITY_MISMATCH'
+          | 'INVITATION_REVOKED'
+          | 'INVITATION_EXPIRED'
+          | 'INVITATION_ALREADY_ACCEPTED'
+          | 'INVITATION_NOT_PENDING'
+          | 'MEMBERSHIP_ALREADY_EXISTS'
+          | 'QUOTA_EXCEEDED'
+          | 'SUBSCRIPTION_REQUIRED'
+          | 'INVITATION_ACTIVATION_COMPENSATING'
+          | 'INVITATION_ACCEPTANCE_RETRY_REQUIRED'
+          | 'INVITATION_ACCEPTANCE_IN_PROGRESS',
+          string
+        >;
+      };
+      members: {
+        title: string;
+        refresh: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        identity: string;
+        status: string;
+        enabled: string;
+        disabled: string;
+        organizationUnits: string;
+        manageUnits: string;
+        unitsLoading: string;
+        reloadUnits: string;
+        unitsUnavailable: string;
+        unitsHint: string;
+        noUnits: string;
+        addUnit: string;
+        removeUnit: string;
+        unitErrors: {
+          missing: string;
+          conflict: string;
+          forbidden: string;
+          unavailable: string;
+        };
+        operation: string;
+        actions: string;
+        disable: string;
+        enable: string;
+        confirmDisable: string;
+        confirmEnable: string;
+        revoking: string;
+        releasePending: string;
+        recoveryRequired: string;
+        noPendingOperation: string;
+        recover: string;
+        disablePending: string;
+        disableCompleted: string;
+        disableConflict: string;
+        disableFailed: string;
+        enablePending: string;
+        enableCompensating: string;
+        enableFencePending: string;
+        enableCompleted: string;
+        enableQuotaExceeded: string;
+        enableCompensated: string;
+        enableConflict: string;
+        enableFailed: string;
+        roles: string;
+        manageRoles: string;
+        loadingRoles: string;
+        unavailableRoles: string;
+        noRoles: string;
+        chooseRole: string;
+        assignRole: string;
+        revokeRole: string;
+        roleError: Record<'forbidden' | 'last-administrator' | 'missing' | 'unavailable', string>;
+      };
+      waiting: {
+        title: string;
+        message: string;
+        refresh: string;
+        unavailable: string;
+      };
+      tenantRoles: {
+        title: string;
+        reload: string;
+        loading: string;
+        forbidden: string;
+        unavailable: string;
+        empty: string;
+        roleKey: string;
+        permissions: string;
+        assignedMembers: string;
+        actions: string;
+        none: string;
+        automatic: string;
+        system: string;
+        create: string;
+        edit: string;
+        delete: string;
+        cancel: string;
+        save: string;
+        saved: string;
+        deleted: string;
+        confirmDelete: string;
+        conflict: string;
+        invalid: string;
+      };
+      platformAdministrators: {
+        title: string;
+        description: string;
+        email: string;
+        grant: string;
+        list: string;
+        reload: string;
+        empty: string;
+        passwordStatus: string;
+        passwordReady: string;
+        passwordPending: string;
+        actions: string;
+        revoke: string;
+        cancel: string;
+        revokeConfirm: string;
+        revokePending: string;
+        revokeResults: {
+          revoked: string;
+          'last-admin': string;
+          missing: string;
+          forbidden: string;
+          conflict: string;
+          invalid: string;
+          unavailable: string;
+        };
+        pending: string;
+        retry: string;
+        results: {
+          PENDING: string;
+          DELIVERED: string;
+          PASSWORD_READY: string;
+          RECOVERY_REQUIRED: string;
+          ALREADY_GRANTED: string;
+          invalid: string;
+          forbidden: string;
+          conflict: string;
+          unavailable: string;
+        };
+      };
+      organization: {
+        title: string;
+        reload: string;
+        loading: string;
+        empty: string;
+        addRoot: string;
+        addChild: string;
+        rename: string;
+        move: string;
+        delete: string;
+        deleteConfirm: string;
+        name: string;
+        parent: string;
+        root: string;
+        cancel: string;
+        save: string;
+        actions: { create: string; rename: string; move: string };
+        errors: {
+          invalid: string;
+          missing: string;
+          conflict: string;
+          forbidden: string;
+          unavailable: string;
+        };
+      };
+      brandAssets: {
+        settings: string;
+        title: string;
+        explanation: string;
+        logo: string;
+        favicon: string;
+        logoLimit: string;
+        faviconLimit: string;
+        uploading: string;
+        preview: string;
+        errors: { invalid: string; forbidden: string; unavailable: string };
+      };
+      brandProfile: {
+        title: string;
+        description: string;
+        displayName: string;
+        primaryColor: string;
+        accentColor: string;
+        logo: string;
+        favicon: string;
+        missing: string;
+        loading: string;
+        reload: string;
+        preview: string;
+        save: string;
+        forbidden: string;
+        stale: string;
+        asset: string;
+        invalid: string;
+        unavailable: string;
+        policyDisabled: string;
+      };
+      brandPolicy: {
+        title: string;
+        description: string;
+        assetId: string;
+        disable: string;
+        cancel: string;
+        confirm: string;
+        disabled: string;
+        invalid: string;
+        missing: string;
+        forbidden: string;
+        unavailable: string;
       };
       manifest: {
         title: string;
@@ -353,7 +633,6 @@ declare namespace App {
         name: string;
         submit: string;
         success: string;
-        brand: string;
         number: string;
         money: string;
         date: string;
@@ -580,15 +859,37 @@ declare namespace App {
         title: string;
         check: string;
         hint: string;
+        closed: string;
         unknown: string;
         progress: string;
         operation: string;
-        actions: { suspend: string; resume: string; recover: string; continue: string };
-        confirm: { suspend: string; resume: string; recover: string; continue: string };
+        actions: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
+        confirm: {
+          suspend: string;
+          resume: string;
+          recover: string;
+          continue: string;
+          close: string;
+          recoverClosure: string;
+        };
         states: { NONE: string; PENDING: string; COMPLETED: string; RETRY_REQUIRED: string; RECOVERY_REQUIRED: string };
       };
       tenants: {
         title: string;
+        edit: {
+          title: string;
+          hint: string;
+          chooseExpiry: string;
+          save: string;
+          unknown: string;
+        };
         create: string;
         closeCreate: string;
         name: string;
@@ -622,6 +923,7 @@ declare namespace App {
         states: {
           PENDING: string;
           ACTIVE: string;
+          EXPIRED: string;
           SUSPENDED: string;
           CLOSED: string;
           COMMITTED: string;
@@ -636,6 +938,9 @@ declare namespace App {
           notFound: string;
           nameInvalid: string;
           stale: string;
+          expiryInvalid: string;
+          lifecycleConflict: string;
+          closed: string;
         };
       };
       console: {
@@ -673,6 +978,17 @@ declare namespace App {
         setupUnavailable: string;
         setupSubmitting: string;
         backToLogin: string;
+        forgotPassword: string;
+        recoveryTitle: string;
+        recoveryIntro: string;
+        recoverySend: string;
+        recoveryRequested: string;
+        recoveryNewPassword: string;
+        recoveryPending: string;
+        recoveryComplete: string;
+        recoveryInvalid: string;
+        recoveryUnknown: string;
+        recoveryUnavailable: string;
         passwordRules: string;
         passwordInvalid: string;
         passwordChanged: string;
