@@ -14,9 +14,9 @@ test('Remote host formatting preserves decimal precision and calendar/instant se
   );
   assert.equal(formatMoney({ value: '1200', currency: 'JPY', locale: 'zh-CN' }), 'JP¥1,200');
   assert.equal(formatDate({ value: '2024-02-29', locale: 'en' }), 'Feb 29, 2024');
-  assert.match(
+  assert.equal(
     formatInstant({ value: '2026-01-02T01:30:00Z', locale: 'en', timeZone: 'America/Los_Angeles' }),
-    /Jan 1, 2026/
+    '2026-01-01 17:30:00 PST'
   );
 });
 

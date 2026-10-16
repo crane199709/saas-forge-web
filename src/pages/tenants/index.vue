@@ -7,12 +7,13 @@ import type { TenantFailure } from '@/service/forge/tenants';
 import { tenantWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
 import ListSearch from '@/components/common/list-search.vue';
+import { statusTagType } from '../status-tag';
 import { useTenantDisplay } from './shared';
 import Create from './create.vue';
 import Recovery from './recovery.vue';
 const workspace = tenantWorkspace();
 const router = useRouter();
-const { enabled, instant, stateText } = useTenantDisplay();
+const { enabled, instant } = useTenantDisplay();
 const heading = useTemplateRef<HTMLElement>('heading');
 const createButton = useTemplateRef<{ $el: HTMLElement }>('createButton');
 const name = ref('');
@@ -58,6 +59,8 @@ function reset() {
   status.value = undefined;
   search();
 }
+const rowStatus = (row: Tenant) =>
+  row.status === 'ACTIVE' && row.expiresAt && row.expiresAt.getTime() <= Date.now() ? 'EXPIRED' : row.status;
 function view(id: string) {
   router.push(`/tenants/${id}`);
 }
@@ -129,11 +132,9 @@ onUnmounted(() => controller?.abort());
         />
         <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="120">
           <template #default="{ row }">
-            {{
-              row.status === 'ACTIVE' && row.expiresAt && row.expiresAt.getTime() <= Date.now()
-                ? $t('tenants.states.EXPIRED')
-                : stateText(row.status)
-            }}
+            <ElTag :type="statusTagType('tenant', rowStatus(row))" disable-transitions>
+              {{ $t(`tenants.states.${rowStatus(row)}`) }}
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn align="left" header-align="center" :label="$t('tenants.createdAt')" min-width="210">

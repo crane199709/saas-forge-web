@@ -47,7 +47,6 @@ watch(enabled, value => {
     <h2 id="oauth-recovery-heading" ref="heading" tabindex="-1" class="text-18px font-semibold">
       {{ $t('oauth.recovery') }}
     </h2>
-    <p>{{ $t('oauth.recoveryHint') }}</p>
     <ElAlert v-if="state.problem" :title="$t(`oauth.errors.${state.problem}`)" type="error" :closable="false" />
     <ElAlert v-if="state.pending.length" :title="$t('oauth.unknown')" type="warning" :closable="false" />
     <ElAlert
@@ -102,6 +101,7 @@ watch(enabled, value => {
         <template #default="{ row }">
           <span v-if="state.recoveryPending.includes(row.operationId)" role="status">{{ $t('oauth.unknown') }}</span>
           <ElButton
+            v-if="row.canRecover"
             type="success"
             plain
             size="small"

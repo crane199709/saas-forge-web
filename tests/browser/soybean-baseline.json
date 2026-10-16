@@ -26,10 +26,10 @@
     "src/styles/css/nprogress.css": "dff95f1ab80a6d9ac55ae3a43350d12cdd80c951d1d3fc1ae98c7931faf061d0",
     "src/styles/css/reset.css": "88891a0495361ef74476c2aaabd548250e702edcccf608ca586c00eca0d12899",
     "src/styles/css/transition.css": "85f8139c97c2713b8fe946f07619d5898720aa62e89ca2d961c91462bd794070",
-    "src/styles/scss/element-plus.scss": "8c9ebdda0992110b0a1e44466e66f52a3ed6ef9c0154806b63ee876996a0d824",
+    "src/styles/scss/element-plus.scss": "31ba9105315e916d9743f497a332f012f471e5a7b26cc4ca7cd853f4fcdf6a00",
     "src/styles/scss/global.scss": "5c252d0b977c121005154832ccfd08b19fe6fe5c7d6289c20ab105c03208b729",
     "src/styles/scss/scrollbar.scss": "e3d5e4c5ac4573a4fb6a401ad26985c1779c80f320209b5e38a0c6fe8ef26692",
-    "src/theme/settings.ts": "94da4794f9d6a71c8c825b0b044d231e7032b89fe44e10c5f6ddeb85846bca8e",
+    "src/theme/settings.ts": "127ad9b3832394c364b6b42fe84221e29c79cdcef6d7a76575a7f247d5b88774",
     "src/theme/vars.ts": "f6e002facc9c178190d4a1079c90d3a052e5b3486c1d4e876416d0d664922e54"
   }
 }

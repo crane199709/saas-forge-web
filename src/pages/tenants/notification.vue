@@ -58,38 +58,38 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section :aria-label="$t('notification.title')" :aria-busy="state.busy" class="mt-24px space-y-16px">
-    <div class="flex flex-wrap items-center justify-between gap-16px">
-      <h3 ref="heading" tabindex="-1" class="text-18px font-semibold">{{ $t('notification.title') }}</h3>
-      <div class="flex flex-wrap gap-8px">
-        <ElButton :disabled="!enabled || state.busy || confirming" @click="refresh">
-          {{ $t('notification.refresh') }}
-        </ElButton>
-        <ElButton type="primary" :disabled="!canResend || confirming" @click="act('resend')">
-          {{ $t('notification.resend') }}
-        </ElButton>
-        <ElButton v-if="progress?.canContinue" :disabled="!canContinue || confirming" @click="act('continue')">
-          {{ $t('notification.continue') }}
-        </ElButton>
+  <ElCard class="card-wrapper">
+    <section :aria-label="$t('notification.title')" :aria-busy="state.busy" class="space-y-16px">
+      <div class="flex flex-wrap items-center justify-between gap-16px">
+        <h2 ref="heading" tabindex="-1" class="text-18px font-semibold">{{ $t('notification.title') }}</h2>
+        <div class="flex flex-wrap gap-8px">
+          <ElButton :disabled="!enabled || state.busy || confirming" @click="refresh">
+            {{ $t('notification.refresh') }}
+          </ElButton>
+          <ElButton type="primary" :disabled="!canResend || confirming" @click="act('resend')">
+            {{ $t('notification.resend') }}
+          </ElButton>
+          <ElButton v-if="progress?.canContinue" :disabled="!canContinue || confirming" @click="act('continue')">
+            {{ $t('notification.continue') }}
+          </ElButton>
+        </div>
       </div>
-    </div>
-    <p>{{ $t('notification.hint') }}</p>
-    <p v-if="state.busy" role="status">{{ $t('tenants.loading') }}</p>
-    <ElAlert v-if="state.problem" :title="$t(`tenants.errors.${state.problem}`)" type="error" :closable="false" />
-    <ElAlert v-if="!state.checked && progress" :title="$t('initialization.stale')" type="warning" :closable="false" />
-    <ElAlert v-if="state.unknown" :title="$t('notification.unknown')" type="warning" :closable="false" />
-    <p v-if="!progress" role="status">{{ $t('initialization.unchecked') }}</p>
-    <ElDescriptions v-else :column="1" border>
-      <ElDescriptionsItem :label="$t('initialization.notification')">
-        <span role="status">{{ $t(`initialization.notifications.${progress.state}`) }}</span>
-      </ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('notification.operation')">
-        <span role="status">{{ $t(`notification.operations.${progress.operationState}`) }}</span>
-      </ElDescriptionsItem>
-    </ElDescriptions>
-    <p v-if="progress?.operationState === 'PENDING' && !progress.canContinue" role="status">
-      {{ $t('notification.pending') }}
-    </p>
-    <p>{{ $t('initialization.notificationHint') }}</p>
-  </section>
+      <p v-if="state.busy" role="status">{{ $t('tenants.loading') }}</p>
+      <ElAlert v-if="state.problem" :title="$t(`tenants.errors.${state.problem}`)" type="error" :closable="false" />
+      <ElAlert v-if="!state.checked && progress" :title="$t('initialization.stale')" type="warning" :closable="false" />
+      <ElAlert v-if="state.unknown" :title="$t('notification.unknown')" type="warning" :closable="false" />
+      <p v-if="!progress" role="status">{{ $t('initialization.unchecked') }}</p>
+      <ElDescriptions v-else :column="1" border label-width="180px">
+        <ElDescriptionsItem :label="$t('initialization.notification')">
+          <span role="status">{{ $t(`initialization.notifications.${progress.state}`) }}</span>
+        </ElDescriptionsItem>
+        <ElDescriptionsItem :label="$t('notification.operation')">
+          <span role="status">{{ $t(`notification.operations.${progress.operationState}`) }}</span>
+        </ElDescriptionsItem>
+      </ElDescriptions>
+      <p v-if="progress?.operationState === 'PENDING' && !progress.canContinue" role="status">
+        {{ $t('notification.pending') }}
+      </p>
+    </section>
+  </ElCard>
 </template>

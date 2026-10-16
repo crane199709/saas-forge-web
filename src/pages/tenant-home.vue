@@ -135,7 +135,7 @@ onMounted(async () => {
       role="alert"
     />
     <p v-if="permissionRefreshing" role="status">{{ $t('members.loading') }}</p>
-    <ElDescriptions :column="1" border class="mb-24px">
+    <ElDescriptions :column="1" border label-width="180px" class="mb-24px">
       <ElDescriptionsItem :label="$t('console.company')">{{ company?.tenantDisplayName }}</ElDescriptionsItem>
       <ElDescriptionsItem :label="$t('console.identity')">
         {{ consoleState.snapshot.identity?.email }}

@@ -36,8 +36,15 @@ html.dark:root,
   }
 }
 
+// 202610162245：上游移除了全局焦点框；恢复主色轮廓，保证键盘用户始终能看到焦点位置（#13）。
 :focus-visible {
-  outline: 0;
+  outline: 2px solid var(--el-color-primary);
+  outline-offset: 2px;
+}
+
+// 202610162345：路由标题等 `tabindex=-1` 的程序化焦点目标只用于读屏定位，不可经 Tab 到达，不显示焦点框。
+[tabindex='-1']:focus-visible {
+  outline: none;
 }
 
 .el-menu--popup {

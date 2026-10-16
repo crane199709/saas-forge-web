@@ -7,7 +7,12 @@
 - 使用完整 Soybean Admin Element Plus 底座，上游固定提交 `7613bd206cd42001b40e3eafceeb895dcbc277a8`。业务页面直接复用底座布局和 Element Plus；认证、品牌、语言、退出保护和原操作恢复只做必要适配，不自建重复 UI 包。
 - 一个 Console、一个受控 Origin、一个当前 Identity 与工作上下文；登录前不预选 Intent。
 - 创建类操作使用抽屉；Tenant 与 Plan/Quota Definition 详情为独立路由页面。返回与关闭使用有可访问名称的图标。列表样式见[语言与页面回归检查](locale-and-ui-verification.md#正式业务列表样式约定2026-09-30)。
-- 不展示解释布局的小字；保留真实业务风险、失败与恢复信息。
+- 不展示解释布局的小字，分区标题下不放固定介绍文字（2026-10-16，#13）。风险由确认弹窗、错误提示与字段输入提示表达；保留字段规则提示（含 `aria-describedby` 关联）、一次性 Secret 警告、所有动态状态/错误/确认文案，以及未登录独立流程页的引导。
+- 详情页按分区拆成独立卡片，卡片间距 16px；不可逆或破坏性操作集中到页面底部带危险色边框的“危险操作”卡片，按钮使用 `danger` + `plain`。恢复类按钮（继续原操作、恢复、继续关闭等）只在服务器允许时渲染；主操作因权威读取不足而禁用时，在按钮附近复用已有状态或错误文案说明原因。
+- 对象状态字段与操作记录状态列使用 `ElTag`：Tenant `ACTIVE`=success、`PENDING`=warning、`SUSPENDED`/`EXPIRED`=danger、`CLOSED`=info；操作记录 `COMMITTED`=success、`PROCESSING`=primary、`UNKNOWN`=warning、`NOT_COMMITTED`=info；Plan/Quota Definition `ACTIVE`=success、`DRAFT`=primary、`RETIRED`=info；OAuth Client `ACTIVE`=success、`REVOKED`=danger。进度描述保持纯文字。
+- `ElDescriptions` 单列、标签列固定 180px。详情路由声明所属列表菜单：面包屑显示“列表 / 详情”，侧边栏高亮列表菜单。
+- 页面标题 `h1` 为 20px，分区标题 `h2` 为 18px，分区内小标题 `h3` 为 16px。
+- 底座关闭多标签栏和页脚；全局 `:focus-visible` 使用 2px 主色轮廓。术语以根目录 `CONTEXT.md` 为准，例如 `SUSPENDED` 显示为“冻结/已冻结”。
 
 ## 认证、品牌与业务
 
@@ -32,7 +37,8 @@
 
 ## 格式化
 
-- 使用 `src/locales/format.ts` 的 `formatDate`、`formatInstant`、`formatNumber`、`formatMoney`，Locale 由调用方显式传入。
+- 使用 `src/locales/format.ts` 的 `formatDate`、`formatInstant`、`formatNumber`、`formatMoney`，Locale 由调用方显式传入。页面显示 helper 不自行拼 `Intl` 选项；持有 `Date` 时先转为 RFC 3339 字符串再调用 `formatInstant`，空值文案由调用方决定。
+- 时间点统一显示为 `YYYY-MM-DD HH:mm:ss <短时区名>`（如 `2026-09-22 11:16:14 GMT+8`），中英文结构一致，24 小时制，只有短时区名随 Locale 本地化。
 - 时间点是 UTC RFC 3339，默认按浏览器时区显示；日历日期 `YYYY-MM-DD` 不转换成时间点，不得出现跨日偏移。
 - 精确小数和金额保持十进制字符串精度，不转成浮点数；币种由业务数据明确提供。切换语言不改变时间点、币种、金额数值或 API 数据格式。
 

@@ -6,6 +6,7 @@ import { failureCode } from '@/service/forge/tenants';
 import type { TenantFailure } from '@/service/forge/tenants';
 import { tenantWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
+import { statusTagType } from '../status-tag';
 import Subscription from './subscription.vue';
 import Lifecycle from './lifecycle.vue';
 import DetailsEdit from './details-edit.vue';
@@ -49,30 +50,38 @@ onUnmounted(() => controller?.abort());
 </script>
 
 <template>
-  <ElCard>
-    <template #header>
-      <div class="flex items-center justify-between gap-16px">
-        <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t('tenants.detail') }}</h1>
-        <div class="flex justify-end">
-          <ElButton :aria-label="$t('tenants.back')" @click="router.push('/tenants')">
-            {{ $t('tenants.back') }}
-          </ElButton>
-          <ElButton :disabled="!enabled || busy" @click="read">{{ $t('common.refresh') }}</ElButton>
+  <div class="space-y-16px">
+    <ElCard class="card-wrapper">
+      <template #header>
+        <div class="flex flex-wrap items-center justify-between gap-16px">
+          <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t('tenants.detail') }}</h1>
+          <div class="flex justify-end">
+            <ElButton :aria-label="$t('tenants.back')" @click="router.push('/tenants')">
+              {{ $t('tenants.back') }}
+            </ElButton>
+            <ElButton :disabled="!enabled || busy" @click="read">{{ $t('common.refresh') }}</ElButton>
+          </div>
         </div>
+      </template>
+      <div class="space-y-16px">
+        <p v-if="busy" role="status">{{ $t('tenants.loading') }}</p>
+        <ElAlert v-if="problem" :title="$t(`tenants.errors.${problem}`)" type="error" :closable="false" show-icon />
+        <ElDescriptions v-if="tenant" :column="1" border label-width="180px">
+          <ElDescriptionsItem :label="$t('tenants.name')">{{ tenant.displayName }}</ElDescriptionsItem>
+          <ElDescriptionsItem :label="$t('tenants.id')">{{ tenant.id }}</ElDescriptionsItem>
+          <ElDescriptionsItem :label="$t('tenants.status')">
+            <ElTag :type="statusTagType('tenant', displayStatus)" disable-transitions>
+              {{ $t(`tenants.states.${displayStatus}`) }}
+            </ElTag>
+          </ElDescriptionsItem>
+          <ElDescriptionsItem :label="$t('tenants.expiresAt')">{{ instant(tenant.expiresAt) }}</ElDescriptionsItem>
+          <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(tenant.createdAt) }}</ElDescriptionsItem>
+          <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(tenant.updatedAt) }}</ElDescriptionsItem>
+        </ElDescriptions>
+        <DetailsEdit v-if="tenant" :key="tenant.id" :tenant="tenant" @changed="tenant = $event" />
       </div>
-    </template>
-    <p v-if="busy" role="status">{{ $t('tenants.loading') }}</p>
-    <ElAlert v-if="problem" :title="$t(`tenants.errors.${problem}`)" type="error" :closable="false" show-icon />
-    <ElDescriptions v-if="tenant" :column="1" border>
-      <ElDescriptionsItem :label="$t('tenants.name')">{{ tenant.displayName }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.id')">{{ tenant.id }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.status')">{{ $t(`tenants.states.${displayStatus}`) }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.expiresAt')">{{ instant(tenant.expiresAt) }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(tenant.createdAt) }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(tenant.updatedAt) }}</ElDescriptionsItem>
-    </ElDescriptions>
-    <DetailsEdit v-if="tenant" :key="tenant.id" :tenant="tenant" @changed="tenant = $event" />
+    </ElCard>
     <Subscription :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
     <Lifecycle :key="String(route.params.id)" :tenant-id="String(route.params.id)" @changed="read" />
-  </ElCard>
+  </div>
 </template>

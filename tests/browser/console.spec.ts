@@ -594,9 +594,149 @@ test('tenant detail renders real sections with accessible headings', async ({ co
   const state = await prepare(context, { locale: 'en', authenticated: true });
   await page.goto(`${origin}/tenants/${tenant.id}`);
   await expect(page.getByText('Example Company', { exact: true })).toBeVisible();
+  // 202610162330：#13 分区卡片、危险操作区、状态标签、统一时间格式与面包屑的可观察结果。
+  await Promise.all(
+    [
+      'Subscription configuration',
+      'Tenant administrator initialization',
+      'Password setup notification',
+      'Tenant lifecycle',
+      'Danger zone'
+    ].map(name => expect(page.getByRole('heading', { name, exact: true, level: 2 })).toBeVisible())
+  );
+  const danger = page.getByRole('region', { name: 'Danger zone' });
+  await expect(danger.getByRole('button', { name: 'Suspend tenant' })).toBeDisabled();
+  await expect(danger.getByRole('button', { name: 'Permanently close tenant' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Resume tenant' })).toBeDisabled();
+  await Promise.all(
+    ['Recover suspension', 'Continue closure', 'Continue original operation'].map(name =>
+      expect(page.getByRole('button', { name, exact: true })).toHaveCount(0)
+    )
+  );
+  const details = page.locator('.el-descriptions').first();
+  await expect(details.getByText('Pending initialization', { exact: true })).toBeVisible();
+  await expect(details.getByText('2026-01-02 01:30:00 UTC', { exact: true })).toHaveCount(2);
+  const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' });
+  await expect(breadcrumb).toHaveText(/Tenants\s*\/\s*Tenant details/);
+  await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Tenants' })).toHaveClass(/is-active/);
+  await expect(page.getByText(/Soybean|Copyright/)).toHaveCount(0);
+  await expect(page).toHaveTitle('SaaS Forge');
   await stable(page);
   await audit(page);
   await expect(page).toHaveScreenshot('tenant-detail-en.png');
+  await danger.scrollIntoViewIfNeeded();
+  await expect(page).toHaveScreenshot('tenant-danger-zone-en.png');
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('keyboard focus shows a visible primary outline on tenant detail controls', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  await expect(page.getByText('Example Company', { exact: true })).toBeVisible();
+  const name = page.getByRole('textbox', { name: 'Tenant name' });
+  await name.focus();
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await expect(name).toBeFocused();
+  for (let index = 0; index < 4; index += 1) {
+    // eslint-disable-next-line no-await-in-loop -- 键盘焦点必须按 Tab 顺序逐个移动。
+    await page.keyboard.press('Tab');
+    // eslint-disable-next-line no-await-in-loop -- 每次移动后读取当前焦点的样式。
+    const outline = await page.evaluate(() => {
+      const style = getComputedStyle(document.activeElement!);
+      return { style: style.outlineStyle, width: style.outlineWidth };
+    });
+    expect(outline.style).not.toBe('none');
+    expect(outline.width).not.toBe('0px');
+  }
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('lifecycle read failure keeps main actions disabled with a nearby reason', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}/lifecycle`, route =>
+    route.fulfill({ status: 503, json: { code: 'SERVICE_UNAVAILABLE' } })
+  );
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const danger = page.getByRole('region', { name: 'Danger zone' });
+  const reason = 'The service or network is unavailable. Check the connection and retry reading.';
+  await expect(danger.getByText(reason, { exact: true })).toBeVisible();
+  await Promise.all(
+    ['Suspend tenant', 'Permanently close tenant'].flatMap(name => [
+      expect(danger.getByRole('button', { name })).toBeDisabled(),
+      expect(danger.getByRole('button', { name })).toHaveAccessibleDescription(reason)
+    ])
+  );
+  await expect(page.getByRole('button', { name: 'Resume tenant' })).toBeDisabled();
+  await stable(page);
+  await audit(page);
+  expect(state.unexpected).toEqual([]);
+  expect(state.errors.filter(error => !/503/.test(error))).toEqual([]);
+});
+
+test('lifecycle recovery appears only when the server allows it', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en', authenticated: true });
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}/lifecycle`, route =>
+    route.fulfill({
+      json: {
+        tenantId: tenant.id,
+        operationId: '019944ca-0000-7000-8000-000000000005',
+        action: 'CLOSE',
+        state: 'RECOVERY_REQUIRED',
+        canSuspend: false,
+        canResume: false,
+        canRecoverSuspension: false,
+        canContinue: false,
+        canClose: false,
+        canRecoverClosure: true
+      }
+    })
+  );
+  await page.goto(`${origin}/tenants/${tenant.id}`);
+  const lifecycle = page.getByRole('region', { name: 'Tenant lifecycle' });
+  await expect(lifecycle.getByRole('button', { name: 'Continue closure', exact: true })).toBeEnabled();
+  await Promise.all(
+    ['Recover suspension', 'Continue original operation'].map(name =>
+      expect(page.getByRole('button', { name, exact: true })).toHaveCount(0)
+    )
+  );
+  await expect(page.getByRole('region', { name: 'Danger zone' }).getByRole('button')).toHaveCount(2);
+  await stable(page);
+  await audit(page);
+  expect(state.errors).toEqual([]);
+  expect(state.unexpected).toEqual([]);
+});
+
+test('suspended tenant uses the freeze term and breadcrumbs in Chinese dark mode', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'zh-CN', authenticated: true });
+  const suspended = { ...tenant, status: 'SUSPENDED' };
+  await page.route(
+    url => url.pathname === '/api/v1/platform/tenants',
+    route => route.fulfill({ json: { items: [suspended], hasMore: false, nextCursor: null } })
+  );
+  await page.route(`**/api/v1/platform/tenants/${tenant.id}`, route =>
+    route.request().method() === 'GET' ? route.fulfill({ json: suspended }) : route.fallback()
+  );
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto(`${origin}/tenants`);
+  await expect(page.getByRole('table').getByText('已冻结', { exact: true })).toBeVisible();
+  await expect(page.getByRole('table').getByText('2026-01-02 01:30:00 UTC', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '查看详情' }).click();
+  await expect(page.locator('.el-descriptions').first().getByText('已冻结', { exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '面包屑' })).toHaveText(/租户管理\s*\/\s*租户详情/);
+  await expect(page.getByRole('menubar').getByRole('menuitem', { name: '租户管理' })).toHaveClass(/is-active/);
+  await expect(page.getByRole('heading', { name: '危险操作', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '主题模式', exact: true }).click();
+  await expect(page.locator('html')).toHaveClass(/dark/);
+  // 主题按钮悬停提示不属于页面外观，截图前移开指针。
+  await page.mouse.move(0, 899);
+  await stable(page);
+  await audit(page);
+  await expect(page).toHaveScreenshot('tenant-detail-zh-CN-1024-dark.png');
+  await page.getByRole('region', { name: '危险操作' }).scrollIntoViewIfNeeded();
+  await expect(page).toHaveScreenshot('tenant-danger-zone-zh-CN-dark.png');
   expect(state.errors).toEqual([]);
   expect(state.unexpected).toEqual([]);
 });

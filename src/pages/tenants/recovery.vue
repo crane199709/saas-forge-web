@@ -2,6 +2,7 @@
 import { onUnmounted, shallowRef } from 'vue';
 import { tenantWorkspace } from '@/runtime/console';
 import { $t } from '@/locales';
+import { statusTagType } from '../status-tag';
 import { useTenantDisplay } from './shared';
 defineOptions({ name: 'TenantRecovery' });
 const emit = defineEmits<{ view: [id: string] }>();
@@ -26,7 +27,6 @@ async function resume(id: string) {
         {{ $t('tenants.check') }}
       </ElButton>
     </div>
-    <p>{{ $t('tenants.recoveryHint') }}</p>
     <ElAlert v-if="state.unknown" :title="$t('tenants.unknown')" type="warning" :closable="false" show-icon />
     <ElAlert
       v-if="state.problem"
@@ -57,7 +57,9 @@ async function resume(id: string) {
         <template #default="{ row }">{{ instant(row.createdAt) }}</template>
       </ElTableColumn>
       <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="120">
-        <template #default="{ row }">{{ stateText(row.state) }}</template>
+        <template #default="{ row }">
+          <ElTag :type="statusTagType('operation', row.state)" disable-transitions>{{ stateText(row.state) }}</ElTag>
+        </template>
       </ElTableColumn>
       <ElTableColumn header-align="center" :label="$t('common.action')" align="center" fixed="right" width="220">
         <template #default="{ row }">

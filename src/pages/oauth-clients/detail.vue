@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { oauthFailure } from '@/service/forge/oauth-clients';
 import type { OAuthProblem, OAuthWorkspace } from '@/service/forge/oauth-clients';
 import { $t } from '@/locales';
+import { statusTagType } from '../status-tag';
 import { useOAuth } from './shared';
 import Recovery from './recovery.vue';
 import Secret from './secret.vue';
@@ -87,7 +88,7 @@ onUnmounted(() => {
 
 <template>
   <div class="space-y-16px">
-    <ElCard>
+    <ElCard class="card-wrapper">
       <template #header>
         <div class="flex items-center justify-between gap-16px">
           <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t('oauth.detail') }}</h1>
@@ -96,7 +97,7 @@ onUnmounted(() => {
       </template>
       <p v-if="busy" role="status">{{ $t('tenants.loading') }}</p>
       <ElAlert v-if="problem" :title="$t(`oauth.errors.${problem}`)" type="error" :closable="false" />
-      <ElDescriptions v-if="value" :column="1" border>
+      <ElDescriptions v-if="value" :column="1" border label-width="180px">
         <ElDescriptionsItem :label="$t('oauth.id')">{{ value.client.clientId }}</ElDescriptionsItem>
         <ElDescriptionsItem :label="$t('oauth.name')">{{ value.client.displayName }}</ElDescriptionsItem>
         <ElDescriptionsItem :label="$t('oauth.type')">
@@ -109,7 +110,9 @@ onUnmounted(() => {
           {{ [...value.client.allowedScopes].join(', ') }}
         </ElDescriptionsItem>
         <ElDescriptionsItem :label="$t('tenants.status')">
-          {{ $t(`oauth.states.${value.client.status}`) }}
+          <ElTag :type="statusTagType('oauthClient', value.client.status)" disable-transitions>
+            {{ $t(`oauth.states.${value.client.status}`) }}
+          </ElTag>
         </ElDescriptionsItem>
         <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(value.client.createdAt) }}</ElDescriptionsItem>
         <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(value.client.updatedAt) }}</ElDescriptionsItem>
@@ -120,8 +123,7 @@ onUnmounted(() => {
           {{ value.credentials.overlapEndsAt ? instant(value.credentials.overlapEndsAt) : $t('oauth.noOverlap') }}
         </ElDescriptionsItem>
       </ElDescriptions>
-      <p class="my-16px">{{ $t('oauth.authorityHint') }}</p>
-      <ElSpace wrap>
+      <ElSpace wrap class="mt-16px">
         <ElButton :disabled="!enabled || busy || mutating || state.busy" @click="read">
           {{ $t('common.refresh') }}
         </ElButton>
@@ -153,9 +155,13 @@ onUnmounted(() => {
         >
           {{ $t('oauth.actions.REVOKE') }}
         </ElButton>
+        <!-- 202610162310：记录核查未完成时轮换与吊销保持禁用，复用核查状态文案就近说明原因（#13）。 -->
+        <span v-if="value && enabled && !state.checked" class="text-sm text-[var(--el-text-color-secondary)]">
+          {{ $t('oauth.unchecked') }}
+        </span>
       </ElSpace>
     </ElCard>
-    <ElCard><Recovery /></ElCard>
+    <ElCard class="card-wrapper"><Recovery /></ElCard>
     <Secret @closed="heading?.focus()" />
   </div>
 </template>

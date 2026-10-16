@@ -211,7 +211,6 @@ onBeforeUnmount(() => controller.abort());
       <template #header>
         <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t('platformAdministrators.title') }}</h1>
       </template>
-      <p class="mb-16px">{{ $t('platformAdministrators.description') }}</p>
       <ElForm @submit.prevent="grant">
         <ElFormItem :label="$t('platformAdministrators.email')">
           <ElInput

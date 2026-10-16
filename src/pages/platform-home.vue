@@ -24,7 +24,7 @@ onMounted(async () => {
         <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t('console.home') }}</h1>
       </template>
       <p class="mb-24px">{{ $t('console.welcome') }}</p>
-      <ElDescriptions :column="1" border>
+      <ElDescriptions :column="1" border label-width="180px">
         <ElDescriptionsItem :label="$t('console.identity')">
           {{ consoleState.snapshot.identity?.email }}
         </ElDescriptionsItem>

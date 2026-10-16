@@ -48,7 +48,11 @@ export function formatDate({ value, locale }: FormatDateInput): string {
   }
 }
 
-/** 时间点必须是带 Z 或数值偏移的 RFC 3339 值；异常输入返回本地化安全恢复文案。 */
+/**
+ * 时间点必须是带 Z 或数值偏移的 RFC 3339 值；异常输入返回本地化安全恢复文案。
+ *
+ * 202610162230：输出固定为 `YYYY-MM-DD HH:mm:ss <短时区名>`，中英文结构一致（#13）；只有短时区名随 Locale 本地化。
+ */
 export function formatInstant({ value, locale, timeZone }: FormatInstantInput): string {
   if (!matchesEntireValue(instantPattern, value) || !isValidCalendarDate(value.slice(0, 10))) {
     return safeRecoveryMessage[locale];
@@ -56,11 +60,19 @@ export function formatInstant({ value, locale, timeZone }: FormatInstantInput): 
   const instant = new Date(value);
   if (Number.isNaN(instant.getTime())) return safeRecoveryMessage[locale];
   try {
-    return new Intl.DateTimeFormat(locale, {
-      dateStyle: 'medium',
-      timeStyle: 'medium',
+    const parts = new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+      timeZoneName: 'short',
       timeZone
-    }).format(instant);
+    }).formatToParts(instant);
+    const part = (type: Intl.DateTimeFormatPartTypes) => parts.find(item => item.type === type)?.value ?? '';
+    return `${part('year')}-${part('month')}-${part('day')} ${part('hour')}:${part('minute')}:${part('second')} ${part('timeZoneName')}`;
   } catch {
     return safeRecoveryMessage[locale];
   }

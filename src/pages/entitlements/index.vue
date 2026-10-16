@@ -5,6 +5,7 @@ import { entitlementFailure } from '@/service/forge/entitlements';
 import type { EntitlementFailure, EntitlementKind, EntitlementResource } from '@/service/forge/entitlements';
 import { $t } from '@/locales';
 import ListSearch from '@/components/common/list-search.vue';
+import { statusTagType } from '../status-tag';
 import { useEntitlements } from './shared';
 import Create from './create.vue';
 import Recovery from './recovery.vue';
@@ -137,9 +138,9 @@ onUnmounted(() => controller?.abort());
         />
         <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="100">
           <template #default="{ row }">
-            <template v-if="row.status">
+            <ElTag v-if="row.status" :type="statusTagType('definition', row.status)" disable-transitions>
               {{ $t(`entitlements.states.${row.status as 'DRAFT' | 'ACTIVE' | 'RETIRED'}`) }}
-            </template>
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn align="left" header-align="center" :label="$t('tenants.createdAt')" min-width="210">

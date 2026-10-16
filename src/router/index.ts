@@ -80,7 +80,13 @@ export const router = createRouter({
           path: ':id',
           name: 'tenant-detail',
           component: () => import('@/pages/tenants/detail.vue'),
-          meta: { title: 'Tenant details', i18nKey: 'tenants.detail' }
+          meta: {
+            title: 'Tenant details',
+            i18nKey: 'tenants.detail',
+            hideInMenu: true,
+            activeMenu: 'tenants',
+            icon: 'mdi:file-document-outline'
+          }
         }
       ]
     },
@@ -110,7 +116,13 @@ export const router = createRouter({
           path: ':id',
           name: 'oauth-client-detail',
           component: () => import('@/pages/oauth-clients/detail.vue'),
-          meta: { title: 'OAuth Client', i18nKey: 'oauth.detail' }
+          meta: {
+            title: 'OAuth Client',
+            i18nKey: 'oauth.detail',
+            hideInMenu: true,
+            activeMenu: 'oauth-clients',
+            icon: 'mdi:file-document-outline'
+          }
         }
       ]
     },
@@ -130,7 +142,13 @@ export const router = createRouter({
           name: 'plan-detail',
           component: () => import('@/pages/entitlements/detail.vue'),
           props: { kind: 'plan' },
-          meta: { title: 'Plans', i18nKey: 'entitlements.plan.detail' }
+          meta: {
+            title: 'Plans',
+            i18nKey: 'entitlements.plan.detail',
+            hideInMenu: true,
+            activeMenu: 'plans',
+            icon: 'mdi:file-document-outline'
+          }
         }
       ]
     },
@@ -150,7 +168,13 @@ export const router = createRouter({
           name: 'quota-detail',
           component: () => import('@/pages/entitlements/detail.vue'),
           props: { kind: 'quota' },
-          meta: { title: 'Quota definitions', i18nKey: 'entitlements.quota.detail' }
+          meta: {
+            title: 'Quota definitions',
+            i18nKey: 'entitlements.quota.detail',
+            hideInMenu: true,
+            activeMenu: 'quota-definitions',
+            icon: 'mdi:file-document-outline'
+          }
         }
       ]
     },

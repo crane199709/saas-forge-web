@@ -5,6 +5,7 @@ import type { QuotaDefinition } from '@crane199709/saas-forge-api-client';
 import { entitlementFailure, maxUsersLimit } from '@/service/forge/entitlements';
 import type { EntitlementFailure, EntitlementKind, EntitlementResource } from '@/service/forge/entitlements';
 import { $t } from '@/locales';
+import { statusTagType } from '../status-tag';
 import { useEntitlements } from './shared';
 import Recovery from './recovery.vue';
 defineOptions({ name: 'EntitlementDetail' });
@@ -92,62 +93,73 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <ElCard>
-    <template #header>
-      <div class="flex items-center justify-between gap-16px">
-        <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t(`entitlements.${kind}.detail`) }}</h1>
-        <div class="flex justify-end">
-          <ElButton :aria-label="$t(`entitlements.${kind}.back`)" @click="router.push(base)">
-            {{ $t(`entitlements.${kind}.back`) }}
-          </ElButton>
-          <ElButton :disabled="!enabled || busy || state.busy" @click="read">{{ $t('common.refresh') }}</ElButton>
-          <ElButton v-if="eligible" type="primary" :disabled="!canActivate" :loading="state.busy" @click="activate">
-            {{ $t(`entitlements.${kind}.activate`) }}
-          </ElButton>
+  <div class="space-y-16px">
+    <ElCard class="card-wrapper">
+      <template #header>
+        <div class="flex items-center justify-between gap-16px">
+          <h1 ref="heading" tabindex="-1" class="text-20px font-semibold">{{ $t(`entitlements.${kind}.detail`) }}</h1>
+          <div class="flex justify-end">
+            <ElButton :aria-label="$t(`entitlements.${kind}.back`)" @click="router.push(base)">
+              {{ $t(`entitlements.${kind}.back`) }}
+            </ElButton>
+            <ElButton :disabled="!enabled || busy || state.busy" @click="read">{{ $t('common.refresh') }}</ElButton>
+            <ElButton v-if="eligible" type="primary" :disabled="!canActivate" :loading="state.busy" @click="activate">
+              {{ $t(`entitlements.${kind}.activate`) }}
+            </ElButton>
+          </div>
         </div>
-      </div>
-    </template>
-    <p v-if="busy" role="status">{{ $t('tenants.loading') }}</p>
-    <ElAlert v-if="problem" :title="$t(`entitlements.errors.${problem}`)" type="error" :closable="false" show-icon />
-    <ElDescriptions v-if="resource" :column="1" border>
-      <ElDescriptionsItem :label="$t('entitlements.id')">{{ resource.id }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('entitlements.code')">{{ resource.code }}</ElDescriptionsItem>
-      <ElDescriptionsItem v-if="'displayName' in resource" :label="$t('entitlements.name')">
-        {{ resource.displayName }}
-      </ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.status')">
-        {{ $t(`entitlements.states.${resource.status}`) }}
-      </ElDescriptionsItem>
-      <ElDescriptionsItem v-if="limit !== undefined" :label="$t('entitlements.limit')">
-        {{ integer(limit) }}
-      </ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(resource.createdAt) }}</ElDescriptionsItem>
-      <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(resource.updatedAt) }}</ElDescriptionsItem>
-    </ElDescriptions>
-    <ElAlert
-      v-if="limit === 0"
-      class="mt-16px"
-      :title="$t('entitlements.legacyZero')"
-      type="warning"
-      :closable="false"
-      show-icon
-    />
-    <ElAlert
-      v-else-if="
-        kind === 'plan' &&
-        resource &&
-        !busy &&
-        (definitionProblem || limit === undefined || definition?.status !== 'ACTIVE')
-      "
-      class="mt-16px"
-      :title="$t('entitlements.errors.definitionRequired')"
-      type="warning"
-      :closable="false"
-      show-icon
-    />
-    <p v-if="eligible && state.checked && !canActivate && !state.busy" class="mt-16px" role="status">
-      {{ $t('entitlements.errors.pending') }}
-    </p>
-    <Recovery class="mt-24px" :kind="kind" @view="view" />
-  </ElCard>
+      </template>
+      <p v-if="busy" role="status">{{ $t('tenants.loading') }}</p>
+      <ElAlert v-if="problem" :title="$t(`entitlements.errors.${problem}`)" type="error" :closable="false" show-icon />
+      <ElDescriptions v-if="resource" :column="1" border label-width="180px">
+        <ElDescriptionsItem :label="$t('entitlements.id')">{{ resource.id }}</ElDescriptionsItem>
+        <ElDescriptionsItem :label="$t('entitlements.code')">{{ resource.code }}</ElDescriptionsItem>
+        <ElDescriptionsItem v-if="'displayName' in resource" :label="$t('entitlements.name')">
+          {{ resource.displayName }}
+        </ElDescriptionsItem>
+        <ElDescriptionsItem :label="$t('tenants.status')">
+          <ElTag :type="statusTagType('definition', resource.status)" disable-transitions>
+            {{ $t(`entitlements.states.${resource.status}`) }}
+          </ElTag>
+        </ElDescriptionsItem>
+        <ElDescriptionsItem v-if="limit !== undefined" :label="$t('entitlements.limit')">
+          {{ integer(limit) }}
+        </ElDescriptionsItem>
+        <ElDescriptionsItem :label="$t('tenants.createdAt')">{{ instant(resource.createdAt) }}</ElDescriptionsItem>
+        <ElDescriptionsItem :label="$t('tenants.updatedAt')">{{ instant(resource.updatedAt) }}</ElDescriptionsItem>
+      </ElDescriptions>
+      <ElAlert
+        v-if="limit === 0"
+        class="mt-16px"
+        :title="$t('entitlements.legacyZero')"
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+      <ElAlert
+        v-else-if="
+          kind === 'plan' &&
+          resource &&
+          !busy &&
+          (definitionProblem || limit === undefined || definition?.status !== 'ACTIVE')
+        "
+        class="mt-16px"
+        :title="$t('entitlements.errors.definitionRequired')"
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+      <p v-if="eligible && state.checked && !canActivate && !state.busy" class="mt-16px" role="status">
+        {{ $t('entitlements.errors.pending') }}
+      </p>
+      <!-- 202610162310：记录核查未完成时激活保持禁用，复用核查状态文案就近说明原因（#13）。 -->
+      <p
+        v-else-if="eligible && enabled && !state.checked && !state.busy"
+        class="mt-16px text-sm text-[var(--el-text-color-secondary)]"
+      >
+        {{ $t('entitlements.unchecked') }}
+      </p>
+    </ElCard>
+    <ElCard class="card-wrapper"><Recovery :kind="kind" @view="view" /></ElCard>
+  </div>
 </template>

@@ -291,17 +291,9 @@ export function getBreadcrumbsByRoute(
       return [transformMenuToBreadcrumb(menu)];
     }
 
+    // 202610162250：Console 详情路由不按 `_` 层级命名，统一显示“所属列表 / 详情”两级面包屑（#13）。
     if (menu.key === activeKey) {
-      const ROUTE_DEGREE_SPLITTER = '_';
-
-      const parentKey = key.split(ROUTE_DEGREE_SPLITTER).slice(0, -1).join(ROUTE_DEGREE_SPLITTER);
-
-      const breadcrumbMenu = getGlobalMenuByBaseRoute(route);
-      if (parentKey !== activeKey) {
-        return [transformMenuToBreadcrumb(breadcrumbMenu)];
-      }
-
-      return [transformMenuToBreadcrumb(menu), transformMenuToBreadcrumb(breadcrumbMenu)];
+      return [transformMenuToBreadcrumb(menu), transformMenuToBreadcrumb(getGlobalMenuByBaseRoute(route))];
     }
 
     if (menu.children?.length) {

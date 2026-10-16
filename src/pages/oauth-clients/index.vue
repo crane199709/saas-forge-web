@@ -6,6 +6,7 @@ import { oauthFailure } from '@/service/forge/oauth-clients';
 import type { OAuthProblem } from '@/service/forge/oauth-clients';
 import { $t } from '@/locales';
 import ListSearch from '@/components/common/list-search.vue';
+import { statusTagType } from '../status-tag';
 import { useOAuth } from './shared';
 import Secret from './secret.vue';
 import Create from './create.vue';
@@ -149,9 +150,9 @@ onUnmounted(() => controller?.abort());
         </ElTableColumn>
         <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="100">
           <template #default="{ row }">
-            <template v-if="row.status">
+            <ElTag v-if="row.status" :type="statusTagType('oauthClient', row.status)" disable-transitions>
               {{ $t(`oauth.states.${row.status as 'ACTIVE' | 'REVOKED'}`) }}
-            </template>
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn align="left" header-align="center" :label="$t('tenants.createdAt')" min-width="210">

@@ -151,7 +151,6 @@ const local: App.I18n.Schema = {
     unitsLoading: 'Loading organization associations…',
     reloadUnits: 'Reload associations',
     unitsUnavailable: 'Organization associations are unavailable. Try again.',
-    unitsHint: 'A member can belong to multiple units. These links do not change roles or business data access.',
     noUnits: 'No organization units are assigned.',
     addUnit: 'Add association',
     removeUnit: 'Remove association',
@@ -233,8 +232,6 @@ const local: App.I18n.Schema = {
   },
   platformAdministrators: {
     title: 'Platform administrators',
-    description:
-      'Grant the fixed PLATFORM_ADMIN role by email. A new identity receives a first password setup message; an existing password stays unchanged.',
     email: 'Email',
     grant: 'Grant platform administrator',
     list: 'Current administrators',
@@ -300,7 +297,6 @@ const local: App.I18n.Schema = {
   brandAssets: {
     settings: 'Tenant settings',
     title: 'Brand images',
-    explanation: 'Upload a PNG to preview it here. Uploading does not change the live brand profile.',
     logo: 'Logo PNG',
     favicon: 'Favicon PNG',
     logoLimit: 'Up to 2 MiB and 2048 pixels on either side.',
@@ -315,8 +311,6 @@ const local: App.I18n.Schema = {
   },
   brandProfile: {
     title: 'Tenant brand',
-    description:
-      'The brand name is separate from the tenant management name. Upload a logo and favicon before saving; all five settings take effect together.',
     displayName: 'Brand display name',
     primaryColor: 'Primary color (hex)',
     accentColor: 'Accent color (hex)',
@@ -337,8 +331,6 @@ const local: App.I18n.Schema = {
   },
   brandPolicy: {
     title: 'Brand image policy',
-    description:
-      'Permanently disable a violating image by its platform asset ID. This does not edit the tenant brand; the tenant must replace and save it.',
     assetId: 'Asset ID or /brands/ reference',
     disable: 'Disable permanently',
     cancel: 'Cancel',
@@ -388,8 +380,6 @@ const local: App.I18n.Schema = {
     copied: 'Copied',
     copyFailed: 'Copy failed. Save the Secret manually.',
     recovery: 'Original operations and recovery',
-    recoveryHint:
-      'Only your original operations are shown. Check first, then explicitly recover. The server enforces ownership, the ten-minute deadline and one replacement.',
     recoveryWarning:
       'Recovery issues a new Secret and immediately invalidates the Secret from the selected issuance. No old plaintext is replayed. For rotation, the earlier stable Secret keeps its original overlap deadline; the window is not extended. The replacement is shown once.',
     recoveryOriginalHint:
@@ -412,8 +402,6 @@ const local: App.I18n.Schema = {
     revokedAt: 'Revoked at',
     overlap: 'Overlap ends at',
     noOverlap: 'No overlap window',
-    authorityHint:
-      'The server controls rotation and revocation. Refresh to recheck; the local clock does not enable rotation.',
     states: {
       ACTIVE: 'Active',
       REVOKED: 'Revoked'
@@ -447,7 +435,6 @@ const local: App.I18n.Schema = {
     continue: 'Continue original notification',
     confirm:
       'Resend the password setup notification to the initial administrator? This does not reinitialize the administrator or change Membership or Quota.',
-    hint: 'Notification status is confirmed by the server. Resending is independent of initialization; only the original actor can recover their pending notification.',
     unknown:
       'The original result is unconfirmed. Keep this page open and check the original notification; continue only when allowed. If it cannot be located after reloading, the server record needs to be checked before any new resend.',
     operation: 'Current actor notification operation',
@@ -466,7 +453,6 @@ const local: App.I18n.Schema = {
     continue: 'Continue original initialization',
     close: 'Close administrator initialization form',
     submit: 'Confirm initialization',
-    hint: 'Actions require an effective subscription and server permission. Check progress while processing or compensating. Only the original administrator can continue recovery.',
     formHint:
       'Email and name are cleared on submission. If interrupted or uncertain, check and continue the original initialization instead of starting another attempt.',
     email: 'Administrator email',
@@ -476,8 +462,6 @@ const local: App.I18n.Schema = {
     result: 'Initialization result',
     membership: 'Initial administrator Membership',
     notification: 'Password setup notification',
-    notificationHint:
-      'Notification status is separate from initialization. Mail service acceptance does not confirm delivery. Server progress and the initial Membership establish initialization success.',
     unchecked: 'Not yet confirmed',
     stale: 'Showing the previous result. Current state is unconfirmed and actions are disabled.',
     unknown:
@@ -569,8 +553,6 @@ const local: App.I18n.Schema = {
     empty: 'No matching records',
     reuse: 'Reuse existing max_users',
     recovery: 'My operations',
-    recoveryHint:
-      'All current-actor records must be read before the server-authorized original operation can continue. Pending operations on other objects do not block this object.',
     operation: 'Operation',
     target: 'Object',
     unknown: 'Operation result is unconfirmed. Check the original operation; do not submit the same object again.',
@@ -607,8 +589,8 @@ const local: App.I18n.Schema = {
   },
   lifecycle: {
     title: 'Tenant lifecycle',
+    dangerZone: 'Danger zone',
     check: 'Check lifecycle',
-    hint: 'Actions follow current server permission. Suspension can be lifted; closure permanently ends tenant access. Both revoke tenant sessions first.',
     closed:
       'This tenant is permanently closed. Access cannot be restored. Membership, business, audit, and separate subscription records remain.',
     unknown:
@@ -654,7 +636,6 @@ const local: App.I18n.Schema = {
     detail: 'Tenant details',
     edit: {
       title: 'Manage tenant details',
-      hint: 'This name is for platform management. The tenant brand display name is managed separately. An expiry must be in the future.',
       chooseExpiry: 'Choose a future date and time',
       save: 'Save changes',
       unknown: 'The result is unknown. Retry the same values to check the original operation.'
@@ -674,8 +655,6 @@ const local: App.I18n.Schema = {
     continue: 'Continue original operation',
     noCreations: 'No creation records',
     unchecked: 'Records have not been fully checked. Creation and recovery are unavailable.',
-    recoveryHint:
-      'Only your own creation records are shown. Continue the original operation only when the server permits it; this never starts a new creation.',
     unknown:
       'The creation result is unknown. Check the original operation. A missing record never permits a new creation.',
     leaveTitle: 'Leave creation form',

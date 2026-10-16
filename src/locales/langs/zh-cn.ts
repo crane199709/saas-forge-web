@@ -148,7 +148,6 @@ const local: App.I18n.Schema = {
     unitsLoading: '正在读取组织归属…',
     reloadUnits: '重新读取归属',
     unitsUnavailable: '暂时无法读取组织归属，请重试。',
-    unitsHint: '可关联多个组织单元；组织归属不改变角色或业务数据范围。',
     noUnits: '当前没有组织归属。',
     addUnit: '添加归属',
     removeUnit: '移除归属',
@@ -229,7 +228,6 @@ const local: App.I18n.Schema = {
   },
   platformAdministrators: {
     title: '平台管理员',
-    description: '按邮箱授予固定 PLATFORM_ADMIN。新身份收到首次密码设置邮件；已有密码不会改变。',
     email: '邮箱',
     grant: '授予平台管理员',
     list: '当前平台管理员',
@@ -294,7 +292,6 @@ const local: App.I18n.Schema = {
   brandAssets: {
     settings: '租户设置',
     title: '品牌图片',
-    explanation: '上传 PNG 后仅在此处预览；上传不会改变当前生效的品牌配置。',
     logo: 'Logo PNG',
     favicon: '网站图标 PNG',
     logoLimit: '不超过 2 MiB，宽高各不超过 2048 像素。',
@@ -309,7 +306,6 @@ const local: App.I18n.Schema = {
   },
   brandProfile: {
     title: '租户品牌',
-    description: '显示名称与租户管理名称相互独立。保存前请上传 Logo 和网站图标，五项设置会一起生效。',
     displayName: '品牌显示名称',
     primaryColor: '主色（十六进制）',
     accentColor: '强调色（十六进制）',
@@ -329,7 +325,6 @@ const local: App.I18n.Schema = {
   },
   brandPolicy: {
     title: '品牌素材政策',
-    description: '按平台素材 ID 永久禁用违规图片。此操作不修改租户品牌；租户需替换素材并保存。',
     assetId: '素材 ID 或 /brands/ 引用',
     disable: '永久禁用',
     cancel: '取消',
@@ -379,7 +374,6 @@ const local: App.I18n.Schema = {
     copied: '已复制',
     copyFailed: '复制失败，请手动保存。',
     recovery: '原操作与恢复入口',
-    recoveryHint: '只显示当前操作者的原操作。请先核查，再显式恢复；恢复许可、十分钟期限与一次替代限制由后端校验。',
     recoveryWarning:
       '恢复会签发新的 Secret，并立即使本次原签发的 Secret 失效。不会回读旧 Secret；轮换前的旧稳定 Secret 仍按原重叠截止时间生效，窗口不会延长。新 Secret 仅展示一次。',
     recoveryOriginalHint:
@@ -401,7 +395,6 @@ const local: App.I18n.Schema = {
     revokedAt: '吊销时间',
     overlap: '重叠截止时间',
     noOverlap: '无重叠窗口',
-    authorityHint: '轮换与吊销许可由服务器决定。刷新可重新核查；本机时间不会自动放行轮换。',
     states: {
       ACTIVE: '有效',
       REVOKED: '已吊销'
@@ -434,7 +427,6 @@ const local: App.I18n.Schema = {
     resend: '重新发送通知',
     continue: '继续原通知操作',
     confirm: '确认向初始管理员重新发送密码设置通知？此操作不会重新初始化管理员，也不会更改 Membership 或 Quota。',
-    hint: '通知状态由服务端确认。重发独立于初始化；只有原操作者可恢复其待处理通知。',
     unknown:
       '原操作结果尚未确认，不能开始新重发。请保留当前页面核查原通知，仅在服务端允许时继续；若刷新后仍无法定位原操作，需要核对服务端记录。',
     operation: '当前操作者的通知操作',
@@ -453,7 +445,6 @@ const local: App.I18n.Schema = {
     continue: '继续原初始化',
     close: '关闭管理员初始化表单',
     submit: '确认初始化',
-    hint: '仅在订阅有效且服务端允许时操作。处理中或补偿中请等待并核查；只有原管理员可继续待恢复的初始化。',
     formHint: '提交后会清除邮箱和名称。中断或结果未知时，请核查并继续原初始化，不要重新创建尝试。',
     email: '管理员邮箱',
     name: '管理员名称（可选）',
@@ -462,8 +453,6 @@ const local: App.I18n.Schema = {
     result: '初始化结果',
     membership: '初始管理员 Membership',
     notification: '密码设置通知',
-    notificationHint:
-      '通知状态独立于初始化结果。“邮件服务已接收”不表示邮件已到达；初始化成功以服务端结果和初始 Membership 为准。',
     unchecked: '尚未确认',
     stale: '当前为上次读取结果，最新状态尚未确认，操作已禁用。',
     unknown: '结果尚未确认，不能开始新尝试。请核查原初始化，仅在服务端允许时继续。',
@@ -551,7 +540,6 @@ const local: App.I18n.Schema = {
     empty: '没有符合条件的记录',
     reuse: '复用已有 max_users',
     recovery: '我的操作记录',
-    recoveryHint: '完整读取当前操作者的记录后，仅在服务端允许时继续原操作。其他对象的未决操作不会阻断当前对象。',
     operation: '操作',
     target: '对象',
     unknown: '操作结果待确认。请核查原操作，不要重复提交同一对象。',
@@ -585,8 +573,8 @@ const local: App.I18n.Schema = {
   },
   lifecycle: {
     title: '租户生命周期',
+    dangerZone: '危险操作',
     check: '核查生命周期',
-    hint: '操作以最新后台许可为准。冻结可解除；关闭将永久终止租户访问。两种操作均先撤销租户会话。',
     closed: '此租户已永久关闭，无法恢复访问。成员、业务、审计及独立订阅记录保留。',
     unknown: '操作结果未知，已禁止新操作。请核查权威进展，不要重复提交。',
     progress: '操作进展',
@@ -630,7 +618,6 @@ const local: App.I18n.Schema = {
     detail: '租户详情',
     edit: {
       title: '维护租户主档',
-      hint: '管理名称仅供平台管理，品牌显示名由租户独立维护。有效期须晚于当前时间。',
       chooseExpiry: '选择未来日期和时间',
       save: '保存修改',
       unknown: '结果尚不确定。使用相同内容重试，以核查原操作。'
@@ -650,7 +637,6 @@ const local: App.I18n.Schema = {
     continue: '继续原操作',
     noCreations: '没有创建记录',
     unchecked: '尚未完成记录核查。创建和恢复操作暂不可用。',
-    recoveryHint: '只显示当前操作者的创建记录。仅在服务端允许时继续原操作，不会发起新的创建。',
     unknown: '创建结果未知，请核查原操作。即使未查到记录，也不要重复创建。',
     leaveTitle: '离开创建表单',
     leaveWarning: '未保存的输入将丢失；已发送的操作不会被取消。结果未知时，请回来核查原操作，不要重新创建。',
@@ -659,7 +645,7 @@ const local: App.I18n.Schema = {
       PENDING: '待初始化',
       ACTIVE: '正常',
       EXPIRED: '已到期',
-      SUSPENDED: '已暂停',
+      SUSPENDED: '已冻结',
       CLOSED: '已关闭',
       COMMITTED: '已完成',
       PROCESSING: '处理中',

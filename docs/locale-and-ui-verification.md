@@ -53,6 +53,14 @@ axe 保留 WCAG 2 A/AA、2.1 AA 适用规则。正常页面检查整个 document
 
 ## 本轮验证记录
 
+2026-10-16 Console 外观整理（#13）：
+
+- 改动：Tenant 详情拆为信息、订阅、初始化、通知、生命周期五张卡片，底部新增危险色边框的“危险操作”卡片（冻结、永久关闭，`danger` + `plain`）；恢复类按钮只在服务器允许时渲染，权威读取不足时危险操作旁复用已有状态/错误文案说明原因并以 `aria-describedby` 关联。对象状态与操作记录状态改为 `ElTag`；`formatInstant` 输出 `YYYY-MM-DD HH:mm:ss <短时区名>`，Tenant/Entitlement/OAuth Client 显示 helper 改为调用它。删除 14 个分区固定说明及中英文 key，`SUSPENDED` 显示为“已冻结”/Suspended。全部业务页 `ElDescriptions` 标签列 180px；四类详情路由声明所属列表菜单，面包屑显示“列表 / 详情”并高亮列表菜单。首页“永久禁用”改为 `danger` + `plain`。`VITE_APP_TITLE` 改为 SaaS Forge。
+- 底座基线变更：`src/theme/settings.ts` 关闭多标签栏与页脚，并通过 `overrideThemeSettings` 让生产模式已缓存的旧主题设置在新版本首次加载时同样关闭；`src/styles/scss/element-plus.scss` 把全局 `:focus-visible` 从去除轮廓改为 2px 主色轮廓，`tabindex=-1` 的程序化焦点目标（路由标题）不显示轮廓。两者均为用户确认的产品适配，`tests/browser/soybean-baseline.json` 已同步这两个文件的哈希，其余文件仍对应固定上游。
+- 模拟 HTTP 回归（正式前端路由 + 生产模式制品 + 浏览器内拦截 API）：`verify` 通过（类型、只读 Lint、1044 个语言 key、280 项 Node 测试、生产构建）；macOS Chromium 不更新基线运行 `verify:ui` 40 项全部通过。新增 5 项浏览器用例覆盖分区与危险操作标题、恢复按钮按服务器许可出现/隐藏、读取失败时禁用原因及可访问描述、状态标签与“已冻结”、时间格式、中英文面包屑与菜单高亮、无模板版权与 SaaS Forge 标题、键盘 Tab 焦点轮廓、中文暗色 1024 与英文浅色 1280 截图及 axe。
+- 截图审阅：macOS 与 Linux 更新 `tenants-en`、`tenant-create-en`、`tenant-detail-en`、`workspace-1024/1440-light/dark`，新增 `tenant-danger-zone-en`、`tenant-detail-zh-CN-1024-dark`、`tenant-danger-zone-zh-CN-dark`。差异来自标签栏/页脚移除、状态标签、时间格式、标签列定宽、面包屑与“永久禁用”样式；另吸收了 `5a4ae8b` 侧栏标题配色调整后未更新的旧基线差异。Linux 基线由本机 arm64 上的 Playwright 1.63.0 Noble 镜像（禁用网络、2GB 内存、2 CPU）使用同一 `.ui-dist` 生成，随后只读比较相关 10 项通过；完整 Linux 运行中 `create-only Project role…` 一项因容器内缺少 rolldown Linux 原生绑定、无法在测试中构建 Project Remote 而失败，属本机环境限制，与本轮改动无关，CI amd64 结果待远程运行确认。
+- 真实 Chrome 检查：见下一条记录；以上模拟 HTTP 结果不能代替真实 Chrome/Gateway 检查。
+
 2026-09-30 折叠菜单修复：先通过浏览器用例复现名称提示缺失和菜单图标不可见。叶子菜单的名称原先放在默认插槽，未满足 Element Plus 折叠提示要求的 `title` 插槽；图标使用的 `i-mdi-*` CSS 类也未出现在生产制品中。改用标题插槽与显式可访问名称，并沿用现有 `SvgIconVNode` 渲染图标。新增中英文五项菜单悬停名称、点击跳转与折叠图标可见性回归。类型检查、改动文件 ESLint、生产模式 UI 构建通过；macOS Chromium 不更新基线的 24 项回归通过，Linux 同制品相关 9 项只读比较通过。审阅并更新 4 张受图标恢复影响的截图。以上仍为模拟 HTTP 验证，未执行真实后端联调。
 
 2026-09-30 列表样式调整：类型检查、改动文件只读 ESLint、734 个中英文语言 key 校验、语言消息与固定 Soybean 基线共 7 项 Node 检查、生产模式隔离 UI 构建通过。最终制品在 macOS Chromium 上不更新基线运行 21 项浏览器用例全部通过；其中新增 8 项覆盖四个主列表的英文浅色 1440px、中文深色 1024px，核查默认折叠、键盘展开、草稿保留、已应用数量、无额外折叠请求、带原条件翻页、重置、表头/正文对齐、按钮不越出单元格、页面不溢出及 axe。原 13 项继续覆盖语言、布局、抽屉焦点与错误监测。页面无空白或框架错误遮罩，正常场景无未预期网络和 Console/pageerror。

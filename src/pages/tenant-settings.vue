@@ -205,7 +205,6 @@ onBeforeUnmount(invalidate);
           :closable="false"
           :title="$t(`brandProfile.${failure}`)"
         />
-        <p class="mb-12px text-sm">{{ $t('brandProfile.description') }}</p>
         <div class="grid gap-12px md:grid-cols-2">
           <label class="block">
             {{ $t('brandProfile.displayName') }}

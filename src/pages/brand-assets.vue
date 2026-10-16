@@ -103,8 +103,7 @@ async function upload(kind: Kind, event: Event) {
 
 <template>
   <section :aria-label="$t('brandAssets.title')" class="border border-gray-200 rounded-12px border-solid p-20px">
-    <h2 class="mb-8px text-18px font-semibold">{{ $t('brandAssets.title') }}</h2>
-    <p class="mb-16px text-sm">{{ $t('brandAssets.explanation') }}</p>
+    <h2 class="mb-16px text-18px font-semibold">{{ $t('brandAssets.title') }}</h2>
     <ElAlert v-if="problem" type="error" role="alert" :closable="false" :title="$t(`brandAssets.errors.${problem}`)" />
     <div class="grid gap-16px md:grid-cols-2">
       <div

@@ -63,11 +63,10 @@ async function disable() {
     <template #header>
       <h2 class="text-18px font-semibold">{{ $t('brandPolicy.title') }}</h2>
     </template>
-    <p class="mb-12px">{{ $t('brandPolicy.description') }}</p>
     <label class="block" for="brand-policy-id">{{ $t('brandPolicy.assetId') }}</label>
     <ElInput id="brand-policy-id" v-model="input" class="mt-6px max-w-600px" :disabled="busy" />
     <div class="mt-12px">
-      <ElButton type="danger" :loading="busy" @click="disable">{{ $t('brandPolicy.disable') }}</ElButton>
+      <ElButton type="danger" plain :loading="busy" @click="disable">{{ $t('brandPolicy.disable') }}</ElButton>
     </div>
     <ElAlert
       v-if="problem"

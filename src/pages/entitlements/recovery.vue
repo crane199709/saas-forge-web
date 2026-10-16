@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EntitlementKind, OperationView } from '@/service/forge/entitlements';
 import { $t } from '@/locales';
+import { statusTagType } from '../status-tag';
 import { useEntitlements } from './shared';
 defineOptions({ name: 'EntitlementRecovery' });
 const props = defineProps<{ kind: EntitlementKind }>();
@@ -21,7 +22,6 @@ async function resume(id: string) {
         {{ $t('tenants.check') }}
       </ElButton>
     </div>
-    <p>{{ $t('entitlements.recoveryHint') }}</p>
     <ElAlert v-if="state.unknown" :title="$t('entitlements.unknown')" type="warning" :closable="false" show-icon />
     <ElAlert
       v-if="state.problem"
@@ -56,7 +56,9 @@ async function resume(id: string) {
       </ElTableColumn>
       <ElTableColumn header-align="center" :label="$t('tenants.status')" align="center" min-width="120">
         <template #default="{ row }">
-          <template v-if="row.state">{{ $t(`tenants.states.${row.state as OperationView['state']}`) }}</template>
+          <ElTag v-if="row.state" :type="statusTagType('operation', row.state)" disable-transitions>
+            {{ $t(`tenants.states.${row.state as OperationView['state']}`) }}
+          </ElTag>
         </template>
       </ElTableColumn>
       <ElTableColumn header-align="center" :label="$t('common.action')" align="center" fixed="right" width="220">

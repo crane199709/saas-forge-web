@@ -129,80 +129,81 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section :aria-label="$t('initialization.title')" :aria-busy="state.busy" class="mt-24px space-y-16px">
-    <div class="flex flex-wrap items-center justify-between gap-16px">
-      <h3 ref="heading" tabindex="-1" class="text-18px font-semibold">{{ $t('initialization.title') }}</h3>
-      <div class="flex flex-wrap gap-8px">
-        <ElButton :disabled="!enabled || state.busy" @click="refresh">{{ $t('initialization.refresh') }}</ElButton>
-        <ElButton ref="startButton" type="primary" :disabled="!canStart" @click="configure">
-          {{ $t('initialization.start') }}
-        </ElButton>
-        <ElButton v-if="progress?.canContinue" :disabled="!canContinue" @click="resume">
-          {{ $t('initialization.continue') }}
-        </ElButton>
+  <ElCard class="card-wrapper">
+    <section :aria-label="$t('initialization.title')" :aria-busy="state.busy" class="space-y-16px">
+      <div class="flex flex-wrap items-center justify-between gap-16px">
+        <h2 ref="heading" tabindex="-1" class="text-18px font-semibold">{{ $t('initialization.title') }}</h2>
+        <div class="flex flex-wrap gap-8px">
+          <ElButton :disabled="!enabled || state.busy" @click="refresh">{{ $t('initialization.refresh') }}</ElButton>
+          <ElButton ref="startButton" type="primary" :disabled="!canStart" @click="configure">
+            {{ $t('initialization.start') }}
+          </ElButton>
+          <ElButton v-if="progress?.canContinue" :disabled="!canContinue" @click="resume">
+            {{ $t('initialization.continue') }}
+          </ElButton>
+        </div>
       </div>
-    </div>
-    <p>{{ $t('initialization.hint') }}</p>
-    <p v-if="state.busy" role="status">{{ $t('tenants.loading') }}</p>
-    <ElAlert v-if="state.problem" :title="$t(`tenants.errors.${state.problem}`)" type="error" :closable="false" />
-    <ElAlert v-if="!state.checked && progress" :title="$t('initialization.stale')" type="warning" :closable="false" />
-    <ElAlert v-if="state.unknown" :title="$t('initialization.unknown')" type="warning" :closable="false" />
-    <p v-if="!progress" role="status">{{ $t('initialization.unchecked') }}</p>
-    <ElDescriptions v-else :column="1" border>
-      <ElDescriptionsItem :label="$t('initialization.result')">
-        <span role="status">{{ $t(`initialization.states.${progress.state}`) }}</span>
-      </ElDescriptionsItem>
-      <ElDescriptionsItem v-if="progress.initialAdministratorMembershipId" :label="$t('initialization.membership')">
-        {{ progress.initialAdministratorMembershipId }}
-      </ElDescriptionsItem>
-    </ElDescriptions>
-    <Notification :tenant-id="tenantId" :initialization-state="progress?.state" />
-    <ElDrawer
-      v-model="open"
-      :title="$t('initialization.start')"
-      size="min(640px, 90vw)"
-      :show-close="false"
-      :before-close="close"
-      destroy-on-close
-      @opened="emailInput?.focus()"
-      @closed="focusStart"
-    >
-      <template #header="{ titleId, titleClass }">
-        <h2 :id="titleId" :class="titleClass">{{ $t('initialization.start') }}</h2>
-        <ElButton :aria-label="$t('initialization.close')" @click="close">{{ $t('common.close') }}</ElButton>
-      </template>
-      <p>{{ $t('initialization.formHint') }}</p>
-      <ElForm label-position="top" :aria-label="$t('initialization.start')" @submit.prevent="submit">
-        <ElFormItem :label="$t('initialization.email')">
-          <ElInput
-            ref="emailInput"
-            v-model="email"
-            :aria-label="$t('initialization.email')"
-            autocomplete="off"
-            :disabled="!canStart"
-            :aria-invalid="attempted && emailInvalid"
-            :aria-describedby="attempted && emailInvalid ? 'administrator-email-error' : undefined"
-          />
-          <p v-if="attempted && emailInvalid" id="administrator-email-error" role="alert" class="text-error">
-            {{ $t('initialization.emailInvalid') }}
-          </p>
-        </ElFormItem>
-        <ElFormItem :label="$t('initialization.name')">
-          <ElInput
-            ref="nameInput"
-            v-model="name"
-            :aria-label="$t('initialization.name')"
-            autocomplete="off"
-            :disabled="!canStart"
-            :aria-invalid="attempted && nameInvalid"
-            :aria-describedby="attempted && nameInvalid ? 'administrator-name-error' : undefined"
-          />
-          <p v-if="attempted && nameInvalid" id="administrator-name-error" role="alert" class="text-error">
-            {{ $t('initialization.nameInvalid') }}
-          </p>
-        </ElFormItem>
-        <ElButton native-type="submit" type="primary" :disabled="!canStart">{{ $t('initialization.submit') }}</ElButton>
-      </ElForm>
-    </ElDrawer>
-  </section>
+      <p v-if="state.busy" role="status">{{ $t('tenants.loading') }}</p>
+      <ElAlert v-if="state.problem" :title="$t(`tenants.errors.${state.problem}`)" type="error" :closable="false" />
+      <ElAlert v-if="!state.checked && progress" :title="$t('initialization.stale')" type="warning" :closable="false" />
+      <ElAlert v-if="state.unknown" :title="$t('initialization.unknown')" type="warning" :closable="false" />
+      <p v-if="!progress" role="status">{{ $t('initialization.unchecked') }}</p>
+      <ElDescriptions v-else :column="1" border label-width="180px">
+        <ElDescriptionsItem :label="$t('initialization.result')">
+          <span role="status">{{ $t(`initialization.states.${progress.state}`) }}</span>
+        </ElDescriptionsItem>
+        <ElDescriptionsItem v-if="progress.initialAdministratorMembershipId" :label="$t('initialization.membership')">
+          {{ progress.initialAdministratorMembershipId }}
+        </ElDescriptionsItem>
+      </ElDescriptions>
+    </section>
+  </ElCard>
+  <Notification :tenant-id="tenantId" :initialization-state="progress?.state" />
+  <ElDrawer
+    v-model="open"
+    :title="$t('initialization.start')"
+    size="min(640px, 90vw)"
+    :show-close="false"
+    :before-close="close"
+    destroy-on-close
+    @opened="emailInput?.focus()"
+    @closed="focusStart"
+  >
+    <template #header="{ titleId, titleClass }">
+      <h2 :id="titleId" :class="titleClass">{{ $t('initialization.start') }}</h2>
+      <ElButton :aria-label="$t('initialization.close')" @click="close">{{ $t('common.close') }}</ElButton>
+    </template>
+    <p>{{ $t('initialization.formHint') }}</p>
+    <ElForm label-position="top" :aria-label="$t('initialization.start')" @submit.prevent="submit">
+      <ElFormItem :label="$t('initialization.email')">
+        <ElInput
+          ref="emailInput"
+          v-model="email"
+          :aria-label="$t('initialization.email')"
+          autocomplete="off"
+          :disabled="!canStart"
+          :aria-invalid="attempted && emailInvalid"
+          :aria-describedby="attempted && emailInvalid ? 'administrator-email-error' : undefined"
+        />
+        <p v-if="attempted && emailInvalid" id="administrator-email-error" role="alert" class="text-error">
+          {{ $t('initialization.emailInvalid') }}
+        </p>
+      </ElFormItem>
+      <ElFormItem :label="$t('initialization.name')">
+        <ElInput
+          ref="nameInput"
+          v-model="name"
+          :aria-label="$t('initialization.name')"
+          autocomplete="off"
+          :disabled="!canStart"
+          :aria-invalid="attempted && nameInvalid"
+          :aria-describedby="attempted && nameInvalid ? 'administrator-name-error' : undefined"
+        />
+        <p v-if="attempted && nameInvalid" id="administrator-name-error" role="alert" class="text-error">
+          {{ $t('initialization.nameInvalid') }}
+        </p>
+      </ElFormItem>
+      <ElButton native-type="submit" type="primary" :disabled="!canStart">{{ $t('initialization.submit') }}</ElButton>
+    </ElForm>
+  </ElDrawer>
 </template>

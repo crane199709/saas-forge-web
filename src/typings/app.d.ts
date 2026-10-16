@@ -427,7 +427,6 @@ declare namespace App {
         unitsLoading: string;
         reloadUnits: string;
         unitsUnavailable: string;
-        unitsHint: string;
         noUnits: string;
         addUnit: string;
         removeUnit: string;
@@ -503,7 +502,6 @@ declare namespace App {
       };
       platformAdministrators: {
         title: string;
-        description: string;
         email: string;
         grant: string;
         list: string;
@@ -568,7 +566,6 @@ declare namespace App {
       brandAssets: {
         settings: string;
         title: string;
-        explanation: string;
         logo: string;
         favicon: string;
         logoLimit: string;
@@ -579,7 +576,6 @@ declare namespace App {
       };
       brandProfile: {
         title: string;
-        description: string;
         displayName: string;
         primaryColor: string;
         accentColor: string;
@@ -599,7 +595,6 @@ declare namespace App {
       };
       brandPolicy: {
         title: string;
-        description: string;
         assetId: string;
         disable: string;
         cancel: string;
@@ -662,7 +657,6 @@ declare namespace App {
         copied: string;
         copyFailed: string;
         recovery: string;
-        recoveryHint: string;
         recoveryWarning: string;
         recoveryOriginalHint: string;
         recoveryUnknown: string;
@@ -682,7 +676,6 @@ declare namespace App {
         revokedAt: string;
         overlap: string;
         noOverlap: string;
-        authorityHint: string;
         states: {
           ACTIVE: string;
           REVOKED: string;
@@ -715,7 +708,6 @@ declare namespace App {
         resend: string;
         continue: string;
         confirm: string;
-        hint: string;
         unknown: string;
         operation: string;
         pending: string;
@@ -728,7 +720,6 @@ declare namespace App {
         continue: string;
         close: string;
         submit: string;
-        hint: string;
         formHint: string;
         email: string;
         name: string;
@@ -737,7 +728,6 @@ declare namespace App {
         result: string;
         membership: string;
         notification: string;
-        notificationHint: string;
         unchecked: string;
         stale: string;
         unknown: string;
@@ -824,7 +814,6 @@ declare namespace App {
         empty: string;
         reuse: string;
         recovery: string;
-        recoveryHint: string;
         operation: string;
         target: string;
         unknown: string;
@@ -857,8 +846,8 @@ declare namespace App {
       };
       lifecycle: {
         title: string;
+        dangerZone: string;
         check: string;
-        hint: string;
         closed: string;
         unknown: string;
         progress: string;
@@ -885,7 +874,6 @@ declare namespace App {
         title: string;
         edit: {
           title: string;
-          hint: string;
           chooseExpiry: string;
           save: string;
           unknown: string;
@@ -915,7 +903,6 @@ declare namespace App {
         continue: string;
         noCreations: string;
         unchecked: string;
-        recoveryHint: string;
         unknown: string;
         leaveTitle: string;
         leaveWarning: string;

@@ -34,8 +34,9 @@ export const themeSettings: App.Theme.ThemeSetting = {
       visible: true
     }
   },
+  // 202610162245：Console 不使用多标签页，关闭空标签栏以腾出内容区（#13）。
   tab: {
-    visible: true,
+    visible: false,
     cache: true,
     height: 44,
     mode: 'chrome'
@@ -49,8 +50,9 @@ export const themeSettings: App.Theme.ThemeSetting = {
     mixCollapsedWidth: 64,
     mixChildMenuWidth: 200
   },
+  // 202610162245：隐藏 Soybean 版权页脚，产品界面只呈现 SaaS Forge 品牌（#13）。
   footer: {
-    visible: true,
+    visible: false,
     fixed: false,
     height: 48,
     right: true
@@ -89,4 +91,8 @@ export const themeSettings: App.Theme.ThemeSetting = {
  *
  * If publish new version, use `overrideThemeSettings` to override certain theme settings
  */
-export const overrideThemeSettings: Partial<App.Theme.ThemeSetting> = {};
+// 202610162245：生产模式会沿用 localStorage 中的旧主题设置；发布时覆盖一次，使已访问用户同样关闭标签栏和页脚（#13）。
+export const overrideThemeSettings: Partial<App.Theme.ThemeSetting> = {
+  tab: themeSettings.tab,
+  footer: themeSettings.footer
+};

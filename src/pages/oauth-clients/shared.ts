@@ -1,5 +1,6 @@
 import { computed, onUnmounted, shallowRef } from 'vue';
 import { useAppStore } from '@/store/modules/app';
+import { formatInstant } from '@/locales/format';
 import { consoleState, oauthWorkspace } from '@/runtime/console';
 export function useOAuth() {
   const workspace = oauthWorkspace();
@@ -14,15 +15,6 @@ export function useOAuth() {
       consoleState.value.status === 'authenticated' && consoleState.value.snapshot?.activeContext?.type === 'PLATFORM'
   );
   const app = useAppStore();
-  const instant = (value: Date) =>
-    new Intl.DateTimeFormat(app.locale, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZoneName: 'short'
-    }).format(value);
+  const instant = (value: Date) => formatInstant({ value: value.toISOString(), locale: app.locale });
   return { workspace, state, enabled, instant };
 }

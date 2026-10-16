@@ -430,7 +430,6 @@ onBeforeUnmount(() => {
         :title="$t(unitStatus === 'forbidden' ? 'members.forbidden' : 'members.unitsUnavailable')"
       />
       <template v-else>
-        <p class="mb-12px">{{ $t('members.unitsHint') }}</p>
         <ElButton class="mb-12px" :disabled="unitSaving" @click="editing && openEditor(editing)">
           {{ $t('members.reloadUnits') }}
         </ElButton>

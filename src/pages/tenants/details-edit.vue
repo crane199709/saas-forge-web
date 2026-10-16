@@ -81,9 +81,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section :aria-busy="busy" class="mt-24px" aria-labelledby="tenant-details-edit-heading">
-    <h2 id="tenant-details-edit-heading" class="mb-12px text-18px font-semibold">{{ $t('tenants.edit.title') }}</h2>
-    <p class="mb-16px">{{ $t('tenants.edit.hint') }}</p>
+  <section :aria-busy="busy" class="pt-8px" aria-labelledby="tenant-details-edit-heading">
+    <h2 id="tenant-details-edit-heading" class="mb-16px text-18px font-semibold">{{ $t('tenants.edit.title') }}</h2>
     <ElAlert
       v-if="problem"
       :title="$t(`tenants.errors.${problem}`)"
