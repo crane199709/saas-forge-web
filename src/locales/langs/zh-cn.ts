@@ -695,7 +695,8 @@ const local: App.I18n.Schema = {
     recoveryNewPassword: '设置新密码后，所有旧会话将退出。完成后请重新登录。',
     recoveryPending: '正在撤销旧会话，尚未完成。请用同一链接和密码重试。',
     recoveryComplete: '密码已恢复，所有旧会话已退出。请使用新密码登录。',
-    recoveryInvalid: '链接无效、已过期或已使用。请重新申请恢复链接。',
+    recoveryInvalid:
+      '链接无效、已过期或已使用。如果已提交新密码，请先尝试用新密码登录；若无法登录，再申请新的恢复链接。',
     recoveryUnknown: '结果暂时无法确认。请用同一链接和密码重试。',
     recoveryUnavailable: '恢复服务暂时不可用，请稍后重试。',
 

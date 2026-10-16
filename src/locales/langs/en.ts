@@ -729,7 +729,8 @@ const local: App.I18n.Schema = {
     recoveryNewPassword: 'Set a new password. All previous sessions will end. Sign in again afterward.',
     recoveryPending: 'Previous sessions are still being revoked. Retry with the same link and password.',
     recoveryComplete: 'Password recovered and previous sessions ended. Sign in with your new password.',
-    recoveryInvalid: 'The link is invalid, expired or already used. Request a new recovery link.',
+    recoveryInvalid:
+      'The link is invalid, expired or already used. If you already set a new password, try signing in with it. If that fails, request a new recovery link.',
     recoveryUnknown: 'The result cannot be confirmed yet. Retry with the same link and password.',
     recoveryUnavailable: 'Recovery is temporarily unavailable. Try again later.',
 

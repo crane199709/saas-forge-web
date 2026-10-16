@@ -371,6 +371,42 @@ test('password recovery email and one-use link render and accept keyboard input'
   expect(state.errors).toEqual([]);
 });
 
+test('completed recovery after pending retry directs the user to sign in', async ({ context, page }) => {
+  const state = await prepare(context, { locale: 'en' });
+  let calls = 0;
+  await page.route('https://api.ui.test/api/v2/auth/password-recoveries', async route => {
+    calls += 1;
+    await route.fulfill(
+      calls === 1
+        ? { status: 202, json: { status: 'PENDING' } }
+        : {
+            status: 410,
+            json: {
+              type: 'urn:saas.forge:problem:password-recovery-token-invalid',
+              title: 'Recovery link unavailable',
+              status: 410,
+              detail: 'Recovery link unavailable',
+              code: 'PASSWORD_RECOVERY_TOKEN_INVALID',
+              traceId: '0123456789abcdef0123456789abcdef'
+            }
+          }
+    );
+  });
+  await page.goto(`${origin}/password-recovery#token=${'A'.repeat(43)}`);
+  const submit = async () => {
+    await page.getByRole('textbox', { name: 'New password', exact: true }).fill('New-password-2026');
+    await page.getByRole('textbox', { name: 'Confirm new password' }).fill('New-password-2026');
+    await page.getByRole('button', { name: 'Set a new password' }).click();
+  };
+  await submit();
+  await expect(page.getByRole('status')).toContainText('Previous sessions are still being revoked.');
+  await submit();
+  await expect(page.getByRole('status')).toContainText('If you already set a new password, try signing in with it.');
+  await expect(page.getByRole('button', { name: 'Return to sign in' })).toBeVisible();
+  expect(calls).toBe(2);
+  expect(state.unexpected).toEqual([]);
+});
+
 test('new invitee requests first password setup from the invitation page', async ({ context, page }) => {
   const state = await prepare(context, { locale: 'en' });
   const keys: string[] = [];
