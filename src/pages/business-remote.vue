@@ -75,7 +75,12 @@ watch(
     const snapshot = consoleState.value.snapshot;
     const next =
       consoleState.value.status === 'authenticated' && snapshot?.activeContext?.type === 'TENANT'
-        ? JSON.stringify([snapshot.sessionId, snapshot.identity?.identityId, snapshot.activeContext])
+        ? JSON.stringify([
+            snapshot.sessionId,
+            snapshot.identity?.identityId,
+            snapshot.activeContext.tenantId,
+            snapshot.activeContext.membershipId
+          ])
         : undefined;
     if (next === observedOwner) return;
     observedOwner = next;

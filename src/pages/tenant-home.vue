@@ -27,6 +27,7 @@ const permissionRefreshing = ref(false);
 const effective = ref<string[]>([]);
 let generation = 0;
 let controller = new AbortController();
+let permissionOwner: string | undefined;
 async function refreshPermissions() {
   generation += 1;
   controller.abort();
@@ -58,9 +59,19 @@ watch(
     consoleState.value.snapshot?.activeContext?.membershipId
   ],
   async () => {
+    if (consoleState.value.status === 'checking') return;
+    const snapshot = consoleState.value.snapshot;
+    const owner =
+      consoleState.value.status === 'authenticated' && snapshot?.activeContext?.type === 'TENANT'
+        ? `${snapshot.sessionId}:${snapshot.activeContext.membershipId}`
+        : undefined;
+    const sameOwner = Boolean(owner && owner === permissionOwner && permissionLoadedOnce.value);
+    permissionOwner = owner;
     effective.value = [];
-    permissionLoadedOnce.value = false;
-    permissionStatus.value = 'loading';
+    if (!sameOwner) {
+      permissionLoadedOnce.value = false;
+      permissionStatus.value = 'loading';
+    }
     await refreshPermissions();
   },
   { immediate: true }
@@ -77,7 +88,11 @@ onMounted(async () => {
 
 <template>
   <p v-if="permissionStatus === 'loading'" role="status">{{ $t('members.loading') }}</p>
-  <ElCard v-else-if="permissionLoadedOnce && effective.length === 0 && consoleState.status === 'authenticated'">
+  <ElCard
+    v-else-if="
+      permissionLoadedOnce && !permissionRefreshing && effective.length === 0 && consoleState.status === 'authenticated'
+    "
+  >
     <h1 class="mb-16px text-20px font-semibold">{{ $t('waiting.title') }}</h1>
     <p role="status" class="mb-16px">{{ $t('waiting.message') }}</p>
     <ElAlert
