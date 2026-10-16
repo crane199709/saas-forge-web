@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { PermissionCatalogFailure } from '@/service/forge/permissions';
 import type { PermissionEntry } from '@/service/forge/permissions';
 import { TenantRoleFailure } from '@/service/forge/tenant-roles';
 import type { TenantRole } from '@/service/forge/tenant-roles';
@@ -44,7 +45,10 @@ async function load() {
     status.value = 'ready';
   } catch (error) {
     if (started !== generation) return;
-    status.value = error instanceof TenantRoleFailure && error.code === 'forbidden' ? 'forbidden' : 'unavailable';
+    status.value =
+      (error instanceof TenantRoleFailure || error instanceof PermissionCatalogFailure) && error.code === 'forbidden'
+        ? 'forbidden'
+        : 'unavailable';
   }
 }
 

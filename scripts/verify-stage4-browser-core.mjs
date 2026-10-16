@@ -20,11 +20,7 @@ const section = (page, name) =>
     .filter({ has: page.getByRole('heading', { name, exact: true }) })
     .first();
 const treeRow = (page, name) =>
-  section(page, 'Organization units')
-    .locator('.el-tree-node__content')
-    .filter({
-      has: page.getByText(name, { exact: true })
-    });
+  section(page, 'Organization units').locator('.el-tree-node__content').filter({ hasText: name });
 const memberRow = (page, email) => section(page, 'Members').getByRole('row').filter({ hasText: email });
 
 async function observed(page, apiOrigin, method, path, status, action) {
@@ -165,7 +161,7 @@ async function run(configPath, outputPath) {
     const child = await createUnit(`Stage4 Core Child ${suffix}`, first);
     await button(treeRow(admin, child.name), 'Move').click();
     const moveDialog = admin.getByRole('dialog', { name: 'Move organization unit' });
-    await moveDialog.getByRole('combobox', { name: 'Destination parent' }).click();
+    await moveDialog.locator('.el-select__wrapper').click();
     await admin.getByRole('option', { name: second.name, exact: true }).click();
     const moved = await observed(
       admin,
@@ -181,7 +177,7 @@ async function run(configPath, outputPath) {
     await button(memberRow(admin, config.ordinaryMember.email), 'Manage associations').click();
     const units = admin.getByRole('dialog', { name: 'Organization units' });
     for (const unit of [first, second]) {
-      await units.getByRole('combobox', { name: 'Add association' }).click();
+      await units.locator('.el-select__wrapper').click();
       await admin.getByRole('option', { name: unit.name, exact: true }).click();
       const association = await observed(
         admin,
@@ -222,11 +218,14 @@ async function run(configPath, outputPath) {
     }
     const orgRole = await createRole(`CORE_ORG_${suffix.toUpperCase()}`, 'system:organization:manage');
     const projectRole = await createRole(`CORE_PROJECT_${suffix.toUpperCase()}`, 'example:project:create');
+    await observed(admin, handoff.apiOrigin, 'GET', '/api/v1/tenant-roles', 200, () =>
+      button(section(admin, 'Members'), 'Refresh members').click()
+    );
     async function changeRole(role, method, expectedStatus) {
       await button(memberRow(admin, config.ordinaryMember.email), 'Manage roles').click();
       const dialog = admin.getByRole('dialog', { name: 'Manage roles' });
       if (method === 'PUT') {
-        await dialog.getByRole('combobox', { name: 'Choose a role to assign' }).click();
+        await dialog.locator('.el-select__wrapper').click();
         await admin.getByRole('option', { name: role.roleKey, exact: true }).click();
       }
       const response = await observed(
@@ -266,7 +265,7 @@ async function run(configPath, outputPath) {
         )
       )
         await confirm.click();
-      await delegate.getByRole('heading', { name: 'Company workspace' }).waitFor();
+      await delegate.getByRole('heading', { name: 'Company workspace', level: 1 }).waitFor();
     }
     await delegate.goto(`${handoff.consoleOrigin}/workbench`);
     await button(section(delegate, 'Organization units'), 'Add root').waitFor();
